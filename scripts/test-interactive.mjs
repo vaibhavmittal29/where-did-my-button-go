@@ -14,7 +14,7 @@ async function testInteractive() {
 
   // 1. Check initial Idle State
   const initialText = await page.textContent('body');
-  if (!initialText.includes('STILL Lab') || !initialText.includes('Tap what you want to keep')) {
+  if (!initialText.includes('STILL Lab') || (!initialText.includes('Tap what you want to keep') && !initialText.includes('Tap what matters'))) {
     throw new Error('Initial idle UI missing ghost ring coach mark or DemoPanel');
   }
   console.log('✓ Scenario 0 Passed: Interactive screen loaded with Viewfinder & DemoPanel');

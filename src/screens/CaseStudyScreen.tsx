@@ -2,18 +2,9 @@ import React from 'react';
 import { 
   Sparkles, 
   Activity, 
-  ShieldCheck, 
-  CheckCircle2, 
-  AlertCircle, 
   Volume2, 
-  Eye, 
-  Zap, 
-  Hand, 
   Clock, 
-  ChevronRight,
-  Maximize2,
-  Users,
-  Smartphone
+  Maximize2
 } from 'lucide-react';
 
 export const CaseStudyScreen: React.FC = () => {

@@ -4,7 +4,7 @@ import { ViewfinderIdleScreen } from './ViewfinderIdleScreen';
 import { LockingScreen } from './LockingScreen';
 import { MomentStripScreen } from './MomentStripScreen';
 import { GroupModeScreen } from './GroupModeScreen';
-import { Sparkles, ShieldCheck, Activity, Users, Eye } from 'lucide-react';
+import { Sparkles, ShieldCheck, Activity, Eye } from 'lucide-react';
 
 export const HeroCompositeScreen: React.FC = () => {
   return (
