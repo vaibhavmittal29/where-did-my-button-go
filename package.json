@@ -1,7 +1,14 @@
 {
-  "name": "still-camera",
+  "name": "where-did-my-button-go",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.0.0",
+  "description": "STILL — A mobile camera interaction with no shutter button. Hold still to capture, rewind to choose.",
+  "author": "Vaibhav Mittal <vaibhavmittalwork@gmail.com> (https://github.com/vaibhavmittal29)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vaibhavmittal29/where-did-my-button-go.git"
+  },
   "type": "module",
   "scripts": {
     "dev": "vite",

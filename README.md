@@ -129,4 +129,14 @@ node scripts/export-screens.mjs
 
 ---
 
+## 👤 Author & Credits
+
+- **Author:** Vaibhav Mittal ([@vaibhavmittal29](https://github.com/vaibhavmittal29))
+- **Email:** [vaibhavmittalwork@gmail.com](mailto:vaibhavmittalwork@gmail.com)
+- **GitHub Repository:** [https://github.com/vaibhavmittal29/where-did-my-button-go](https://github.com/vaibhavmittal29/where-did-my-button-go)
+- **License:** [MIT License](LICENSE) — Copyright © 2026 Vaibhav Mittal
+- **Asset Credits:** Detailed photography and typography attribution documented in [`docs/CREDITS.md`](docs/CREDITS.md).
+
+---
+
 *Designed and engineered with pride for VinnovateIT 2026.*
