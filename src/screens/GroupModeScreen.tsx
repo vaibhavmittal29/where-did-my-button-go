@@ -6,7 +6,11 @@ import { IconButton } from '../components/IconButton';
 import { GlassChip } from '../components/GlassChip';
 import { Settings2, RotateCcw, Zap, Mic, Users } from 'lucide-react';
 
-export const GroupModeScreen: React.FC = () => {
+interface GroupModeScreenProps {
+  pureDevice?: boolean;
+}
+
+export const GroupModeScreen: React.FC<GroupModeScreenProps> = ({ pureDevice = false }) => {
   const urlParams = new URLSearchParams(window.location.search);
   const readyCount = parseInt(urlParams.get('ready') || '3', 10);
 
@@ -23,7 +27,7 @@ export const GroupModeScreen: React.FC = () => {
   ];
 
   return (
-    <PhoneFrame>
+    <PhoneFrame pureDevice={pureDevice}>
       <div style={{
         position: 'relative',
         height: '100%',

@@ -6,7 +6,11 @@ import { IconButton } from '../components/IconButton';
 import { Toast } from '../components/Toast';
 import { Sparkles, Check, X, Share2 } from 'lucide-react';
 
-export const MomentStripScreen: React.FC = () => {
+interface MomentStripScreenProps {
+  pureDevice?: boolean;
+}
+
+export const MomentStripScreen: React.FC<MomentStripScreenProps> = ({ pureDevice = false }) => {
   const urlParams = new URLSearchParams(window.location.search);
   const initialIndex = parseInt(urlParams.get('selected') || '3', 10);
   const showSavedToast = urlParams.get('saved') === '1';
@@ -15,7 +19,7 @@ export const MomentStripScreen: React.FC = () => {
   const [selectedIndex, setSelectedIndex] = useState(initialIndex);
 
   return (
-    <PhoneFrame>
+    <PhoneFrame pureDevice={pureDevice}>
       <div style={{
         position: 'relative',
         height: '100%',

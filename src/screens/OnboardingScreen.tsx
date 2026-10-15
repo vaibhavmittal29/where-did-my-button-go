@@ -4,7 +4,11 @@ import { LockRing } from '../components/LockRing';
 import { GlassChip } from '../components/GlassChip';
 import { Hand, Sparkles, Sliders } from 'lucide-react';
 
-export const OnboardingScreen: React.FC = () => {
+interface OnboardingScreenProps {
+  pureDevice?: boolean;
+}
+
+export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ pureDevice = false }) => {
   const [demoProgress, setDemoProgress] = useState(0.4);
 
   useEffect(() => {
@@ -15,7 +19,7 @@ export const OnboardingScreen: React.FC = () => {
   }, []);
 
   return (
-    <PhoneFrame>
+    <PhoneFrame pureDevice={pureDevice}>
       <div style={{
         position: 'relative',
         height: '100%',

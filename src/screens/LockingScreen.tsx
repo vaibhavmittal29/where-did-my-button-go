@@ -6,13 +6,17 @@ import { IconButton } from '../components/IconButton';
 import { GlassChip } from '../components/GlassChip';
 import { Settings2, RotateCcw, Zap, Sun, Hand, Activity } from 'lucide-react';
 
-export const LockingScreen: React.FC = () => {
+interface LockingScreenProps {
+  pureDevice?: boolean;
+}
+
+export const LockingScreen: React.FC<LockingScreenProps> = ({ pureDevice = false }) => {
   const urlParams = new URLSearchParams(window.location.search);
   const progressParam = parseFloat(urlParams.get('progress') || '0.6');
   const isAnnotated = urlParams.get('annotate') === '1';
 
   return (
-    <PhoneFrame>
+    <PhoneFrame pureDevice={pureDevice}>
       <div style={{
         position: 'relative',
         height: '100%',

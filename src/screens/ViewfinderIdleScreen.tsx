@@ -7,9 +7,13 @@ import { IconButton } from '../components/IconButton';
 import { GlassChip } from '../components/GlassChip';
 import { Settings2, RotateCcw, Zap, Sun } from 'lucide-react';
 
-export const ViewfinderIdleScreen: React.FC = () => {
+interface ViewfinderIdleScreenProps {
+  pureDevice?: boolean;
+}
+
+export const ViewfinderIdleScreen: React.FC<ViewfinderIdleScreenProps> = ({ pureDevice = false }) => {
   return (
-    <PhoneFrame>
+    <PhoneFrame pureDevice={pureDevice}>
       <div style={{
         position: 'relative',
         height: '100%',

@@ -5,6 +5,8 @@ import { MomentStripScreen } from './screens/MomentStripScreen';
 import { GroupModeScreen } from './screens/GroupModeScreen';
 import { ComponentKitScreen } from './screens/ComponentKitScreen';
 import { InteractiveCameraScreen } from './screens/InteractiveCameraScreen';
+import { HeroCompositeScreen } from './screens/HeroCompositeScreen';
+import { CaseStudyScreen } from './screens/CaseStudyScreen';
 
 export default function App() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -23,6 +25,13 @@ export default function App() {
       return <GroupModeScreen />;
     case 'kit':
       return <ComponentKitScreen />;
+    case 'hero':
+    case 'composite':
+    case 'hero-composite':
+      return <HeroCompositeScreen />;
+    case 'case-study':
+    case 'casestudy':
+      return <CaseStudyScreen />;
     case 'interactive':
     case 'live':
     default:
