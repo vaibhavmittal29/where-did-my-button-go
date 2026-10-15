@@ -1,0 +1,118 @@
+.container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+}
+
+.svg {
+  transform: rotate(-90deg); /* Start arc at 12 o'clock */
+  overflow: visible;
+}
+
+.track {
+  fill: none;
+  stroke: var(--ring-track);
+  transition: stroke var(--dur-fast) var(--ease-out);
+}
+
+.arc {
+  fill: none;
+  stroke: var(--accent);
+  stroke-linecap: round;
+  transition: stroke-dashoffset var(--dur-fast) linear,
+              stroke var(--dur-fast) var(--ease-out);
+}
+
+.container[data-state="idle"] .arc {
+  stroke: var(--ring-track);
+}
+
+.container[data-state="idle"] {
+  animation: ghostPulse 2s ease-in-out infinite;
+}
+
+@keyframes ghostPulse {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(0.98);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.02);
+  }
+}
+
+.container[data-state="danger"] .arc {
+  stroke: var(--danger);
+  transition: stroke-dashoffset 150ms linear, stroke var(--dur-fast) var(--ease-out);
+}
+
+.container[data-state="captured"] .arc {
+  stroke: var(--success);
+}
+
+.centerDot {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background-color: var(--accent);
+  pointer-events: none;
+  transition: transform var(--dur-fast) var(--ease-out),
+              background-color var(--dur-fast) var(--ease-out);
+}
+
+.container[data-state="captured"] .centerDot {
+  background-color: var(--success);
+  transform: scale(1.4);
+}
+
+.container[data-state="danger"] .centerDot {
+  background-color: var(--danger);
+}
+
+/* Framing brackets around subject */
+.brackets {
+  position: absolute;
+  inset: -8px;
+  pointer-events: none;
+  opacity: 0.75;
+}
+
+.bracketTL, .bracketTR, .bracketBL, .bracketBR {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-color: var(--text);
+  border-style: solid;
+}
+
+.bracketTL {
+  top: 0;
+  left: 0;
+  border-width: 2px 0 0 2px;
+  border-top-left-radius: var(--space-1);
+}
+
+.bracketTR {
+  top: 0;
+  right: 0;
+  border-width: 2px 2px 0 0;
+  border-top-right-radius: var(--space-1);
+}
+
+.bracketBL {
+  bottom: 0;
+  left: 0;
+  border-width: 0 0 2px 2px;
+  border-bottom-left-radius: var(--space-1);
+}
+
+.bracketBR {
+  bottom: 0;
+  right: 0;
+  border-width: 0 2px 2px 0;
+  border-bottom-right-radius: var(--space-1);
+}

@@ -1,0 +1,51 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: var(--radius-pill);
+  background-color: var(--glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  color: var(--text);
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-out),
+              background-color var(--dur-fast) var(--ease-out),
+              color var(--dur-fast) var(--ease-out);
+  outline: none;
+  padding: 0;
+}
+
+.button:hover {
+  background-color: var(--surface-2);
+  color: var(--accent);
+}
+
+.button:active {
+  transform: scale(0.92);
+}
+
+.button[data-variant="accent"] {
+  background-color: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+}
+
+.button[data-variant="accent"]:hover {
+  filter: brightness(1.1);
+  color: var(--bg);
+}
+
+.button[data-variant="ghost"] {
+  background-color: transparent;
+  border-color: transparent;
+  backdrop-filter: none;
+}
+
+.button[data-variant="ghost"]:hover {
+  background-color: var(--glass);
+}
