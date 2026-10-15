@@ -243,6 +243,20 @@ export const InteractiveCameraScreen: React.FC = () => {
     };
   }, [state.mode, state.status, groupReadyCount, steadiness]);
 
+  // 8. Accessibility Fallback Trigger: Volume Key / 'C' key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (e.key === 'c' || e.key === 'C') {
+        e.preventDefault();
+        triggerHaptic('capture');
+        dispatch({ type: 'VOLUME_KEY' });
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [triggerHaptic]);
+
   // Handlers for Undo and Reset
   const handleUndo = useCallback(() => {
     triggerHaptic('tap');
@@ -303,6 +317,17 @@ export const InteractiveCameraScreen: React.FC = () => {
             cursor: state.status === 'REVIEW' ? 'default' : 'crosshair',
           }}
         >
+          {/* Accessible Screen Reader Status Announcements */}
+          <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+            {state.status === 'IDLE' && 'Camera ready. Tap viewfinder to focus and hold steady to capture.'}
+            {state.status === 'FOCUSED' && 'Subject focused. Hold phone steady to lock.'}
+            {state.status === 'LOCKING' && `Locking capture. ${Math.round(state.progress * 100)} percent.`}
+            {state.status === 'CAPTURED' && 'Photo captured. Reviewing best moment in Moment Strip.'}
+            {state.status === 'REVIEW' && `Reviewing frame ${previewFrameIndex + 1} of 7. Autosaving.`}
+            {state.status === 'SAVED' && 'Photo saved to gallery. Undo available.'}
+            {state.status === 'CANCELLED' && 'Too much movement — hold still.'}
+          </div>
+
           {/* Live Viewfinder Background Photo */}
           <img
             src={getSceneSrc()}
@@ -663,6 +688,10 @@ export const InteractiveCameraScreen: React.FC = () => {
         onTriggerVoice={(phrase) => {
           triggerHaptic('tap');
           dispatch({ type: 'VOICE_TRIGGER', phrase });
+        }}
+        onTriggerVolumeKey={() => {
+          triggerHaptic('capture');
+          dispatch({ type: 'VOLUME_KEY' });
         }}
         onReset={handleReset}
         onModeChange={(m) => {

@@ -17,6 +17,7 @@ export interface DemoPanelProps {
   onToggleLowLight: () => void;
   onSetGroupReady: (count: number) => void;
   onTriggerVoice: (phrase: string) => void;
+  onTriggerVolumeKey?: () => void;
   onReset: () => void;
   onModeChange: (mode: CameraMode) => void;
 }
@@ -35,6 +36,7 @@ export const DemoPanel: React.FC<DemoPanelProps> = ({
   onToggleLowLight,
   onSetGroupReady,
   onTriggerVoice,
+  onTriggerVolumeKey,
   onReset,
   onModeChange,
 }) => {
@@ -156,6 +158,18 @@ export const DemoPanel: React.FC<DemoPanelProps> = ({
             <Zap size={14} />
             <span>{mode === 'doc' ? 'Doc Mode' : 'Doc Mode'}</span>
           </button>
+
+          {onTriggerVolumeKey && (
+            <button
+              className={styles.actionBtn}
+              onClick={onTriggerVolumeKey}
+              title="Physical volume key accessibility fallback ('C' key)"
+              style={{ gridColumn: 'span 2' }}
+            >
+              <Volume2 size={14} color="var(--accent)" />
+              <span>Accessibility Volume Key ('C')</span>
+            </button>
+          )}
         </div>
       </div>
 

@@ -16,7 +16,11 @@
   position: relative;
   background: none;
   border: none;
-  padding: var(--space-2) var(--space-4);
+  padding: 0 var(--space-4);
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border-radius: var(--radius-pill);
   color: var(--text-dim);
   font-family: var(--font-family-body);
