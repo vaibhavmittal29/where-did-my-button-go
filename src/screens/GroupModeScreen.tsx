@@ -10,11 +10,16 @@ export const GroupModeScreen: React.FC = () => {
   const urlParams = new URLSearchParams(window.location.search);
   const readyCount = parseInt(urlParams.get('ready') || '3', 10);
 
-  // Calibrated positions for student faces with objectPosition: center 75%
+  // 4 university friends clearly framed across the viewfinder:
+  // 1. Tara (Female in red shirt on left - laughing with eyes closed) -> Blinking (Amber)
+  // 2. Aarav (Male in blue button-down - smiling at camera) -> Ready (Green)
+  // 3. Pooja (Female in white shirt - smiling at camera) -> Ready (Green)
+  // 4. Neha (Female in navy graphic tee - smiling at camera) -> Ready (Green)
   const faces: FaceData[] = [
-    { id: '1', name: 'Aarav (Ready)', top: '48%', left: '8%', width: '26%', height: '16%', isReady: true },
-    { id: '2', name: 'Pooja (Ready)', top: '38%', left: '40%', width: '25%', height: '17%', isReady: true },
-    { id: '3', name: 'Tara (Blinking)', top: '44%', left: '70%', width: '24%', height: '16%', isReady: readyCount >= 4 },
+    { id: '1', name: 'Tara · Blinking', top: '46.5%', left: '11.5%', width: '14%', height: '8%', isReady: readyCount >= 4 },
+    { id: '2', name: 'Aarav', top: '47%', left: '31%', width: '12.5%', height: '8%', isReady: true },
+    { id: '3', name: 'Pooja', top: '48%', left: '54.5%', width: '12%', height: '8%', isReady: true },
+    { id: '4', name: 'Neha', top: '46%', left: '73%', width: '12.5%', height: '8%', isReady: true },
   ];
 
   return (
@@ -29,17 +34,17 @@ export const GroupModeScreen: React.FC = () => {
         backgroundColor: 'var(--bg)',
         overflow: 'hidden'
       }}>
-        {/* Full-Bleed Viewfinder Photo with objectPosition centered on people */}
+        {/* Full-Bleed Viewfinder Photo (4 University Friends Facing Camera) */}
         <img
           src="/scenes/group-campus.jpg"
-          alt="University campus group of friends facing camera"
+          alt="University campus group of 4 friends smiling at camera"
           style={{
             position: 'absolute',
             inset: 0,
             width: '100%',
             height: '100%',
             objectFit: 'cover',
-            objectPosition: 'center 72%',
+            objectPosition: 'center center',
           }}
         />
 
@@ -94,7 +99,7 @@ export const GroupModeScreen: React.FC = () => {
             icon={<Users size={14} />}
             variant={readyCount >= 4 ? 'success' : 'accent'}
           >
-            {readyCount >= 4 ? 'All Ready · Auto-Capturing' : `${readyCount} of 4 ready`}
+            {readyCount >= 4 ? 'All 4 Ready · Auto-Capturing' : `${readyCount} of 4 ready`}
           </GlassChip>
 
           <IconButton icon={<Settings2 size={18} />} aria-label="Settings" />
