@@ -4,10 +4,11 @@ import { LockingScreen } from './screens/LockingScreen';
 import { MomentStripScreen } from './screens/MomentStripScreen';
 import { GroupModeScreen } from './screens/GroupModeScreen';
 import { ComponentKitScreen } from './screens/ComponentKitScreen';
+import { InteractiveCameraScreen } from './screens/InteractiveCameraScreen';
 
 export default function App() {
   const urlParams = new URLSearchParams(window.location.search);
-  const screen = urlParams.get('screen') || 'idle';
+  const screen = urlParams.get('screen');
 
   switch (screen) {
     case 'onboarding':
@@ -22,7 +23,10 @@ export default function App() {
       return <GroupModeScreen />;
     case 'kit':
       return <ComponentKitScreen />;
+    case 'interactive':
+    case 'live':
     default:
-      return <ViewfinderIdleScreen />;
+      // Default root route renders the full interactive state-machine camera experience with DemoPanel
+      return <InteractiveCameraScreen />;
   }
 }
