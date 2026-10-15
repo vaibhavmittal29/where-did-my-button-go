@@ -1,11 +1,14 @@
 import { chromium } from 'playwright';
 import path from 'node:path';
 import fs from 'node:fs';
+import { fileURLToPath } from 'node:url';
 
-const BRAIN_DIR = 'C:/Users/vaibh/.gemini/antigravity/brain/d3c251cc-b9ea-4484-982e-138020751b92';
-const PROJECT_DIR = 'C:/Programming/Projects of antigravity/project_7_uiux_vinnovateit_switchthebutton';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const PROJECT_DIR = path.resolve(__dirname, '..');
 const EXPORT_SCREENS_DIR = path.join(PROJECT_DIR, 'export/screens');
 const EXPORT_DIR = path.join(PROJECT_DIR, 'export');
+const BRAIN_DIR = process.env.BRAIN_DIR || 'C:/Users/vaibh/.gemini/antigravity/brain/d3c251cc-b9ea-4484-982e-138020751b92';
 
 // Hi-Fi Screens to capture at 1170x2532 (390x844 @ 3x)
 const HI_FI_SCREENS = [
@@ -16,6 +19,16 @@ const HI_FI_SCREENS = [
   { name: 'screen-04-moments', url: 'http://localhost:5173/?screen=moments&selected=3' },
   { name: 'screen-05-group', url: 'http://localhost:5173/?screen=group&ready=3' },
 ];
+
+function safeCopyToBrain(src, dst) {
+  if (BRAIN_DIR && fs.existsSync(BRAIN_DIR)) {
+    try {
+      fs.copyFileSync(src, dst);
+    } catch {
+      // ignore copy errors to optional external brain dir
+    }
+  }
+}
 
 async function runExport() {
   console.log('🚀 Starting Phase 8 Export Deliverables...');
@@ -45,7 +58,7 @@ async function runExport() {
     const targetBrainFile = path.join(BRAIN_DIR, `${s.name}.png`);
 
     await page.screenshot({ path: targetProjectFile, type: 'png' });
-    fs.copyFileSync(targetProjectFile, targetBrainFile);
+    safeCopyToBrain(targetProjectFile, targetBrainFile);
 
     const stats = fs.statSync(targetProjectFile);
     console.log(`     ✓ Saved ${s.name}.png (${(stats.size / 1024).toFixed(1)} KB)`);
@@ -69,7 +82,7 @@ async function runExport() {
   const heroProjectFile = path.join(EXPORT_DIR, 'hero-composite.png');
   const heroBrainFile = path.join(BRAIN_DIR, 'hero-composite.png');
   await heroPage.screenshot({ path: heroProjectFile, type: 'png' });
-  fs.copyFileSync(heroProjectFile, heroBrainFile);
+  safeCopyToBrain(heroProjectFile, heroBrainFile);
 
   const heroStats = fs.statSync(heroProjectFile);
   console.log(`     ✓ Saved hero-composite.png (${(heroStats.size / 1024).toFixed(1)} KB)`);
@@ -103,13 +116,13 @@ async function runExport() {
       right: '14mm',
     },
   });
-  fs.copyFileSync(pdfProjectFile, pdfBrainFile);
+  safeCopyToBrain(pdfProjectFile, pdfBrainFile);
 
   // Also take a full-page preview screenshot of the Case Study
   const csPreviewProjectFile = path.join(EXPORT_DIR, 'case-study-preview.png');
   const csPreviewBrainFile = path.join(BRAIN_DIR, 'case-study-preview.png');
   await pdfPage.screenshot({ path: csPreviewProjectFile, fullPage: true });
-  fs.copyFileSync(csPreviewProjectFile, csPreviewBrainFile);
+  safeCopyToBrain(csPreviewProjectFile, csPreviewBrainFile);
 
   const pdfStats = fs.statSync(pdfProjectFile);
   console.log(`     ✓ Generated case-study.pdf (${(pdfStats.size / 1024).toFixed(1)} KB)`);

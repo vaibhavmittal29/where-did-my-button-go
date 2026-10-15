@@ -12,11 +12,13 @@ interface MomentStripScreenProps {
 
 export const MomentStripScreen: React.FC<MomentStripScreenProps> = ({ pureDevice = false }) => {
   const urlParams = new URLSearchParams(window.location.search);
-  const initialIndex = parseInt(urlParams.get('selected') || '3', 10);
+  const rawIndex = parseInt(urlParams.get('selected') || '3', 10);
+  const initialIndex = isNaN(rawIndex) ? 3 : Math.max(0, Math.min(6, rawIndex));
   const showSavedToast = urlParams.get('saved') === '1';
   const isAnnotated = urlParams.get('annotate') === '1';
 
   const [selectedIndex, setSelectedIndex] = useState(initialIndex);
+  const [toastMessage, setToastMessage] = useState<string | null>(showSavedToast ? 'Saved to gallery' : null);
 
   return (
     <PhoneFrame pureDevice={pureDevice}>
@@ -75,7 +77,7 @@ export const MomentStripScreen: React.FC<MomentStripScreenProps> = ({ pureDevice
 
             <div style={{ position: 'relative' }}>
               <GlassChip icon={<Sparkles size={14} />} variant="accent">
-                {selectedIndex === 3 ? 'AI Recommended Best' : `Frame ${selectedIndex + 1} of 7`}
+                {selectedIndex === 3 ? 'Best Moment (Sharpest)' : `Frame ${selectedIndex + 1} of 7`}
               </GlassChip>
 
               {isAnnotated && (
@@ -101,7 +103,7 @@ export const MomentStripScreen: React.FC<MomentStripScreenProps> = ({ pureDevice
           </div>
 
           {/* Toast Variant (if saved or active) */}
-          {showSavedToast && (
+          {toastMessage && (
             <div style={{
               position: 'absolute',
               bottom: 'var(--space-4)',
@@ -110,7 +112,14 @@ export const MomentStripScreen: React.FC<MomentStripScreenProps> = ({ pureDevice
               zIndex: 30,
               width: '90%',
             }}>
-              <Toast message="Saved to gallery" actionLabel="Undo" onAction={() => alert('Undo clicked')} />
+              <Toast
+                message={toastMessage}
+                actionLabel={toastMessage.includes('Saved') ? 'Undo' : undefined}
+                onAction={() => {
+                  setToastMessage('Photo removed');
+                  setTimeout(() => setToastMessage(null), 1500);
+                }}
+              />
             </div>
           )}
         </div>

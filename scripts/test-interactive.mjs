@@ -1,4 +1,29 @@
 import { chromium } from 'playwright';
+import path from 'node:path';
+import fs from 'node:fs';
+import { fileURLToPath } from 'node:url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const PROJECT_DIR = path.resolve(__dirname, '..');
+const TEST_RESULTS_DIR = path.join(PROJECT_DIR, 'test-results');
+const BRAIN_DIR = process.env.BRAIN_DIR || 'C:/Users/vaibh/.gemini/antigravity/brain/d3c251cc-b9ea-4484-982e-138020751b92';
+
+if (!fs.existsSync(TEST_RESULTS_DIR)) {
+  fs.mkdirSync(TEST_RESULTS_DIR, { recursive: true });
+}
+
+async function saveScreen(page, filename) {
+  const localPath = path.join(TEST_RESULTS_DIR, filename);
+  await page.screenshot({ path: localPath });
+  if (BRAIN_DIR && fs.existsSync(BRAIN_DIR)) {
+    try {
+      fs.copyFileSync(localPath, path.join(BRAIN_DIR, filename));
+    } catch {
+      // ignore copy errors
+    }
+  }
+}
 
 async function testInteractive() {
   console.log('Testing Phase 5 Interactive Camera Scenarios...');
@@ -20,7 +45,7 @@ async function testInteractive() {
   console.log('✓ Scenario 0 Passed: Interactive screen loaded with Viewfinder & DemoPanel');
 
   // Take screenshot of idle interactive state
-  await page.screenshot({ path: 'C:/Users/vaibh/.gemini/antigravity/brain/d3c251cc-b9ea-4484-982e-138020751b92/phase5-01-idle.png' });
+  await saveScreen(page, 'phase5-01-idle.png');
 
   // 2. Scenario 1: Tap subject to focus
   // Click on the viewfinder image
@@ -34,7 +59,7 @@ async function testInteractive() {
 
   // Wait for lock ring progress to accumulate (since default steadiness is > 0.7)
   await page.waitForTimeout(500);
-  await page.screenshot({ path: 'C:/Users/vaibh/.gemini/antigravity/brain/d3c251cc-b9ea-4484-982e-138020751b92/phase5-02-locking.png' });
+  await saveScreen(page, 'phase5-02-locking.png');
 
   // Wait for capture and transition to REVIEW
   await page.waitForTimeout(800);
@@ -43,7 +68,7 @@ async function testInteractive() {
     throw new Error('Moment Strip did not open after lock completion');
   }
   console.log('✓ Scenario 1 Passed: Tap -> Steady Hold -> Auto-Capture -> Moment Strip Review');
-  await page.screenshot({ path: 'C:/Users/vaibh/.gemini/antigravity/brain/d3c251cc-b9ea-4484-982e-138020751b92/phase5-03-review.png' });
+  await saveScreen(page, 'phase5-03-review.png');
 
   // 3. Scenario 2: Frame Selection in Moment Strip
   const frameThumbnails = page.locator('button[aria-label^="Frame"]');
@@ -56,15 +81,15 @@ async function testInteractive() {
   console.log('✓ Scenario 2 Passed: Moment Strip allows frame swapping');
 
   // 4. Scenario 3: Wait for autosave countdown -> Toast "Saved · Undo" -> Click Undo
-  console.log('Waiting for autosave countdown (approx 3.5s)...');
-  await page.waitForTimeout(4000);
+  console.log('Waiting for autosave countdown (approx 4s)...');
+  await page.waitForTimeout(4500);
 
   const toastText = await page.textContent('body');
   if (!toastText.includes('Saved · Undo') && !toastText.includes('Undo')) {
     throw new Error('Toast "Saved · Undo" did not appear after autosave');
   }
   console.log('✓ Scenario 3a Passed: Autosave completed and showed Saved · Undo toast');
-  await page.screenshot({ path: 'C:/Users/vaibh/.gemini/antigravity/brain/d3c251cc-b9ea-4484-982e-138020751b92/phase5-04-saved.png' });
+  await saveScreen(page, 'phase5-04-saved.png');
 
   // Click Undo button
   const undoBtn = page.locator('button:has-text("Undo")');
@@ -75,7 +100,7 @@ async function testInteractive() {
     throw new Error('Undo did not show "Photo removed" feedback');
   }
   console.log('✓ Scenario 3b Passed: Undo successfully discarded photo');
-  await page.screenshot({ path: 'C:/Users/vaibh/.gemini/antigravity/brain/d3c251cc-b9ea-4484-982e-138020751b92/phase5-05-undone.png' });
+  await saveScreen(page, 'phase5-05-undone.png');
 
   // 5. Scenario 4: Shake / Movement Interruption
   // Reset camera
@@ -91,7 +116,7 @@ async function testInteractive() {
 
   const shakeBody = await page.textContent('body');
   console.log('Shake state feedback:', shakeBody.includes('Too much movement') ? 'Too much movement detected' : 'State updated');
-  await page.screenshot({ path: 'C:/Users/vaibh/.gemini/antigravity/brain/d3c251cc-b9ea-4484-982e-138020751b92/phase5-06-shake.png' });
+  await saveScreen(page, 'phase5-06-shake.png');
   console.log('✓ Scenario 4 Passed: Sudden movement cancels lock and drains ring');
 
   // 6. Scenario 5: Group Mode & Voice Trigger
@@ -105,10 +130,10 @@ async function testInteractive() {
     throw new Error('Group mode did not activate properly');
   }
   console.log('✓ Scenario 5a Passed: Group Mode active with 3 of 4 ready and Tara blinking');
-  await page.screenshot({ path: 'C:/Users/vaibh/.gemini/antigravity/brain/d3c251cc-b9ea-4484-982e-138020751b92/phase5-07-group.png' });
+  await saveScreen(page, 'phase5-07-group.png');
 
   // Test voice trigger
-  await page.locator('button:has-text("Say \\"Cheese\\"")').click();
+  await page.locator('button:has-text("Cheese")').click();
   await page.waitForTimeout(500);
   const voiceBody = await page.textContent('body');
   if (!voiceBody.includes('Pick your favourite moment')) {

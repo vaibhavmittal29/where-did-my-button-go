@@ -15,9 +15,9 @@ console.log('--- RUNNING CAMERA STATE MACHINE SANITY TESTS ---\n');
   assert.strictEqual(state.status, 'IDLE');
 
   // Step 1: User taps subject
-  state = cameraReducer(state, { type: 'TAP_SUBJECT', x: 195, y: 400 });
+  state = cameraReducer(state, { type: 'TAP_SUBJECT', x: 50, y: 45 });
   assert.strictEqual(state.status, 'FOCUSED');
-  assert.deepStrictEqual(state.focusPoint, { x: 195, y: 400 });
+  assert.deepStrictEqual(state.focusPoint, { x: 50, y: 45 });
   assert.strictEqual(state.progress, 0);
 
   // Step 2: Steady detected
@@ -56,7 +56,7 @@ console.log('--- RUNNING CAMERA STATE MACHINE SANITY TESTS ---\n');
 {
   console.log('Test 2: Cancelled Lock Flow');
   let state = initialCameraState;
-  state = cameraReducer(state, { type: 'TAP_SUBJECT', x: 100, y: 200 });
+  state = cameraReducer(state, { type: 'TAP_SUBJECT', x: 40, y: 60 });
   state = cameraReducer(state, { type: 'STEADY_OK' });
   state = cameraReducer(state, { type: 'STEADY_TICK', dt: 300 });
   assert.strictEqual(state.status, 'LOCKING');
@@ -69,7 +69,7 @@ console.log('--- RUNNING CAMERA STATE MACHINE SANITY TESTS ---\n');
   // When drain animation completes, returns to FOCUSED with pin preserved
   state = cameraReducer(state, { type: 'ANIM_DONE' });
   assert.strictEqual(state.status, 'FOCUSED');
-  assert.deepStrictEqual(state.focusPoint, { x: 100, y: 200 });
+  assert.deepStrictEqual(state.focusPoint, { x: 40, y: 60 });
   assert.strictEqual(state.progress, 0);
 
   console.log('✔ Test 2 Passed: Lock cancellation retains focus pin for immediate retry.\n');
@@ -79,7 +79,7 @@ console.log('--- RUNNING CAMERA STATE MACHINE SANITY TESTS ---\n');
 {
   console.log('Test 3: Undo Reversal Flow');
   let state = initialCameraState;
-  state = cameraReducer(state, { type: 'TAP_SUBJECT', x: 150, y: 300 });
+  state = cameraReducer(state, { type: 'TAP_SUBJECT', x: 50, y: 50 });
   state = cameraReducer(state, { type: 'STEADY_OK' });
   state = cameraReducer(state, { type: 'STEADY_TICK', dt: HOLD_TIME_MS });
   assert.strictEqual(state.status, 'CAPTURED');
@@ -110,7 +110,7 @@ console.log('--- RUNNING CAMERA STATE MACHINE SANITY TESTS ---\n');
   assert.strictEqual(lowLightHoldTime, 1200);
 
   let state = { ...initialCameraState, isLowLight: true };
-  state = cameraReducer(state, { type: 'TAP_SUBJECT', x: 200, y: 200 });
+  state = cameraReducer(state, { type: 'TAP_SUBJECT', x: 50, y: 50 });
   state = cameraReducer(state, { type: 'STEADY_OK' });
   assert.strictEqual(state.statusMessage, 'Low light — hold a bit longer');
 
@@ -127,4 +127,116 @@ console.log('--- RUNNING CAMERA STATE MACHINE SANITY TESTS ---\n');
   console.log('✔ Test 4 Passed: Low light accurately extends hold time by 1.5x.\n');
 }
 
-console.log('ALL 4 STATE MACHINE SANITY TESTS PASSED SUCCESSFULLY! 🎉');
+// SCENARIO 5: Voice Trigger Phrase Validation & Unsteady Guard
+{
+  console.log('Test 5: Voice Trigger Validation');
+  let state = initialCameraState;
+
+  // Unsupported phrase rejected
+  state = cameraReducer(state, { type: 'VOICE_TRIGGER', phrase: 'shoot now' });
+  assert.strictEqual(state.status, 'IDLE');
+  assert.ok(state.statusMessage?.includes('Voice command ignored'));
+
+  // Unsteady rejection
+  state = cameraReducer(state, { type: 'VOICE_TRIGGER', phrase: 'Cheese', isSteady: false });
+  assert.strictEqual(state.status, 'IDLE');
+  assert.ok(state.statusMessage?.includes('Device moving'));
+
+  // Valid phrase while steady captures
+  state = cameraReducer(state, { type: 'VOICE_TRIGGER', phrase: 'Cheese', isSteady: true });
+  assert.strictEqual(state.status, 'CAPTURED');
+  assert.strictEqual(state.progress, 1);
+  assert.ok(state.statusMessage?.includes('Voice capture'));
+
+  console.log('✔ Test 5 Passed: Voice trigger enforces supported phrase and stillness.\n');
+}
+
+// SCENARIO 6: Volume Key Accessibility Fallback & Guards
+{
+  console.log('Test 6: Volume Key Accessibility Fallback');
+  let state = initialCameraState;
+
+  // Volume key while unsteady rejected
+  state = cameraReducer(state, { type: 'VOLUME_KEY', isSteady: false });
+  assert.strictEqual(state.status, 'IDLE');
+  assert.ok(state.statusMessage?.includes('Device moving'));
+
+  // Volume key while steady captures
+  state = cameraReducer(state, { type: 'VOLUME_KEY', isSteady: true });
+  assert.strictEqual(state.status, 'CAPTURED');
+  assert.strictEqual(state.progress, 1);
+
+  // Volume key while in REVIEW ignored
+  state = cameraReducer(state, { type: 'ANIM_DONE' });
+  assert.strictEqual(state.status, 'REVIEW');
+  const reviewState = cameraReducer(state, { type: 'VOLUME_KEY', isSteady: true });
+  assert.strictEqual(reviewState.status, 'REVIEW');
+
+  console.log('✔ Test 6 Passed: Volume key accessibility fallback verified with guards.\n');
+}
+
+// SCENARIO 7: Group Mode Readiness Guards
+{
+  console.log('Test 7: Group Mode Readiness Guards');
+  let state: typeof initialCameraState = {
+    ...initialCameraState,
+    mode: 'group',
+    groupReadyCount: 3,
+    groupTotalCount: 4,
+  };
+
+  // When only 3 of 4 are ready, PROGRESS_COMPLETE must be rejected
+  state = cameraReducer(state, { type: 'PROGRESS_COMPLETE' });
+  assert.strictEqual(state.status, 'IDLE'); // Not captured!
+
+  // When 4 of 4 are ready, PROGRESS_COMPLETE triggers capture
+  state = cameraReducer(state, { type: 'SET_GROUP_READY', count: 4 });
+  assert.strictEqual(state.groupReadyCount, 4);
+  state = cameraReducer(state, { type: 'PROGRESS_COMPLETE' });
+  assert.strictEqual(state.status, 'CAPTURED');
+
+  console.log('✔ Test 7 Passed: Group mode requires all faces ready before capture.\n');
+}
+
+// SCENARIO 8: Tunable Stillness Sensitivity (Hold Time)
+{
+  console.log('Test 8: Tunable Hold Time Setting');
+  let state = initialCameraState;
+  assert.strictEqual(state.baseHoldTime, 800);
+
+  // Custom hold time setting (e.g. 500 ms)
+  state = cameraReducer(state, { type: 'SET_HOLD_TIME', holdTimeMs: 500 });
+  assert.strictEqual(state.baseHoldTime, 500);
+
+  // Clamped at min (400 ms) and max (1500 ms)
+  state = cameraReducer(state, { type: 'SET_HOLD_TIME', holdTimeMs: 200 });
+  assert.strictEqual(state.baseHoldTime, 400);
+
+  state = cameraReducer(state, { type: 'SET_HOLD_TIME', holdTimeMs: 2500 });
+  assert.strictEqual(state.baseHoldTime, 1500);
+
+  // Preserved across RESET
+  state = cameraReducer(state, { type: 'RESET' });
+  assert.strictEqual(state.baseHoldTime, 1500);
+
+  console.log('✔ Test 8 Passed: Tunable hold time clamps and persists correctly.\n');
+}
+
+// SCENARIO 9: Tap Isolation (Tap NEVER captures alone)
+{
+  console.log('Test 9: Tap Isolation');
+  let state = initialCameraState;
+  state = cameraReducer(state, { type: 'TAP_SUBJECT', x: 50, y: 50 });
+  assert.strictEqual(state.status, 'FOCUSED');
+  assert.strictEqual(state.progress, 0);
+
+  // Additional taps update position but never capture
+  state = cameraReducer(state, { type: 'TAP_SUBJECT', x: 80, y: 20 });
+  assert.strictEqual(state.status, 'FOCUSED');
+  assert.deepStrictEqual(state.focusPoint, { x: 80, y: 20 });
+  assert.strictEqual(state.progress, 0);
+
+  console.log('✔ Test 9 Passed: Tap subject exclusively focuses and never triggers capture.\n');
+}
+
+console.log('ALL 9 STATE MACHINE TESTS PASSED SUCCESSFULLY! 🎉');

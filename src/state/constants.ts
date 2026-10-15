@@ -9,3 +9,6 @@ export const CANDIDATE_FRAMES = 7;        // Number of frames presented in Momen
 export const AUTOSAVE_MS = 4000;          // Autosave countdown in review mode (ms)
 export const UNDO_WINDOW_MS = 5000;       // Window in which an undo can revert the save (ms)
 export const COOLDOWN_MS = 600;           // Cooldown to avoid accidental double-captures (ms)
+export const TIMEOUT_FOCUS_MS = 3000;     // Dwell timeout when focused before resetting to IDLE (ms)
+export const GROUP_STEADY_HOLD_MS = 600;  // Steadiness hold required in Group Mode once all faces are ready (ms)
+export const VOICE_SUPPORTED_PHRASES = ['capture', 'cheese'] as const;

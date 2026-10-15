@@ -30,7 +30,7 @@ export const MomentStrip: React.FC<MomentStripProps> = ({
       </div>
 
       {/* 7-frame horizontal strip */}
-      <div className={styles.stripScroll}>
+      <div className={styles.stripScroll} role="group" aria-label="7 candidate burst frames">
         {frames.map((src, index) => {
           const isSelected = selectedIndex === index;
           const isBest = bestIndex === index;
@@ -43,7 +43,8 @@ export const MomentStrip: React.FC<MomentStripProps> = ({
               className={styles.thumbnailCard}
               data-selected={isSelected}
               onClick={() => onSelectFrame?.(index)}
-              aria-label={`Frame ${index + 1} of 7${isBest ? ' (Best)' : ''}`}
+              aria-label={`Frame ${index + 1} of 7${isBest ? ' (Best moment)' : ''}${isSelected ? ' (Selected)' : ''}`}
+              aria-pressed={isSelected}
             >
               <img src={src} alt={`Moment ${index + 1}`} className={styles.thumbImg} />
               {isBest && <span className={styles.bestBadge}>Best</span>}
@@ -54,7 +55,14 @@ export const MomentStrip: React.FC<MomentStripProps> = ({
       </div>
 
       {/* Autosave countdown bar and label */}
-      <div className={styles.countdownBar}>
+      <div
+        className={styles.countdownBar}
+        role="progressbar"
+        aria-label="Autosave countdown"
+        aria-valuenow={Math.round(countdownProgress * 100)}
+        aria-valuemin={0}
+        aria-valuemax={100}
+      >
         <div
           className={styles.countdownFill}
           style={{ width: `${Math.round(countdownProgress * 100)}%` }}
@@ -62,8 +70,8 @@ export const MomentStrip: React.FC<MomentStripProps> = ({
       </div>
 
       <div className={styles.savingText}>
-        <span>Saving best moment…</span>
-        <span className="tabular-nums">{(4 * (1 - countdownProgress)).toFixed(1)}s</span>
+        <span>{selectedIndex === bestIndex ? 'Saving best moment…' : 'Saving selection…'}</span>
+        <span className="tabular-nums">{(4 * Math.max(0, 1 - countdownProgress)).toFixed(1)}s</span>
       </div>
     </div>
   );

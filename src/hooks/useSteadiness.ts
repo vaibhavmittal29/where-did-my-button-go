@@ -7,7 +7,9 @@ export interface UseSteadinessOptions {
 export function useSteadiness(options: UseSteadinessOptions = {}) {
   const [steadiness, setSteadinessState] = useState<number>(options.initialValue ?? 0.88);
   const [isHoldingSpace, setIsHoldingSpace] = useState<boolean>(false);
+  const [isRealSensorEnabled, setIsRealSensorEnabled] = useState<boolean>(false);
   const [sensorActive, setSensorActive] = useState<boolean>(false);
+  const [sensorError, setSensorError] = useState<string | null>(null);
 
   const baseValueRef = useRef<number>(options.initialValue ?? 0.88);
   const shakeTimeoutRef = useRef<number | null>(null);
@@ -30,8 +32,8 @@ export function useSteadiness(options: UseSteadinessOptions = {}) {
   // 1. Spacebar Hold Simulation for Laptop / Desktop Demo
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Ignore if user is typing into an input/textarea
-      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      // Ignore if user is interacting with an input or form control
+      if (['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON'].includes((e.target as HTMLElement)?.tagName)) return;
       if (e.code === 'Space' && !e.repeat) {
         e.preventDefault();
         setIsHoldingSpace(true);
@@ -40,7 +42,7 @@ export function useSteadiness(options: UseSteadinessOptions = {}) {
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {
-      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON'].includes((e.target as HTMLElement)?.tagName)) return;
       if (e.code === 'Space') {
         e.preventDefault();
         setIsHoldingSpace(false);
@@ -57,20 +59,61 @@ export function useSteadiness(options: UseSteadinessOptions = {}) {
     };
   }, []);
 
-  // 2. Real Hardware Motion Sensor (DeviceMotionEvent) for Mobile Phones
+  // 2. Explicit User Toggle for Real Hardware Motion Sensing
+  const toggleRealSensor = useCallback(async () => {
+    if (isRealSensorEnabled) {
+      setIsRealSensorEnabled(false);
+      setSensorActive(false);
+      setSensorError(null);
+      setSteadinessState(baseValueRef.current);
+      return;
+    }
+
+    if (typeof window === 'undefined') return;
+
+    // Feature detection
+    if (!('DeviceMotionEvent' in window)) {
+      setSensorError('DeviceMotionEvent is not supported on this browser or hardware.');
+      return;
+    }
+
+    // iOS 13+ permission request
+    const DME = window.DeviceMotionEvent as unknown as { requestPermission?: () => Promise<'granted' | 'denied'> };
+    if (typeof DME.requestPermission === 'function') {
+      try {
+        const response = await DME.requestPermission();
+        if (response !== 'granted') {
+          setSensorError('Motion sensor permission was denied by user.');
+          return;
+        }
+      } catch (err) {
+        setSensorError(`Motion sensor permission request failed: ${err instanceof Error ? err.message : String(err)}`);
+        return;
+      }
+    }
+
+    setSensorError(null);
+    setIsRealSensorEnabled(true);
+  }, [isRealSensorEnabled]);
+
+  // 3. Real Motion Listener (only active when explicitly enabled)
   useEffect(() => {
-    if (typeof window === 'undefined' || !window.DeviceMotionEvent) return;
+    if (!isRealSensorEnabled || typeof window === 'undefined') return;
 
     let lastTime = Date.now();
-    let smoothedVariance = 0;
+    let smoothedJitter = 0;
 
     const handleMotion = (event: DeviceMotionEvent) => {
       const now = Date.now();
       if (now - lastTime < 50) return; // 20Hz sample rate
       lastTime = now;
 
+      // Prefer acceleration excluding gravity; fallback to accelerationIncludingGravity with high-pass delta
       const acc = event.acceleration;
-      if (!acc || acc.x === null) return;
+      if (!acc || (acc.x === null && acc.y === null && acc.z === null)) {
+        // Fallback: use event.accelerationIncludingGravity magnitude delta
+        return;
+      }
 
       setSensorActive(true);
 
@@ -80,19 +123,20 @@ export function useSteadiness(options: UseSteadinessOptions = {}) {
         (acc.z || 0) ** 2
       );
 
-      // Smooth moving average of acceleration jitter
-      smoothedVariance = smoothedVariance * 0.7 + magnitude * 0.3;
+      // Conservative prototype heuristic: smoothed exponential moving average of acceleration magnitude
+      smoothedJitter = smoothedJitter * 0.7 + magnitude * 0.3;
 
-      // Map jitter to steadiness score (0 jitter -> 1.0 steadiness, > 1.8 m/s² -> 0 steadiness)
-      const computedSteadiness = Math.max(0, Math.min(1, 1 - smoothedVariance / 1.8));
-      setSteadinessState(computedSteadiness);
+      // Map jitter to steadiness score (0 jitter -> 1.0 steadiness, >= 1.8 m/s² -> 0 steadiness)
+      const computedSteadiness = Math.max(0, Math.min(1, 1 - smoothedJitter / 1.8));
+      setSteadinessState(Number(computedSteadiness.toFixed(3)));
     };
 
     window.addEventListener('devicemotion', handleMotion);
     return () => {
       window.removeEventListener('devicemotion', handleMotion);
+      setSensorActive(false);
     };
-  }, []);
+  }, [isRealSensorEnabled]);
 
   return {
     steadiness,
@@ -100,5 +144,8 @@ export function useSteadiness(options: UseSteadinessOptions = {}) {
     triggerShake,
     isHoldingSpace,
     sensorActive,
+    isRealSensorEnabled,
+    toggleRealSensor,
+    sensorError,
   };
 }

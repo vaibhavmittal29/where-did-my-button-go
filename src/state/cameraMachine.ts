@@ -1,7 +1,10 @@
 import {
   HOLD_TIME_MS,
+  HOLD_TIME_MIN_MS,
+  HOLD_TIME_MAX_MS,
   LOW_LIGHT_MULTIPLIER,
   CANDIDATE_FRAMES,
+  VOICE_SUPPORTED_PHRASES,
 } from './constants';
 
 export type CameraStatus =
@@ -21,6 +24,7 @@ export interface CameraState {
   progress: number; // 0.0 to 1.0
   mode: CameraMode;
   isLowLight: boolean;
+  baseHoldTime: number; // tunable hold time (400 - 1500 ms)
   selectedFrameIndex: number;
   bestFrameIndex: number;
   statusMessage: string | null;
@@ -41,10 +45,11 @@ export type CameraAction =
   | { type: 'PICK_FRAME'; index: number }
   | { type: 'TIMEOUT_REVIEW' }
   | { type: 'UNDO' }
-  | { type: 'VOICE_TRIGGER'; phrase?: string }
-  | { type: 'VOLUME_KEY' }
+  | { type: 'VOICE_TRIGGER'; phrase?: string; isSteady?: boolean }
+  | { type: 'VOLUME_KEY'; isSteady?: boolean }
   | { type: 'MODE_CHANGE'; mode: CameraMode }
   | { type: 'SET_LOW_LIGHT'; isLowLight: boolean }
+  | { type: 'SET_HOLD_TIME'; holdTimeMs: number }
   | { type: 'SET_GROUP_READY'; count: number }
   | { type: 'RESET' };
 
@@ -54,6 +59,7 @@ export const initialCameraState: CameraState = {
   progress: 0,
   mode: 'still',
   isLowLight: false,
+  baseHoldTime: HOLD_TIME_MS,
   selectedFrameIndex: 3, // middle frame (0..6)
   bestFrameIndex: 3,
   statusMessage: null,
@@ -63,17 +69,22 @@ export const initialCameraState: CameraState = {
   groupTotalCount: 4,
 };
 
-export function getEffectiveHoldTime(isLowLight: boolean): number {
-  return isLowLight ? HOLD_TIME_MS * LOW_LIGHT_MULTIPLIER : HOLD_TIME_MS;
+export function getEffectiveHoldTime(isLowLight: boolean, baseHoldTime: number = HOLD_TIME_MS): number {
+  return isLowLight ? baseHoldTime * LOW_LIGHT_MULTIPLIER : baseHoldTime;
 }
 
 export function cameraReducer(state: CameraState, action: CameraAction): CameraState {
   switch (action.type) {
     case 'TAP_SUBJECT': {
+      // Disallow focus anchoring while reviewing, saving, or capturing
+      if (['CAPTURED', 'REVIEW', 'SAVED'].includes(state.status)) {
+        return state;
+      }
+      // Tap sets focus point but NEVER triggers capture on its own
       return {
         ...state,
         status: 'FOCUSED',
-        focusPoint: { x: action.x, y: action.y },
+        focusPoint: { x: Math.max(0, Math.min(100, action.x)), y: Math.max(0, Math.min(100, action.y)) },
         progress: 0,
         statusMessage: null,
         canUndo: false,
@@ -81,6 +92,7 @@ export function cameraReducer(state: CameraState, action: CameraAction): CameraS
     }
 
     case 'STEADY_OK': {
+      // Can only start locking from FOCUSED state
       if (state.status !== 'FOCUSED') return state;
       return {
         ...state,
@@ -91,8 +103,8 @@ export function cameraReducer(state: CameraState, action: CameraAction): CameraS
 
     case 'STEADY_TICK': {
       if (state.status !== 'LOCKING') return state;
-      const holdTime = getEffectiveHoldTime(state.isLowLight);
-      const nextProgress = Math.min(1, state.progress + action.dt / holdTime);
+      const holdTime = getEffectiveHoldTime(state.isLowLight, state.baseHoldTime);
+      const nextProgress = Math.min(1, Math.max(0, state.progress + action.dt / holdTime));
       if (nextProgress >= 1) {
         return {
           ...state,
@@ -122,12 +134,18 @@ export function cameraReducer(state: CameraState, action: CameraAction): CameraS
         ...state,
         status: 'IDLE',
         focusPoint: null,
+        progress: 0,
         statusMessage: 'Hold still',
       };
     }
 
     case 'PROGRESS_COMPLETE': {
-      if (state.status !== 'LOCKING') return state;
+      // Only capture if currently in an active capture-eligible state
+      if (!['LOCKING', 'FOCUSED', 'IDLE'].includes(state.status)) return state;
+      // In group mode, only allow capture if everyone is ready
+      if (state.mode === 'group' && state.groupReadyCount < state.groupTotalCount) {
+        return state;
+      }
       return {
         ...state,
         status: 'CAPTURED',
@@ -138,7 +156,7 @@ export function cameraReducer(state: CameraState, action: CameraAction): CameraS
 
     case 'ANIM_DONE': {
       if (state.status === 'CANCELLED') {
-        // Pin remains at focusPoint so user can retry instantly
+        // Pin remains at focusPoint so user can retry immediately without re-tapping
         return {
           ...state,
           status: 'FOCUSED',
@@ -190,22 +208,61 @@ export function cameraReducer(state: CameraState, action: CameraAction): CameraS
     }
 
     case 'VOICE_TRIGGER': {
-      // Voice trigger bypasses tap if phone is steady
+      // Guarded hands-free capture flow:
+      // 1. Reject if already captured, in review, or saved
+      if (!['IDLE', 'FOCUSED', 'LOCKING'].includes(state.status)) {
+        return state;
+      }
+
+      // 2. Accept only supported phrases ('Capture' or 'Cheese')
+      const phrase = (action.phrase || 'Cheese').trim().toLowerCase();
+      const isSupported = (VOICE_SUPPORTED_PHRASES as readonly string[]).includes(phrase);
+      if (!isSupported) {
+        return {
+          ...state,
+          statusMessage: `Voice command ignored: "${action.phrase || ''}". Use "Capture" or "Cheese".`,
+        };
+      }
+
+      // 3. Reject if unsteady when explicitly checked
+      if (action.isSteady === false) {
+        return {
+          ...state,
+          statusMessage: 'Device moving — hold steady for voice capture',
+        };
+      }
+
+      // 4. Capture cleanly
       return {
         ...state,
         status: 'CAPTURED',
+        focusPoint: state.focusPoint || { x: 50, y: 50 },
         progress: 1,
-        statusMessage: `Voice capture: "${action.phrase || 'Cheese'}"`,
+        statusMessage: `Voice capture: "${phrase === 'capture' ? 'Capture' : 'Cheese'}"`,
       };
     }
 
     case 'VOLUME_KEY': {
-      // Accessibility fallback trigger
+      // Accessibility fallback trigger:
+      // Reject if camera is already captured, reviewing, or saved
+      if (!['IDLE', 'FOCUSED', 'LOCKING'].includes(state.status)) {
+        return state;
+      }
+
+      // Reject if device is unsteady when explicitly checked
+      if (action.isSteady === false) {
+        return {
+          ...state,
+          statusMessage: 'Device moving — hold steady for fallback capture',
+        };
+      }
+
       return {
         ...state,
         status: 'CAPTURED',
+        focusPoint: state.focusPoint || { x: 50, y: 50 },
         progress: 1,
-        statusMessage: 'Accessibility capture (Volume key)',
+        statusMessage: 'Accessibility capture (Simulated volume key)',
       };
     }
 
@@ -227,10 +284,19 @@ export function cameraReducer(state: CameraState, action: CameraAction): CameraS
       };
     }
 
-    case 'SET_GROUP_READY': {
+    case 'SET_HOLD_TIME': {
+      const clamped = Math.max(HOLD_TIME_MIN_MS, Math.min(HOLD_TIME_MAX_MS, action.holdTimeMs));
       return {
         ...state,
-        groupReadyCount: action.count,
+        baseHoldTime: clamped,
+      };
+    }
+
+    case 'SET_GROUP_READY': {
+      const clamped = Math.max(0, Math.min(state.groupTotalCount, action.count));
+      return {
+        ...state,
+        groupReadyCount: clamped,
       };
     }
 
@@ -239,6 +305,9 @@ export function cameraReducer(state: CameraState, action: CameraAction): CameraS
         ...initialCameraState,
         mode: state.mode,
         isLowLight: state.isLowLight,
+        baseHoldTime: state.baseHoldTime,
+        groupReadyCount: state.groupReadyCount,
+        groupTotalCount: state.groupTotalCount,
       };
     }
 

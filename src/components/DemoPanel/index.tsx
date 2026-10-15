@@ -11,7 +11,10 @@ export interface DemoPanelProps {
   isLowLight: boolean;
   groupReadyCount: number;
   isMuted?: boolean;
+  isRealSensorEnabled?: boolean;
+  sensorError?: string | null;
   onToggleMute?: () => void;
+  onToggleRealSensor?: () => void;
   onSetSteadiness: (val: number) => void;
   onTriggerShake: () => void;
   onToggleLowLight: () => void;
@@ -30,7 +33,10 @@ export const DemoPanel: React.FC<DemoPanelProps> = ({
   isLowLight,
   groupReadyCount,
   isMuted = false,
+  isRealSensorEnabled = false,
+  sensorError,
   onToggleMute,
+  onToggleRealSensor,
   onSetSteadiness,
   onTriggerShake,
   onToggleLowLight,
@@ -114,10 +120,29 @@ export const DemoPanel: React.FC<DemoPanelProps> = ({
           <span>Hold to steady (96%), release to move</span>
         </div>
 
-        <button className={styles.actionBtn} onClick={onTriggerShake}>
-          <Activity size={14} color="var(--accent)" />
-          <span>Simulate Sudden Shake</span>
-        </button>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          <button className={styles.actionBtn} onClick={onTriggerShake}>
+            <Activity size={14} color="var(--accent)" />
+            <span>Simulate Sudden Shake</span>
+          </button>
+
+          {onToggleRealSensor && (
+            <button
+              className={`${styles.actionBtn} ${isRealSensorEnabled ? styles.actionBtnPrimary : ''}`}
+              onClick={onToggleRealSensor}
+              title="Toggle real device accelerometer/gyroscope sensors (requires mobile browser permission)"
+            >
+              <Activity size={14} />
+              <span>{isRealSensorEnabled ? 'Real Sensor (Active)' : 'Enable Real Device Sensor'}</span>
+            </button>
+          )}
+
+          {sensorError && (
+            <div style={{ fontSize: '11px', color: 'var(--danger)', marginTop: '2px' }}>
+              {sensorError}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Mode & Environment Scenarios */}
@@ -135,9 +160,10 @@ export const DemoPanel: React.FC<DemoPanelProps> = ({
           <button
             className={styles.actionBtn}
             onClick={() => onTriggerVoice('Cheese')}
+            title="Simulate hands-free voice command trigger"
           >
             <Mic size={14} color="var(--accent)" />
-            <span>Say "Cheese"</span>
+            <span>Simulate Voice ("Cheese")</span>
           </button>
 
           <button
@@ -167,7 +193,7 @@ export const DemoPanel: React.FC<DemoPanelProps> = ({
               style={{ gridColumn: 'span 2' }}
             >
               <Volume2 size={14} color="var(--accent)" />
-              <span>Accessibility Volume Key ('C')</span>
+              <span>Simulated Volume Key ('C')</span>
             </button>
           )}
         </div>

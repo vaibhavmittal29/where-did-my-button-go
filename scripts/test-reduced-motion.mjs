@@ -1,4 +1,17 @@
 import { chromium } from 'playwright';
+import path from 'node:path';
+import fs from 'node:fs';
+import { fileURLToPath } from 'node:url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const PROJECT_DIR = path.resolve(__dirname, '..');
+const TEST_RESULTS_DIR = path.join(PROJECT_DIR, 'test-results');
+const BRAIN_DIR = process.env.BRAIN_DIR || 'C:/Users/vaibh/.gemini/antigravity/brain/d3c251cc-b9ea-4484-982e-138020751b92';
+
+if (!fs.existsSync(TEST_RESULTS_DIR)) {
+  fs.mkdirSync(TEST_RESULTS_DIR, { recursive: true });
+}
 
 async function testReducedMotion() {
   console.log('Testing Phase 6 Prefers-Reduced-Motion Compliance...');
@@ -25,7 +38,15 @@ async function testReducedMotion() {
     throw new Error('LockRing did not detect reduced motion mode');
   }
 
-  await page.screenshot({ path: 'C:/Users/vaibh/.gemini/antigravity/brain/d3c251cc-b9ea-4484-982e-138020751b92/phase6-reduced-motion.png' });
+  const localPath = path.join(TEST_RESULTS_DIR, 'phase6-reduced-motion.png');
+  await page.screenshot({ path: localPath });
+  if (BRAIN_DIR && fs.existsSync(BRAIN_DIR)) {
+    try {
+      fs.copyFileSync(localPath, path.join(BRAIN_DIR, 'phase6-reduced-motion.png'));
+    } catch {
+      // ignore copy errors
+    }
+  }
   console.log('✓ Reduced motion test passed!');
 
   await browser.close();

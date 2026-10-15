@@ -13,6 +13,7 @@ import {
   initialCameraState,
   getEffectiveHoldTime,
 } from '../state/cameraMachine';
+import { UNSTEADY_GRACE_MS } from '../state/constants';
 import { useSteadiness } from '../hooks/useSteadiness';
 import { useHaptics } from '../hooks/useHaptics';
 import {
@@ -24,17 +25,30 @@ import {
   Users,
   FileText,
   Sparkles,
+  X,
 } from 'lucide-react';
 
 export const InteractiveCameraScreen: React.FC = () => {
   const [state, dispatch] = useReducer(cameraReducer, initialCameraState);
-  const { steadiness, setSteadiness, triggerShake, isHoldingSpace } = useSteadiness();
+  const {
+    steadiness,
+    setSteadiness,
+    triggerShake,
+    isHoldingSpace,
+    isRealSensorEnabled,
+    toggleRealSensor,
+    sensorError,
+  } = useSteadiness();
   const { triggerHaptic, isMuted, toggleMute } = useHaptics();
 
   // Selected frame preview during review
   const [previewFrameIndex, setPreviewFrameIndex] = useState<number>(3);
+  const previewFrameIndexRef = useRef<number>(3);
+  const hasResetAutosaveRef = useRef<boolean>(false);
   const [savedThumbnail, setSavedThumbnail] = useState<string>('/scenes/portrait-subject.jpg');
   const [flashActive, setFlashActive] = useState<boolean>(false);
+  const [flashMode, setFlashMode] = useState<'off' | 'auto' | 'on'>('auto');
+  const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Group mode readiness count (3 of 4 or 4 of 4)
@@ -134,7 +148,7 @@ export const InteractiveCameraScreen: React.FC = () => {
         // Track unsteadiness duration
         if (unsteadySinceRef.current === null) {
           unsteadySinceRef.current = now;
-        } else if (now - unsteadySinceRef.current > 200) {
+        } else if (now - unsteadySinceRef.current > UNSTEADY_GRACE_MS) {
           // Unsteady exceeded grace period -> cancel & drain ring
           triggerHaptic('error');
           dispatch({ type: 'UNSTEADY' });
@@ -170,7 +184,7 @@ export const InteractiveCameraScreen: React.FC = () => {
     }
   }, [state.status, triggerHaptic]);
 
-  // 5. REVIEW Autosave 4-second Countdown
+  // 5. REVIEW Autosave 4-second Countdown (Max 1 reset on frame scrub)
   useEffect(() => {
     if (state.status !== 'REVIEW') {
       setAutosaveProgress(0);
@@ -178,6 +192,9 @@ export const InteractiveCameraScreen: React.FC = () => {
       return;
     }
 
+    hasResetAutosaveRef.current = false;
+    previewFrameIndexRef.current = 3;
+    setPreviewFrameIndex(3);
     autosaveStartRef.current = performance.now();
     const duration = 4000;
 
@@ -188,7 +205,7 @@ export const InteractiveCameraScreen: React.FC = () => {
 
       if (progress >= 1) {
         triggerHaptic('save');
-        setSavedThumbnail(`/scenes/moment-${previewFrameIndex}.jpg`);
+        setSavedThumbnail(`/scenes/moment-${previewFrameIndexRef.current}.jpg`);
         dispatch({ type: 'TIMEOUT_REVIEW' });
       } else {
         autosaveTimerRef.current = requestAnimationFrame(updateAutosave);
@@ -199,7 +216,20 @@ export const InteractiveCameraScreen: React.FC = () => {
     return () => {
       if (autosaveTimerRef.current) cancelAnimationFrame(autosaveTimerRef.current);
     };
-  }, [state.status, previewFrameIndex, triggerHaptic]);
+  }, [state.status, triggerHaptic]);
+
+  // Frame selection in Moment Strip (resets 4s timer once if not already reset)
+  const handleSelectFrame = useCallback((index: number) => {
+    setPreviewFrameIndex(index);
+    previewFrameIndexRef.current = index;
+    triggerHaptic('tick');
+    dispatch({ type: 'PICK_FRAME', index });
+    if (!hasResetAutosaveRef.current) {
+      hasResetAutosaveRef.current = true;
+      autosaveStartRef.current = performance.now();
+      setAutosaveProgress(0);
+    }
+  }, [triggerHaptic]);
 
   // 6. SAVED Toast & 5s Undo Window
   useEffect(() => {
@@ -243,19 +273,39 @@ export const InteractiveCameraScreen: React.FC = () => {
     };
   }, [state.mode, state.status, groupReadyCount, steadiness]);
 
+  // Guarded triggers for Volume Key & Voice
+  const handleVolumeKeyTrigger = useCallback(() => {
+    const isSteady = steadiness >= 0.7;
+    dispatch({ type: 'VOLUME_KEY', isSteady });
+    if (isSteady) {
+      triggerHaptic('capture');
+    } else {
+      triggerHaptic('error');
+    }
+  }, [steadiness, triggerHaptic]);
+
+  const handleVoiceTrigger = useCallback((phrase: string) => {
+    const isSteady = steadiness >= 0.7;
+    dispatch({ type: 'VOICE_TRIGGER', phrase, isSteady });
+    if (isSteady) {
+      triggerHaptic('capture');
+    } else {
+      triggerHaptic('error');
+    }
+  }, [steadiness, triggerHaptic]);
+
   // 8. Accessibility Fallback Trigger: Volume Key / 'C' key
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
       if (e.key === 'c' || e.key === 'C') {
         e.preventDefault();
-        triggerHaptic('capture');
-        dispatch({ type: 'VOLUME_KEY' });
+        handleVolumeKeyTrigger();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [triggerHaptic]);
+  }, [handleVolumeKeyTrigger]);
 
   // Handlers for Undo and Reset
   const handleUndo = useCallback(() => {
@@ -343,14 +393,17 @@ export const InteractiveCameraScreen: React.FC = () => {
             }}
           />
 
-          {/* White Flash / Shutterless Capture Pulse */}
+          {/* Shutterless Capture Pulse (Subtle perimeter bloom, avoiding harsh white flash) */}
           <div style={{
             position: 'absolute',
             inset: 0,
-            backgroundColor: '#ffffff',
-            opacity: flashActive ? 0.85 : 0,
+            boxShadow: flashActive
+              ? 'inset 0 0 80px 24px rgba(255, 176, 32, 0.45), inset 0 0 120px 48px rgba(255, 255, 255, 0.3)'
+              : 'none',
+            backgroundColor: flashActive ? 'rgba(255, 255, 255, 0.12)' : 'transparent',
+            opacity: flashActive ? 1 : 0,
             pointerEvents: 'none',
-            transition: 'opacity 0.12s ease-out',
+            transition: 'opacity 0.15s ease-out',
             zIndex: 90,
           }} />
 
@@ -402,7 +455,17 @@ export const InteractiveCameraScreen: React.FC = () => {
             alignItems: 'center',
             justifyContent: 'space-between',
           }}>
-            <IconButton icon={<Zap size={18} />} aria-label="Flash" />
+            <IconButton
+              icon={<Zap size={18} />}
+              aria-label={`Flash mode: ${flashMode}`}
+              onClick={() => {
+                triggerHaptic('tap');
+                const next = flashMode === 'auto' ? 'on' : flashMode === 'on' ? 'off' : 'auto';
+                setFlashMode(next);
+                setToastMessage(`Flash: ${next.toUpperCase()}`);
+                setTimeout(() => setToastMessage((p) => (p?.startsWith('Flash:') ? null : p)), 1400);
+              }}
+            />
 
             {/* Top Context Chip */}
             {state.mode === 'group' ? (
@@ -422,8 +485,129 @@ export const InteractiveCameraScreen: React.FC = () => {
               </GlassChip>
             )}
 
-            <IconButton icon={<Settings2 size={18} />} aria-label="Settings" />
+            <IconButton
+              icon={<Settings2 size={18} />}
+              aria-label="Settings"
+              onClick={() => {
+                triggerHaptic('tap');
+                setIsSettingsOpen(true);
+              }}
+            />
           </header>
+
+          {/* Settings Modal Sheet */}
+          {isSettingsOpen && (
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="camera-settings-title"
+              style={{
+                position: 'absolute',
+                inset: 0,
+                backgroundColor: 'rgba(11, 11, 15, 0.85)',
+                backdropFilter: 'blur(16px)',
+                zIndex: 100,
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'flex-end',
+              }}
+              onClick={() => setIsSettingsOpen(false)}
+            >
+              <div
+                style={{
+                  backgroundColor: 'var(--surface-1)',
+                  borderTop: '1px solid var(--border)',
+                  borderRadius: '24px 24px 0 0',
+                  padding: 'var(--space-5) var(--space-4)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 'var(--space-4)',
+                  boxShadow: '0 -8px 32px rgba(0, 0, 0, 0.6)',
+                }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <h3 id="camera-settings-title" style={{ margin: 0, fontSize: '17px', fontWeight: 600, color: 'var(--text)' }}>
+                    STILL Settings
+                  </h3>
+                  <IconButton
+                    icon={<X size={18} />}
+                    aria-label="Close settings"
+                    onClick={() => setIsSettingsOpen(false)}
+                  />
+                </div>
+
+                {/* Tunable Hold Duration */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
+                    <span style={{ color: 'var(--text-muted)' }}>Stillness Hold Duration</span>
+                    <span style={{ color: 'var(--accent)', fontWeight: 600 }}>{state.baseHoldTime} ms</span>
+                  </div>
+                  <input
+                    type="range"
+                    min={400}
+                    max={1500}
+                    step={50}
+                    value={state.baseHoldTime}
+                    onChange={(e) => dispatch({ type: 'SET_HOLD_TIME', holdTimeMs: parseInt(e.target.value, 10) })}
+                    style={{ width: '100%', accentColor: 'var(--accent)' }}
+                    aria-label="Stillness hold duration in milliseconds"
+                  />
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: 'var(--text-dim)' }}>
+                    <span>400ms (Fast)</span>
+                    <span>800ms (Default)</span>
+                    <span>1500ms (Steady)</span>
+                  </div>
+                </div>
+
+                {/* Audio Feedback Toggle */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderTop: '1px solid var(--border)' }}>
+                  <div>
+                    <div style={{ fontSize: '13px', fontWeight: 500, color: 'var(--text)' }}>Sound & Haptic Feedback</div>
+                    <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Progress clicks and capture confirmation</div>
+                  </div>
+                  <button
+                    onClick={toggleMute}
+                    style={{
+                      padding: '5px 12px',
+                      borderRadius: 'var(--radius-pill)',
+                      border: '1px solid var(--border)',
+                      backgroundColor: isMuted ? 'transparent' : 'var(--accent)',
+                      color: isMuted ? 'var(--text-muted)' : 'var(--bg)',
+                      fontWeight: 600,
+                      fontSize: '12px',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {isMuted ? 'Muted' : 'Sound On'}
+                  </button>
+                </div>
+
+                {/* Hardware Sensors Toggle */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderTop: '1px solid var(--border)' }}>
+                  <div>
+                    <div style={{ fontSize: '13px', fontWeight: 500, color: 'var(--text)' }}>Hardware Gyroscope</div>
+                    <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{sensorError || 'Use real physical device motion if supported'}</div>
+                  </div>
+                  <button
+                    onClick={toggleRealSensor}
+                    style={{
+                      padding: '5px 12px',
+                      borderRadius: 'var(--radius-pill)',
+                      border: '1px solid var(--border)',
+                      backgroundColor: isRealSensorEnabled ? 'var(--accent)' : 'transparent',
+                      color: isRealSensorEnabled ? 'var(--bg)' : 'var(--text-muted)',
+                      fontWeight: 600,
+                      fontSize: '12px',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {isRealSensorEnabled ? 'Active' : 'Disabled'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Group Mode Detected Faces */}
           {state.mode === 'group' && state.status !== 'REVIEW' && (
@@ -545,11 +729,7 @@ export const InteractiveCameraScreen: React.FC = () => {
                 selectedIndex={previewFrameIndex}
                 bestIndex={3}
                 countdownProgress={autosaveProgress}
-                onSelectFrame={(idx) => {
-                  triggerHaptic('tap');
-                  setPreviewFrameIndex(idx);
-                  dispatch({ type: 'PICK_FRAME', index: idx });
-                }}
+                onSelectFrame={handleSelectFrame}
               />
             </div>
           )}
@@ -677,7 +857,10 @@ export const InteractiveCameraScreen: React.FC = () => {
         isLowLight={state.isLowLight}
         groupReadyCount={groupReadyCount}
         isMuted={isMuted}
+        isRealSensorEnabled={isRealSensorEnabled}
+        sensorError={sensorError}
         onToggleMute={toggleMute}
+        onToggleRealSensor={toggleRealSensor}
         onSetSteadiness={setSteadiness}
         onTriggerShake={triggerShake}
         onToggleLowLight={() => dispatch({ type: 'SET_LOW_LIGHT', isLowLight: !state.isLowLight })}
@@ -685,14 +868,8 @@ export const InteractiveCameraScreen: React.FC = () => {
           setGroupReadyCount(count);
           dispatch({ type: 'SET_GROUP_READY', count });
         }}
-        onTriggerVoice={(phrase) => {
-          triggerHaptic('tap');
-          dispatch({ type: 'VOICE_TRIGGER', phrase });
-        }}
-        onTriggerVolumeKey={() => {
-          triggerHaptic('capture');
-          dispatch({ type: 'VOLUME_KEY' });
-        }}
+        onTriggerVoice={handleVoiceTrigger}
+        onTriggerVolumeKey={handleVolumeKeyTrigger}
         onReset={handleReset}
         onModeChange={(m) => {
           triggerHaptic('tap');

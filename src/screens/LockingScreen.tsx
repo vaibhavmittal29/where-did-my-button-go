@@ -12,7 +12,8 @@ interface LockingScreenProps {
 
 export const LockingScreen: React.FC<LockingScreenProps> = ({ pureDevice = false }) => {
   const urlParams = new URLSearchParams(window.location.search);
-  const progressParam = parseFloat(urlParams.get('progress') || '0.6');
+  const rawProgress = parseFloat(urlParams.get('progress') || '0.6');
+  const progressParam = isNaN(rawProgress) ? 0.6 : Math.max(0, Math.min(1, rawProgress));
   const isAnnotated = urlParams.get('annotate') === '1';
 
   return (
@@ -186,7 +187,7 @@ export const LockingScreen: React.FC<LockingScreenProps> = ({ pureDevice = false
               textShadow: '0 1px 4px rgba(0,0,0,0.8)'
             }}>
               <Activity size={12} />
-              <span>Gyroscope Steadiness: 94%</span>
+              <span>Steadiness: Optimal (Simulated)</span>
             </div>
 
             {/* SVG Steadiness Line */}

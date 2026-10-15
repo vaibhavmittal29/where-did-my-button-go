@@ -12,7 +12,8 @@ interface GroupModeScreenProps {
 
 export const GroupModeScreen: React.FC<GroupModeScreenProps> = ({ pureDevice = false }) => {
   const urlParams = new URLSearchParams(window.location.search);
-  const readyCount = parseInt(urlParams.get('ready') || '3', 10);
+  const rawReady = parseInt(urlParams.get('ready') || '3', 10);
+  const readyCount = isNaN(rawReady) ? 3 : Math.max(0, Math.min(4, rawReady));
 
   // 4 university friends clearly framed across the viewfinder:
   // 1. Tara (Female in red shirt on left - laughing with eyes closed) -> Blinking (Amber)
@@ -20,7 +21,7 @@ export const GroupModeScreen: React.FC<GroupModeScreenProps> = ({ pureDevice = f
   // 3. Pooja (Female in white shirt - smiling at camera) -> Ready (Green)
   // 4. Neha (Female in navy graphic tee - smiling at camera) -> Ready (Green)
   const faces: FaceData[] = [
-    { id: '1', name: 'Tara · Blinking', top: '46.5%', left: '11.5%', width: '14%', height: '8%', isReady: readyCount >= 4 },
+    { id: '1', name: readyCount >= 4 ? 'Tara' : 'Tara · Blinking', top: '46.5%', left: '11.5%', width: '14%', height: '8%', isReady: readyCount >= 4 },
     { id: '2', name: 'Aarav', top: '47%', left: '31%', width: '12.5%', height: '8%', isReady: true },
     { id: '3', name: 'Pooja', top: '48%', left: '54.5%', width: '12%', height: '8%', isReady: true },
     { id: '4', name: 'Neha', top: '46%', left: '73%', width: '12.5%', height: '8%', isReady: true },
