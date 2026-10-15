@@ -1,0 +1,14 @@
+:root {
+  /* Design Tokens Placeholder — To be refined in Phase 3 */
+  --bg: #0B0B0F;
+  --surface-1: #15151C;
+  --surface-2: #1F1F2A;
+  --glass: rgba(20, 20, 28, 0.55);
+  --text: #F5F5F7;
+  --text-dim: #A3A3B2;
+  --accent: #FFB020;
+  --accent-soft: rgba(255, 176, 32, 0.18);
+  --success: #3DDC97;
+  --danger: #FF6B5E;
+  --ring-track: rgba(255, 255, 255, 0.28);
+}
