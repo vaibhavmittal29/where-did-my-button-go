@@ -1,4 +1,61 @@
-%% D2: User Flow Diagram
-%% To be populated in Phase 2
+%%{init: {
+  'theme': 'base',
+  'themeVariables': {
+    'darkMode': true,
+    'background': '#0B0B0F',
+    'primaryColor': '#15151C',
+    'primaryTextColor': '#F5F5F7',
+    'primaryBorderColor': '#FFB020',
+    'lineColor': '#8E8E9E',
+    'secondaryColor': '#1F1F2A',
+    'tertiaryColor': '#15151C',
+    'fontFamily': 'Inter, system-ui, sans-serif',
+    'fontSize': '15px'
+  }
+}}%%
 flowchart TD
-    Start([Open Camera])
+    classDef default fill:#15151C,stroke:#38384A,stroke-width:1.5px,color:#F5F5F7;
+    classDef startEnd fill:#1F1F2A,stroke:#FFB020,stroke-width:2px,color:#FFB020,font-weight:bold;
+    classDef decision fill:#1A1A24,stroke:#8E8E9E,stroke-width:1.5px,color:#F5F5F7;
+    classDef hero fill:#221B0A,stroke:#FFB020,stroke-width:2.5px,color:#FFB020,font-weight:bold;
+    classDef success fill:#0D2218,stroke:#3DDC97,stroke-width:2px,color:#3DDC97,font-weight:bold;
+    classDef warn fill:#261010,stroke:#FF6B5E,stroke-width:2px,color:#FF6B5E;
+
+    A(["Open Camera"]):::startEnd --> B{"First time launch?"}:::decision
+    B -- "Yes" --> C["Screen 1 · Onboarding<br/>(Explain: Tap, Hold Still, Rewind)"]
+    B -- "No" --> D
+    C --> D["Screen 2 · Viewfinder Idle<br/>(Ghost ring + 'Tap what you want to keep')"]:::hero
+    
+    D --> E{"Choose capture intent"}:::decision
+    E -- "Tap subject (Primary)" --> F["Focus pin & ring anchored on subject<br/>(Haptic confirmation)"]:::hero
+    E -- "Hands-free Voice" --> V["Voice trigger ('Cheese' / 'Capture')<br/>(1.0s steady verification)"]
+    E -- "Group Mode" --> G["Screen 5 · Group Mode<br/>(Track faces & ready count)"]
+    
+    F --> H["Screen 3 · Ring Starts Filling<br/>(Hold phone steady for ~0.8s)"]:::hero
+    
+    H --> I{"Steady for required hold time?"}:::decision
+    I -- "No, moved (>250ms)" --> J["Ring drains at 2x speed<br/>'Too much movement — hold still'"]:::warn
+    J --> F
+    I -- "Low light detected" --> K["Hold time extended by 1.5x<br/>'Low light — hold a bit longer'"]:::warn
+    K --> I
+    I -- "Yes (Threshold >= 0.7)" --> L["Auto-Capture at Peak Stillness<br/>(Screen bloom pulse + Success haptic)"]:::success
+    
+    V --> L
+    G --> M{"All faces ready & steady?"}:::decision
+    M -- "No (e.g. 3 of 4)" --> G
+    M -- "Yes (4 of 4 ready)" --> L
+    
+    L --> N["Screen 4 · Moment Strip<br/>(3s rolling buffer, 'Best' frame preselected)"]:::hero
+    
+    N --> O{"User action in review"}:::decision
+    O -- "Tap another candidate frame" --> P["Swap primary preview<br/>(Autosave reset)"]
+    P --> N
+    O -- "Do nothing for 4s" --> Q["Auto-Save Chosen Frame<br/>(Silent commit)"]:::success
+    O -- "Swipe up / Tap Save" --> Q
+    
+    Q --> R["Toast Feedback: 'Saved · Undo'<br/>(5-second grace window)"]:::success
+    
+    R --> S{"Undo tapped within 5s?"}:::decision
+    S -- "Yes" --> T["Photo discarded from gallery<br/>'Photo removed'"]:::warn
+    T --> D
+    S -- "No" --> U(["Photo permanently stored in Gallery"]):::startEnd
