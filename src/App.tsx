@@ -1,35 +1,28 @@
+import { OnboardingScreen } from './screens/OnboardingScreen';
+import { ViewfinderIdleScreen } from './screens/ViewfinderIdleScreen';
+import { LockingScreen } from './screens/LockingScreen';
+import { MomentStripScreen } from './screens/MomentStripScreen';
+import { GroupModeScreen } from './screens/GroupModeScreen';
 import { ComponentKitScreen } from './screens/ComponentKitScreen';
 
 export default function App() {
   const urlParams = new URLSearchParams(window.location.search);
-  const screen = urlParams.get('screen') || 'kit';
+  const screen = urlParams.get('screen') || 'idle';
 
-  if (screen === 'kit') {
-    return <ComponentKitScreen />;
+  switch (screen) {
+    case 'onboarding':
+      return <OnboardingScreen />;
+    case 'idle':
+      return <ViewfinderIdleScreen />;
+    case 'locking':
+      return <LockingScreen />;
+    case 'moments':
+      return <MomentStripScreen />;
+    case 'group':
+      return <GroupModeScreen />;
+    case 'kit':
+      return <ComponentKitScreen />;
+    default:
+      return <ViewfinderIdleScreen />;
   }
-
-  return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      minHeight: '100vh',
-      gap: 'var(--space-4)',
-      textAlign: 'center',
-      padding: 'var(--space-6)'
-    }}>
-      <h1 style={{
-        fontSize: 'var(--text-headline)',
-        fontWeight: 700,
-        fontFamily: 'var(--font-family-display)',
-        color: 'var(--accent)'
-      }}>
-        STILL — Screen: {screen}
-      </h1>
-      <p style={{ color: 'var(--text-dim)', fontSize: 'var(--text-body)' }}>
-        View the component kit at <a href="/?screen=kit" style={{ color: 'var(--accent)' }}>/?screen=kit</a>
-      </p>
-    </div>
-  );
 }

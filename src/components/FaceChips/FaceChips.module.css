@@ -1,0 +1,62 @@
+.faceBox {
+  position: absolute;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-radius: var(--radius-card);
+  pointer-events: none;
+  transition: all var(--dur-base) var(--ease-out);
+}
+
+.faceBox[data-ready="true"] {
+  border-color: var(--success);
+  box-shadow: 0 0 12px rgba(61, 220, 151, 0.3);
+}
+
+.faceBox[data-ready="false"] {
+  border-color: var(--accent);
+  box-shadow: 0 0 12px rgba(255, 176, 32, 0.3);
+}
+
+.statusIndicator {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-pill);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--surface-1);
+  border: 1.5px solid currentColor;
+}
+
+.statusIndicator[data-ready="true"] {
+  color: var(--success);
+}
+
+.statusIndicator[data-ready="false"] {
+  color: var(--accent);
+}
+
+.statusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background-color: currentColor;
+}
+
+.label {
+  position: absolute;
+  bottom: -24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 2px 8px;
+  border-radius: var(--radius-chip);
+  font-size: var(--text-caption);
+  color: var(--text);
+  white-space: nowrap;
+  border: 1px solid var(--glass-border);
+}

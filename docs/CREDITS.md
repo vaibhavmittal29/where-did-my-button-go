@@ -1,19 +1,28 @@
-# Asset Credits & Attributions
+# Asset Credits & Photographic Attributions
 
-All assets in this project are strictly royalty-free (Unsplash / Pexels license) or synthetically generated with zero copyrighted trademarks or brand UI clones.
+All visual assets used in the **STILL** camera prototype are strictly royalty-free under the **Unsplash License** (free for commercial and non-commercial use, no permission required) or open-source licenses. Zero copyrighted UI elements, brand logos, or phone chassis clones are used.
 
-## Photography & Visual Assets
-| Asset Path | Description | Source / License | Attribution |
-|---|---|---|---|
-| `public/scenes/group-campus.jpg` | Campus student group shot | Royalty-Free / Unsplash | Unsplash Free License |
-| `public/scenes/subject-portrait.jpg` | Single portrait for locking screen | Royalty-Free / Unsplash | Unsplash Free License |
-| `public/scenes/whiteboard-notes.jpg` | Academic notes & diagrams | Royalty-Free / Unsplash | Unsplash Free License |
-| `public/scenes/pet-action.jpg` | Dynamic pet shot | Royalty-Free / Unsplash | Unsplash Free License |
-| `public/scenes/burst-*.jpg` | 7 sequential moment frames | Synthetically generated / Burst series | Illustrative mock frames |
+---
 
-## Typography
-- **Space Grotesk**: Open-source display font by Florian Karsten (SIL Open Font License).
-- **Inter**: Open-source UI font by Rasmus Andersson (SIL Open Font License).
+## 1. Viewfinder Photography
 
-## Icons
-- **Lucide React**: Open-source iconography package (ISC License).
+| Filename | Description & Role | Source | Photographer / Creator | License |
+|---|---|---|---|---|
+| `portrait-subject.jpg` | Single portrait subject used for Idle and Locking screens | [Unsplash Photo](https://images.unsplash.com/photo-1534528741775-53994a69daeb) | Aiony Haust | Unsplash Free License |
+| `group-campus.jpg` | Group of university students used for Group Mode screen | [Unsplash Photo](https://images.unsplash.com/photo-1529156069898-49953e39b3ac) | Duy Pham | Unsplash Free License |
+| `whiteboard-notes.jpg` | Academic lecture notes used for Document Mode | [Unsplash Photo](https://images.unsplash.com/photo-1516321318423-f06f85e504b3) | John Schnobrich | Unsplash Free License |
+| `dynamic-subject.jpg` | Dynamic pet in motion used for Action scenarios | [Unsplash Photo](https://images.unsplash.com/photo-1583511655857-d19b40a7a54e) | Karsten Winegeart | Unsplash Free License |
+| `moment-0.jpg` to `moment-6.jpg` | 7 sequential moment frames for rolling buffer review | Illustrative sequential burst series derived from portrait session | STILL Simulation | Unsplash Derived / Creative Commons |
+
+---
+
+## 2. Open-Source Typography
+
+- **Space Grotesk:** Designed by Florian Karsten. Distributed under the **SIL Open Font License v1.1**.
+- **Inter:** Designed by Rasmus Andersson. Distributed under the **SIL Open Font License v1.1**.
+
+---
+
+## 3. UI Iconography
+
+- **Lucide Icons:** Open-source icon library created by the Lucide Community. Distributed under the **ISC License**.
