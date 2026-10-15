@@ -1,10 +1,20 @@
-import { useCallback } from 'react';
+import { useState, useCallback } from 'react';
 
 export type HapticType = 'tap' | 'tick' | 'capture' | 'error' | 'save';
 
 export function useHaptics() {
+  const [isMuted, setIsMuted] = useState<boolean>(false);
+
+  const toggleMute = useCallback(() => {
+    setIsMuted(prev => !prev);
+  }, []);
+
   const triggerHaptic = useCallback((type: HapticType = 'tap') => {
+    if (isMuted) return;
+
     // 1. Physical Device Vibration (navigator.vibrate)
+    // Matches PLAN.md Section 6.4 table:
+    // Tap subject: 10ms | Ring 33%/66%: 8ms | Capture: [18, 30, 18] | Cancelled: [30] | Saved: 12ms
     if (typeof window !== 'undefined' && 'vibrate' in navigator) {
       try {
         switch (type) {
@@ -18,7 +28,7 @@ export function useHaptics() {
             navigator.vibrate([18, 30, 18]);
             break;
           case 'error':
-            navigator.vibrate([30, 20, 30]);
+            navigator.vibrate(30);
             break;
           case 'save':
             navigator.vibrate(12);
@@ -66,6 +76,14 @@ export function useHaptics() {
             gain.gain.exponentialRampToValueAtTime(0.001, now + 0.015);
             osc.start(now);
             osc.stop(now + 0.015);
+          } else if (type === 'save') {
+            // Positive confirmation chirp
+            osc.frequency.setValueAtTime(520, now);
+            osc.frequency.exponentialRampToValueAtTime(880, now + 0.06);
+            gain.gain.setValueAtTime(0.15, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.07);
+            osc.start(now);
+            osc.stop(now + 0.07);
           } else {
             // Subtle UI tap
             osc.frequency.setValueAtTime(600, now);
@@ -79,7 +97,7 @@ export function useHaptics() {
         // AudioContext may be suspended before first gesture
       }
     }
-  }, []);
+  }, [isMuted]);
 
-  return { triggerHaptic };
+  return { triggerHaptic, isMuted, toggleMute };
 }

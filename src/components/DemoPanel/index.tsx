@@ -1,7 +1,7 @@
 import React from 'react';
 import styles from './DemoPanel.module.css';
 import { CameraStatus, CameraMode } from '../../state/cameraMachine';
-import { Activity, Zap, Mic, RotateCcw, ShieldAlert, Users } from 'lucide-react';
+import { Activity, Zap, Mic, RotateCcw, ShieldAlert, Users, Volume2, VolumeX } from 'lucide-react';
 
 export interface DemoPanelProps {
   status: CameraStatus;
@@ -10,6 +10,8 @@ export interface DemoPanelProps {
   isHoldingSpace: boolean;
   isLowLight: boolean;
   groupReadyCount: number;
+  isMuted?: boolean;
+  onToggleMute?: () => void;
   onSetSteadiness: (val: number) => void;
   onTriggerShake: () => void;
   onToggleLowLight: () => void;
@@ -26,6 +28,8 @@ export const DemoPanel: React.FC<DemoPanelProps> = ({
   isHoldingSpace,
   isLowLight,
   groupReadyCount,
+  isMuted = false,
+  onToggleMute,
   onSetSteadiness,
   onTriggerShake,
   onToggleLowLight,
@@ -41,15 +45,28 @@ export const DemoPanel: React.FC<DemoPanelProps> = ({
           <span>STILL Lab</span>
           <span className={styles.badge}>Live Demo</span>
         </div>
-        <button
-          className={styles.actionBtn}
-          onClick={onReset}
-          title="Reset to idle"
-          style={{ padding: '4px 8px', fontSize: '11px' }}
-        >
-          <RotateCcw size={13} />
-          <span>Reset</span>
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          {onToggleMute && (
+            <button
+              className={styles.actionBtn}
+              onClick={onToggleMute}
+              title={isMuted ? 'Unmute Audio & Haptics' : 'Mute Audio & Haptics'}
+              style={{ padding: '4px 8px', fontSize: '11px', color: isMuted ? 'var(--text-muted)' : 'var(--accent)' }}
+            >
+              {isMuted ? <VolumeX size={13} /> : <Volume2 size={13} />}
+              <span>{isMuted ? 'Muted' : 'Sound'}</span>
+            </button>
+          )}
+          <button
+            className={styles.actionBtn}
+            onClick={onReset}
+            title="Reset to idle"
+            style={{ padding: '4px 8px', fontSize: '11px' }}
+          >
+            <RotateCcw size={13} />
+            <span>Reset</span>
+          </button>
+        </div>
       </div>
 
       {/* Live State Machine Status */}

@@ -44,6 +44,17 @@
   }
 }
 
+.container[data-state="danger"] {
+  animation: ringShake 0.3s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes ringShake {
+  10%, 90% { transform: translate3d(-3px, 0, 0); }
+  20%, 80% { transform: translate3d(5px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-5px, 0, 0); }
+  40%, 60% { transform: translate3d(5px, 0, 0); }
+}
+
 .container[data-state="danger"] .arc {
   stroke: var(--danger);
   transition: stroke-dashoffset 150ms linear, stroke var(--dur-fast) var(--ease-out);
@@ -64,6 +75,16 @@
               background-color var(--dur-fast) var(--ease-out);
 }
 
+.steppedText {
+  position: absolute;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
+}
+
 .container[data-state="captured"] .centerDot {
   background-color: var(--success);
   transform: scale(1.4);
@@ -71,6 +92,18 @@
 
 .container[data-state="danger"] .centerDot {
   background-color: var(--danger);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .container[data-state="idle"] {
+    animation: none;
+  }
+  .container[data-state="danger"] {
+    animation: none;
+  }
+  .arc {
+    transition: none !important;
+  }
 }
 
 /* Framing brackets around subject */

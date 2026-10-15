@@ -1,5 +1,6 @@
 import React from 'react';
 import styles from './LockRing.module.css';
+import { useReducedMotion } from '../../hooks/useReducedMotion';
 
 export interface LockRingProps {
   progress?: number; // 0.0 to 1.0
@@ -18,19 +19,30 @@ export const LockRing: React.FC<LockRingProps> = ({
   showBrackets = true,
   className = '',
 }) => {
+  const reducedMotion = useReducedMotion();
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
-  const clampedProgress = Math.max(0, Math.min(1, progress));
-  const strokeDashoffset = circumference * (1 - clampedProgress);
+  
+  // Under reduced motion: step progress into 0, 0.33, 0.66, 1.0
+  let effectiveProgress = Math.max(0, Math.min(1, progress));
+  if (reducedMotion && state === 'locking') {
+    if (effectiveProgress >= 0.99) effectiveProgress = 1;
+    else if (effectiveProgress >= 0.66) effectiveProgress = 0.66;
+    else if (effectiveProgress >= 0.33) effectiveProgress = 0.33;
+    else effectiveProgress = 0;
+  }
+
+  const strokeDashoffset = circumference * (1 - effectiveProgress);
 
   return (
     <div
       className={`${styles.container} ${className}`}
       data-state={state}
+      data-reduced-motion={reducedMotion}
       style={{ width: size, height: size }}
       role="progressbar"
       aria-label="Capture stability progress"
-      aria-valuenow={Math.round(clampedProgress * 100)}
+      aria-valuenow={Math.round(effectiveProgress * 100)}
       aria-valuemin={0}
       aria-valuemax={100}
     >
@@ -60,8 +72,12 @@ export const LockRing: React.FC<LockRingProps> = ({
         />
       </svg>
 
-      {/* Center anchor pin */}
-      <div className={styles.centerDot} />
+      {/* Center anchor pin or percentage text */}
+      {reducedMotion && state === 'locking' ? (
+        <span className={styles.steppedText}>{Math.round(effectiveProgress * 100)}%</span>
+      ) : (
+        <div className={styles.centerDot} />
+      )}
 
       {/* Viewfinder framing brackets */}
       {showBrackets && (

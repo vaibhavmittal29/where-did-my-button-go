@@ -29,7 +29,7 @@ import {
 export const InteractiveCameraScreen: React.FC = () => {
   const [state, dispatch] = useReducer(cameraReducer, initialCameraState);
   const { steadiness, setSteadiness, triggerShake, isHoldingSpace } = useSteadiness();
-  const { triggerHaptic } = useHaptics();
+  const { triggerHaptic, isMuted, toggleMute } = useHaptics();
 
   // Selected frame preview during review
   const [previewFrameIndex, setPreviewFrameIndex] = useState<number>(3);
@@ -39,6 +39,33 @@ export const InteractiveCameraScreen: React.FC = () => {
 
   // Group mode readiness count (3 of 4 or 4 of 4)
   const [groupReadyCount, setGroupReadyCount] = useState<number>(3);
+
+  // Dwell timer: if user holds phone steady in IDLE for 1.5s, prompt "Tap what matters"
+  const [dwellHintActive, setDwellHintActive] = useState<boolean>(false);
+  useEffect(() => {
+    if (state.status === 'IDLE' && steadiness >= 0.7) {
+      const timer = window.setTimeout(() => {
+        setDwellHintActive(true);
+      }, 1500);
+      return () => clearTimeout(timer);
+    } else {
+      setDwellHintActive(false);
+    }
+  }, [state.status, steadiness]);
+
+  // Track 33% and 66% ring progress ticks (PLAN.md Section 6.4)
+  const lastProgressRef = useRef<number>(0);
+  useEffect(() => {
+    if (state.status === 'LOCKING') {
+      const prev = lastProgressRef.current;
+      const curr = state.progress;
+      if (prev < 0.33 && curr >= 0.33) triggerHaptic('tick');
+      if (prev < 0.66 && curr >= 0.66) triggerHaptic('tick');
+      lastProgressRef.current = curr;
+    } else {
+      lastProgressRef.current = 0;
+    }
+  }, [state.status, state.progress, triggerHaptic]);
 
   // Refs for tracking animation loops & timeouts
   const lastTickTimeRef = useRef<number>(performance.now());
@@ -414,7 +441,7 @@ export const InteractiveCameraScreen: React.FC = () => {
                   pointerEvents: 'none',
                 }}>
                   <LockRing state="idle" progress={0} size={96} showBrackets={false} />
-                  <GlassChip>Tap what you want to keep</GlassChip>
+                  <GlassChip>{dwellHintActive ? 'Tap what matters' : 'Tap what you want to keep'}</GlassChip>
                 </div>
               )}
 
@@ -624,6 +651,8 @@ export const InteractiveCameraScreen: React.FC = () => {
         isHoldingSpace={isHoldingSpace}
         isLowLight={state.isLowLight}
         groupReadyCount={groupReadyCount}
+        isMuted={isMuted}
+        onToggleMute={toggleMute}
         onSetSteadiness={setSteadiness}
         onTriggerShake={triggerShake}
         onToggleLowLight={() => dispatch({ type: 'SET_LOW_LIGHT', isLowLight: !state.isLowLight })}
