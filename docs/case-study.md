@@ -10,7 +10,7 @@
 
 ## 1. Executive Summary & Problem Statement
 
-For over 180 years, photography has relied on an explicit mechanical or digital trigger: the shutter button. When mobile smartphones emerged, interface designers migrated the tactile shutter button directly onto capacitive glass touchscreens.
+For generations, photography has relied on an explicit mechanical or digital trigger: the shutter button. When mobile smartphones emerged, interface designers migrated the tactile shutter button directly onto capacitive glass touchscreens.
 
 However, a capacitive shutter button introduces fundamental ergonomic flaws:
 1. **Tap Tremor:** The physical force required to tap a touchscreen imparts angular micro-shakes to the smartphone chassis precisely as the image sensor integrates light, causing motion blur.

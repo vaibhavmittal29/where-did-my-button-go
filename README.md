@@ -83,13 +83,13 @@ STILL operates on a deterministic 6-state finite state machine with automatic re
 
 ## ♿ Accessibility & Ergonomics
 
-- **Touch Target Sizing:** Every interactive control enforces a minimum bounding box of **44 × 44 CSS pixels**, complying with Apple Human Interface Guidelines and satisfying WCAG 2.2 Success Criteria 2.5.8 (Level AA, 24px) and 2.5.5 (Level AAA, 44px).
+- **Touch Target Sizing:** Every interactive control enforces a minimum bounding box of **44 × 44 CSS pixels**, complying with Apple Human Interface Guidelines and satisfying WCAG 2.2 Success Criteria 2.5.8 (Level AA minimum target).
 - **Color Contrast:** Mathematically verified against dark backgrounds (`#0B0B0F`):
-  - Primary text (`#F5F5F7`): **18.0 : 1** (WCAG AAA)
-  - Signal Amber (`#FFB020`): **10.7 : 1** (WCAG AAA)
-  - Success Green (`#3DDC97`): **11.1 : 1** (WCAG AAA)
-  - Movement Warning (`#FF6B5E`): **7.0 : 1** (WCAG AA normal, AAA large)
-  - Secondary text (`#A3A3B2`): **7.9 : 1** (WCAG AAA)
+  - Primary text (`#F5F5F7`): **18.0 : 1** (exceeds WCAG AA 4.5:1 standard)
+  - Signal Amber (`#FFB020`): **10.7 : 1** (exceeds WCAG AA 4.5:1 standard)
+  - Success Green (`#3DDC97`): **11.1 : 1** (exceeds WCAG AA 4.5:1 standard)
+  - Movement Warning (`#FF6B5E`): **7.0 : 1** (exceeds WCAG AA 4.5:1 standard)
+  - Secondary text (`#A3A3B2`): **7.9 : 1** (exceeds WCAG AA 4.5:1 standard)
 - **Screen Reader Announcements:** Dynamic live region (`aria-live="polite"`) announces camera state changes, countdown seconds, and save confirmations in real time.
 - **Vestibular Motion Safety:** Honors `prefers-reduced-motion` by replacing continuous sweeps with discrete stepped percentage ticks (33% → 66% → 100%).
 - **Inclusive Fallbacks:** Adjustable hold time in settings (400–1500 ms), voice trigger (*"Capture"* / *"Cheese"*), and physical key trigger ('C' key). *Note: Voice trigger and volume key capture are simulated in this browser prototype; native iOS/Android builds would connect directly to platform volume buttons and speech APIs.*

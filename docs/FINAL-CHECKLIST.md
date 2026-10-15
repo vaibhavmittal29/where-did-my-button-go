@@ -40,10 +40,10 @@
 
 - [x] **Touch Target Size:** Enforced $\ge 44 \times 44\text{ px}$ on all interactive controls (`IconButton`, `GlassChip` touch wrappers, `Toast` undo button, `ModeCarousel` items, `MomentStrip` thumbnails) conforming to Apple HIG and WCAG 2.2.
 - [x] **Color Contrast Ratio:**
-  - Primary Text (`#F5F5F7`) on Background (`#0B0B0F`): **18.0 : 1** (WCAG AAA).
-  - Signal Amber (`#FFB020`) on Background (`#0B0B0F`): **10.7 : 1** (WCAG AAA).
-  - Success Green (`#3DDC97`) on Background (`#0B0B0F`): **11.1 : 1** (WCAG AAA).
-  - Movement Warning (`#FF6B5E`) on Background (`#0B0B0F`): **7.0 : 1** (WCAG AA normal, AAA large).
+  - Primary Text (`#F5F5F7`) on Background (`#0B0B0F`): **18.0 : 1** (exceeds WCAG AA 4.5:1 standard).
+  - Signal Amber (`#FFB020`) on Background (`#0B0B0F`): **10.7 : 1** (exceeds WCAG AA 4.5:1 standard).
+  - Success Green (`#3DDC97`) on Background (`#0B0B0F`): **11.1 : 1** (exceeds WCAG AA 4.5:1 standard).
+  - Movement Warning (`#FF6B5E`) on Background (`#0B0B0F`): **7.0 : 1** (exceeds WCAG AA 4.5:1 standard).
 - [x] **Screen Reader Accessibility:** Live region element with `aria-live="polite"` and `aria-atomic="true"` continuously announces state changes (*"Locking focus. Hold steady for 0.8 seconds."*, *"Photo captured."*, *"Auto-saved to gallery."*).
 - [x] **Reduced Motion Compliance:** Full `prefers-reduced-motion: reduce` support replacing continuous ring sweep with discrete 33% $\rightarrow$ 66% $\rightarrow$ 100% steps and haptic-only confirmations (verified via `scripts/test-reduced-motion.mjs`).
 - [x] **Hardware Fallback:** Physical Volume Key (`'C'` / Volume Up/Down) capture trigger provided for users with tremors or physical mittens.
