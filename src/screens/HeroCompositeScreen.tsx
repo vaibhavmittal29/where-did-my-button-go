@@ -328,7 +328,7 @@ export const HeroCompositeScreen: React.FC = () => {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '24px', fontSize: '13px', color: '#A3A3B2' }}>
-          <span>WCAG AAA Accessible</span>
+          <span>WCAG Accessible</span>
           <span>•</span>
           <span>Dual Haptic Feedback</span>
           <span>•</span>

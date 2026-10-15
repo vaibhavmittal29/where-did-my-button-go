@@ -12,7 +12,7 @@ Traditional camera interfaces rely on a dedicated capture button rooted in 19th-
 | # | Shutter Job | Traditional Mechanism | Inherent Flaw / Limitation |
 |---|---|---|---|
 | **1** | **Intent** | Explicit press declares: *"I want a photo right now."* | High friction; requires cognitive commitment before seeing the outcome. |
-| **2** | **Timing** | Determines the exact millisecond of exposure. | Anxiety-inducing; human reaction time (~200ms) often misses fast action or blinks. |
+| **2** | **Timing** | Determines the exact millisecond of exposure. | Anxiety-inducing; human reaction time often misses fast action or blinks. |
 | **3** | **Feedback** | Visual shutter blink, haptic pulse, and mechanical click sound. | Confirms capture occurred, but cannot confirm image sharpness or quality. |
 | **4** | **Reachability** | Centered circular target at the bottom safe zone. | Fixed coordinates demand one-handed thumb stretching or two-handed framing. |
 | **5** | **Stability (The Hidden Flaw)** | Physical tap on glass or chassis. | **Self-defeating:** The physical tap impulse jars phone gyroscopes, causing motion blur at exposure. |
@@ -60,8 +60,8 @@ STILL does not relocate the button; it redesigns the interaction model from firs
 |---|---|---|---|
 | **Discoverability** | High | First-time users wonder *"Where is the button?"* and feel lost. | 1. Interactive 3-step onboarding sheet on first launch.<br/>2. Ambient pulsing **ghost ring** on viewfinder with coach text: *"Tap what you want to keep"*. |
 | **Accidental Captures** | Medium | Phone takes photos automatically in pocket or while walking. | Tapping alone **never** captures; sustained device steadiness (accelerometer variance < threshold for 800ms) is strictly enforced. |
-| **Loss of Precision** | Medium | User feels they lost control over the exact split-second. | Post-capture **Moment Strip** presents 7 candidate frames with the sharpest frame pre-selected via computer vision metrics. |
-| **Motor Impairments & Tremors** | High | Users with essential tremors or parkinsonism cannot keep phone still. | 1. Configurable steadiness sensitivity in Settings.<br/>2. Voice command trigger (*"Capture"* / *"Cheese"*).<br/>3. Documented hardware volume rocker accessibility fallback. |
+| **Loss of Precision** | Medium | User feels they lost control over the exact split-second. | Post-capture **Moment Strip** presents 7 candidate frames with the sharpest frame pre-selected (precomputed in prototype). |
+| **Motor Impairments & Tremors** | High | Users with essential tremors or parkinsonism cannot keep phone still. | 1. Configurable hold time in Settings (400–1500 ms).<br/>2. Voice command trigger (*"Capture"* / *"Cheese"*, simulated in prototype).<br/>3. Physical key fallback ('C' key in prototype; volume keys in native apps). |
 | **Unwanted Captures** | Low | A capture completed that the user did not want stored. | Prominent 5-second **"Saved · Undo"** toast allows single-tap immediate deletion. |
 
 ---

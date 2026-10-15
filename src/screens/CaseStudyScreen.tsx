@@ -1,11 +1,5 @@
 import React from 'react';
-import { 
-  Sparkles, 
-  Activity, 
-  Volume2, 
-  Clock, 
-  Maximize2
-} from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 
 export const CaseStudyScreen: React.FC = () => {
   return (
@@ -136,9 +130,9 @@ export const CaseStudyScreen: React.FC = () => {
               backgroundColor: 'rgba(255, 255, 255, 0.03)',
               border: '1px solid rgba(255, 255, 255, 0.08)',
             }}>
-              <div style={{ fontSize: '12px', color: '#A3A3B2', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Shutter Buttons</div>
-              <div style={{ fontSize: '24px', fontWeight: 700, color: '#FFB020', marginTop: '4px' }}>0 (Removed)</div>
-              <div style={{ fontSize: '12px', color: '#6E6E80', marginTop: '2px' }}>Zero tap tremor</div>
+              <div style={{ fontSize: '12px', color: '#A3A3B2', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Hold-to-Capture</div>
+              <div style={{ fontSize: '24px', fontWeight: 700, color: '#FFB020', marginTop: '4px' }}>0.8s (Tunable)</div>
+              <div style={{ fontSize: '12px', color: '#A3A3B2', marginTop: '2px' }}>Range: 400–1500 ms</div>
             </div>
 
             <div style={{
@@ -147,9 +141,9 @@ export const CaseStudyScreen: React.FC = () => {
               backgroundColor: 'rgba(255, 255, 255, 0.03)',
               border: '1px solid rgba(255, 255, 255, 0.08)',
             }}>
-              <div style={{ fontSize: '12px', color: '#A3A3B2', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Trigger Threshold</div>
-              <div style={{ fontSize: '24px', fontWeight: 700, color: '#3DDC97', marginTop: '4px' }}>0.8s Stillness</div>
-              <div style={{ fontSize: '12px', color: '#6E6E80', marginTop: '2px' }}>Gyroscope verified</div>
+              <div style={{ fontSize: '12px', color: '#A3A3B2', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Steadiness Trigger</div>
+              <div style={{ fontSize: '24px', fontWeight: 700, color: '#3DDC97', marginTop: '4px' }}>Sensors Active</div>
+              <div style={{ fontSize: '12px', color: '#A3A3B2', marginTop: '2px' }}>Simulated in prototype</div>
             </div>
 
             <div style={{
@@ -159,8 +153,8 @@ export const CaseStudyScreen: React.FC = () => {
               border: '1px solid rgba(255, 255, 255, 0.08)',
             }}>
               <div style={{ fontSize: '12px', color: '#A3A3B2', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Rolling Buffer</div>
-              <div style={{ fontSize: '24px', fontWeight: 700, color: '#60A5FA', marginTop: '4px' }}>3.0s (90 Frames)</div>
-              <div style={{ fontSize: '12px', color: '#6E6E80', marginTop: '2px' }}>Pre-capture history</div>
+              <div style={{ fontSize: '24px', fontWeight: 700, color: '#60A5FA', marginTop: '4px' }}>3.0s (7 Candidates)</div>
+              <div style={{ fontSize: '12px', color: '#A3A3B2', marginTop: '2px' }}>Pre-capture history</div>
             </div>
 
             <div style={{
@@ -170,8 +164,8 @@ export const CaseStudyScreen: React.FC = () => {
               border: '1px solid rgba(255, 255, 255, 0.08)',
             }}>
               <div style={{ fontSize: '12px', color: '#A3A3B2', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Accessibility</div>
-              <div style={{ fontSize: '24px', fontWeight: 700, color: '#A78BFA', marginTop: '4px' }}>WCAG AAA</div>
-              <div style={{ fontSize: '12px', color: '#6E6E80', marginTop: '2px' }}>Voice & Key Fallback</div>
+              <div style={{ fontSize: '24px', fontWeight: 700, color: '#A78BFA', marginTop: '4px' }}>WCAG AA / AAA</div>
+              <div style={{ fontSize: '12px', color: '#A3A3B2', marginTop: '2px' }}>Voice & Key Fallbacks</div>
             </div>
           </div>
         </header>
@@ -210,7 +204,7 @@ export const CaseStudyScreen: React.FC = () => {
               paddingBottom: '8px',
             }}>
               <span style={{ fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#FFB020' }}>
-                Official Problem Statement (127 Words · Limit ≤ 150)
+                Official Problem Statement (148 Words · Limit ≤ 150)
               </span>
               <span style={{ fontSize: '12px', color: '#A3A3B2' }}>Word count verified</span>
             </div>
@@ -225,7 +219,7 @@ export const CaseStudyScreen: React.FC = () => {
               <strong>The core problem:</strong> Without a shutter button, users lack a direct command to trigger capture, risking unintended shots or missed memories. Naive solutions — like volume-key triggers or full-screen tapping — simply relocate the physical button and preserve the shake penalty.
             </p>
             <p style={{ margin: 0, fontSize: '16px', lineHeight: 1.6, color: '#FFB020', fontStyle: 'italic' }}>
-              <strong>The design question:</strong> How can a camera infer deliberate intent and capture the optimal moment without requiring a destructive command?
+              <strong>The design question:</strong> How can a camera infer deliberate intent and capture the optimal moment without requiring a destructive command? The tap only sets the focus point; capture waits until the phone is steady.
             </p>
           </div>
 
@@ -252,8 +246,8 @@ export const CaseStudyScreen: React.FC = () => {
               <tr>
                 <td><strong>2. Timing</strong></td>
                 <td>Single discrete shutter click freezes millisecond.</td>
-                <td>Human reaction time (~200ms) lags behind action, causing missed smiles or blinks.</td>
-                <td><strong style={{ color: '#3DDC97' }}>Moment Strip (3s Buffer)</strong>: 90 frames recorded pre- and post-lock. Pick the exact sharpest frame post-hoc.</td>
+                <td>Human reaction time lags behind action, causing missed smiles or blinks.</td>
+                <td><strong style={{ color: '#3DDC97' }}>Moment Strip (3s Buffer)</strong>: 7 candidate frames recorded pre- and post-lock. Pick the exact sharpest frame post-hoc.</td>
               </tr>
               <tr>
                 <td><strong>3. Feedback</strong></td>
@@ -271,7 +265,7 @@ export const CaseStudyScreen: React.FC = () => {
                 <td><strong>5. Stability</strong></td>
                 <td>Physical tap impact on glass or chassis.</td>
                 <td><strong>Self-defeating:</strong> Tap momentum directly induces angular jerk and motion blur at exposure.</td>
-                <td><strong style={{ color: '#3DDC97' }}>Stillness Triggered</strong>: Photo captures automatically when gyroscope detects minimum tremor (≤1.2°/s).</td>
+                <td><strong style={{ color: '#3DDC97' }}>Stillness Triggered</strong>: Photo captures automatically after tap jolt has settled and device is steady.</td>
               </tr>
             </tbody>
           </table>
@@ -515,7 +509,7 @@ export const CaseStudyScreen: React.FC = () => {
                     }}>1</span>
                     <div>
                       <div style={{ fontSize: '14px', fontWeight: 600, color: '#F5F5F7' }}>104px Physical LockRing & Tracking Brackets</div>
-                      <div style={{ fontSize: '13px', color: '#A3A3B2' }}>Linear sweep (not eased) reflects real-time physical gyroscope stability. Dimmed vignette emphasizes the subject.</div>
+                      <div style={{ fontSize: '13px', color: '#A3A3B2' }}>Linear sweep (not eased) reflects real-time device steadiness. Dimmed vignette emphasizes the subject.</div>
                     </div>
                   </div>
 
@@ -555,7 +549,7 @@ export const CaseStudyScreen: React.FC = () => {
                     }}>3</span>
                     <div>
                       <div style={{ fontSize: '14px', fontWeight: 600, color: '#F5F5F7' }}>Steadiness Waveform Meter</div>
-                      <div style={{ fontSize: '13px', color: '#A3A3B2' }}>Replaces the old shutter button position. Dynamic sine waveform straightens into a solid bar as gyroscope steadiness hits 94%.</div>
+                      <div style={{ fontSize: '13px', color: '#A3A3B2' }}>Replaces the old shutter button position. Dynamic sine waveform straightens into a solid bar as device steadiness is reached.</div>
                     </div>
                   </div>
                 </div>
@@ -585,7 +579,7 @@ export const CaseStudyScreen: React.FC = () => {
                   Moment Strip (Rewind & Choose)
                 </h3>
                 <p style={{ fontSize: '14px', color: '#A3A3B2', margin: '0 0 16px', lineHeight: 1.5 }}>
-                  <strong>Post-hoc reassurance:</strong> 7-frame rolling buffer carousel with AI Recommended "Best" preselected. 4-second autosave countdown removes decision paralysis; 5-second Undo toast guarantees reversible control.
+                  <strong>Post-hoc reassurance:</strong> 7-frame rolling buffer carousel with preselected "Best" frame. 4-second autosave countdown removes decision paralysis; 5-second Undo toast guarantees reversible control.
                 </p>
               </div>
               <div style={{
@@ -655,83 +649,72 @@ export const CaseStudyScreen: React.FC = () => {
             letterSpacing: '-0.02em',
             margin: '0 0 16px',
           }}>
-            Key Design Decisions & Trade-Offs
+            Key Design Decisions
           </h2>
           <p style={{ color: '#A3A3B2', fontSize: '16px', margin: '0 0 28px', maxWidth: '840px' }}>
-            Every interaction in STILL was weighed against user psychology, biometric physics, and cognitive load.
+            Official submission copy (190 words · Limit ≤ 200 words):
           </p>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-            {/* Decision 1 */}
-            <div style={{
-              padding: '24px',
-              borderRadius: '20px',
-              backgroundColor: 'rgba(20, 20, 30, 0.7)',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-                <Activity size={20} color="#FFB020" />
-                <h4 style={{ margin: 0, fontSize: '17px', color: '#F5F5F7' }}>1. Physical Stillness vs. Tap Command</h4>
-              </div>
-              <p style={{ fontSize: '14px', color: '#A3A3B2', lineHeight: 1.6, margin: 0 }}>
-                <strong>The Decision:</strong> We inverted the traditional camera flaw: tapping a flat piece of glass causes an instantaneous 2.4° angular jolt, responsible for over 40% of indoor blur. In STILL, <em>physical stillness itself</em> is the trigger condition (0.8s threshold).
-                <br /><br />
-                <strong>The Trade-off:</strong> Takes 0.8 seconds to capture rather than 0.05 seconds. We resolved this by keeping a rolling 3-second buffer: the photo was already captured <em>before</em> the lock completed!
+          <div style={{
+            padding: '28px',
+            borderRadius: '20px',
+            backgroundColor: 'rgba(20, 20, 30, 0.7)',
+            border: '1px solid rgba(255, 176, 32, 0.25)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '16px',
+          }}>
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+              <span style={{ color: '#FFB020', fontWeight: 700, fontSize: '15px' }}>1.</span>
+              <p style={{ margin: 0, fontSize: '15px', color: '#D1D1DB', lineHeight: 1.6 }}>
+                <strong style={{ color: '#F5F5F7' }}>Reuse tap-to-focus.</strong> Everyone already taps to focus, so STILL extends a familiar gesture instead of teaching a new one.
               </p>
             </div>
 
-            {/* Decision 2 */}
-            <div style={{
-              padding: '24px',
-              borderRadius: '20px',
-              backgroundColor: 'rgba(20, 20, 30, 0.7)',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-                <Clock size={20} color="#3DDC97" />
-                <h4 style={{ margin: 0, fontSize: '17px', color: '#F5F5F7' }}>2. 4s Autosave with 5s Reversible Undo</h4>
-              </div>
-              <p style={{ fontSize: '14px', color: '#A3A3B2', lineHeight: 1.6, margin: 0 }}>
-                <strong>The Decision:</strong> Post-capture selection interfaces often create decision fatigue (e.g. taking 20 burst photos and spending 10 minutes triaging). STILL pre-selects the sharpest moment with computer vision and initiates a 4-second auto-save countdown.
-                <br /><br />
-                <strong>The Trade-off:</strong> Casual users don't have to touch anything—the camera saves the best picture automatically. Power users can swipe between 7 frames or tap "Undo" within 5s.
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+              <span style={{ color: '#FFB020', fontWeight: 700, fontSize: '15px' }}>2.</span>
+              <p style={{ margin: 0, fontSize: '15px', color: '#D1D1DB', lineHeight: 1.6 }}>
+                <strong style={{ color: '#F5F5F7' }}>Stillness is consent.</strong> The tap sets the focus point; the photo is taken only after the phone has settled for about 0.8 s. The jolt from the tap fades before capture, and an accidental touch never takes a photo.
               </p>
             </div>
 
-            {/* Decision 3 */}
-            <div style={{
-              padding: '24px',
-              borderRadius: '20px',
-              backgroundColor: 'rgba(20, 20, 30, 0.7)',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-                <Maximize2 size={20} color="#60A5FA" />
-                <h4 style={{ margin: 0, fontSize: '17px', color: '#F5F5F7' }}>3. Viewport-Wide Reachability</h4>
-              </div>
-              <p style={{ fontSize: '14px', color: '#A3A3B2', lineHeight: 1.6, margin: 0 }}>
-                <strong>The Decision:</strong> Traditional cameras anchor the shutter at the bottom safe zone, requiring thumb gymnastics on 6.7-inch displays. STILL turns the <em>entire viewfinder</em> into an active touch surface.
-                <br /><br />
-                <strong>The Trade-off:</strong> Accidental palm touches could trigger unwanted locks. We mitigated this by requiring an intentional 0.8s steadiness dwell; erratic edge contacts are rejected in 100ms.
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+              <span style={{ color: '#FFB020', fontWeight: 700, fontSize: '15px' }}>3.</span>
+              <p style={{ margin: 0, fontSize: '15px', color: '#D1D1DB', lineHeight: 1.6 }}>
+                <strong style={{ color: '#F5F5F7' }}>Visible, physical progress.</strong> A filling ring shows what is about to happen. If you move, it drains, so you stay in control without a button.
               </p>
             </div>
 
-            {/* Decision 4 */}
-            <div style={{
-              padding: '24px',
-              borderRadius: '20px',
-              backgroundColor: 'rgba(20, 20, 30, 0.7)',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-                <Volume2 size={20} color="#A78BFA" />
-                <h4 style={{ margin: 0, fontSize: '17px', color: '#F5F5F7' }}>4. Multimodal Accessibility Fallbacks</h4>
-              </div>
-              <p style={{ fontSize: '14px', color: '#A3A3B2', lineHeight: 1.6, margin: 0 }}>
-                <strong>The Decision:</strong> Not all humans can maintain fine motor stillness (essential tremors, Parkinson's, cold winter mittens). STILL provides redundant triggers: voice command ("Capture" or "Cheese") and physical Volume Key trigger.
-                <br /><br />
-                <strong>The Trade-off:</strong> Maintains 100% inclusivity without diluting the primary zero-button gestural elegance.
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+              <span style={{ color: '#FFB020', fontWeight: 700, fontSize: '15px' }}>4.</span>
+              <p style={{ margin: 0, fontSize: '15px', color: '#D1D1DB', lineHeight: 1.6 }}>
+                <strong style={{ color: '#F5F5F7' }}>Choose the moment afterwards.</strong> A rewind strip (a simulated 3-second buffer in this prototype) removes the pressure of perfect timing. The sharpest frame is preselected, saves after 4 seconds, and Undo lasts 5 seconds.
               </p>
+            </div>
+
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+              <span style={{ color: '#FFB020', fontWeight: 700, fontSize: '15px' }}>5.</span>
+              <p style={{ margin: 0, fontSize: '15px', color: '#D1D1DB', lineHeight: 1.6 }}>
+                <strong style={{ color: '#F5F5F7' }}>Whole-screen control.</strong> No corner to reach, which suits one-handed and selfie use.
+              </p>
+            </div>
+
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+              <span style={{ color: '#FFB020', fontWeight: 700, fontSize: '15px' }}>6.</span>
+              <p style={{ margin: 0, fontSize: '15px', color: '#D1D1DB', lineHeight: 1.6 }}>
+                <strong style={{ color: '#F5F5F7' }}>Inclusive fallbacks.</strong> Adjustable hold time, voice trigger and volume key for people who cannot hold still.
+              </p>
+            </div>
+
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+              <span style={{ color: '#FFB020', fontWeight: 700, fontSize: '15px' }}>7.</span>
+              <p style={{ margin: 0, fontSize: '15px', color: '#D1D1DB', lineHeight: 1.6 }}>
+                <strong style={{ color: '#F5F5F7' }}>Calm dark UI.</strong> The photo is the hero; amber is reserved for action and "best".
+              </p>
+            </div>
+
+            <div style={{ marginTop: '8px', paddingTop: '12px', borderTop: '1px solid rgba(255, 255, 255, 0.08)', fontSize: '13px', color: '#A3A3B2', fontStyle: 'italic' }}>
+              Note: the timings (0.8 s, 4 s, 5 s) are starting values to tune through usability testing.
             </div>
           </div>
         </section>
@@ -767,7 +750,7 @@ export const CaseStudyScreen: React.FC = () => {
             }}>
               <div style={{ color: '#3DDC97', fontWeight: 700, fontSize: '18px' }}>≥ 44 × 44 px</div>
               <div style={{ fontSize: '13px', fontWeight: 600, color: '#F5F5F7', marginTop: '4px' }}>Touch Target Enforced</div>
-              <div style={{ fontSize: '12px', color: '#A3A3B2', marginTop: '4px' }}>All icon buttons, chips, and strip thumbs audited for Apple HIG & Android guidelines.</div>
+              <div style={{ fontSize: '12px', color: '#A3A3B2', marginTop: '4px' }}>All icon buttons, chips, and strip thumbs audited for Apple HIG guidelines (≥ 44×44 px).</div>
             </div>
 
             <div style={{
@@ -776,9 +759,9 @@ export const CaseStudyScreen: React.FC = () => {
               backgroundColor: 'rgba(255, 255, 255, 0.02)',
               border: '1px solid rgba(255, 255, 255, 0.08)',
             }}>
-              <div style={{ color: '#3DDC97', fontWeight: 700, fontSize: '18px' }}>18.2 : 1 Contrast</div>
-              <div style={{ fontSize: '13px', fontWeight: 600, color: '#F5F5F7', marginTop: '4px' }}>WCAG AAA Compliant</div>
-              <div style={{ fontSize: '12px', color: '#A3A3B2', marginTop: '4px' }}>Primary text on dark OLED canvas; signal amber 8.9:1 exceeds WCAG AA requirements.</div>
+              <div style={{ color: '#3DDC97', fontWeight: 700, fontSize: '18px' }}>18.0 : 1 Contrast</div>
+              <div style={{ fontSize: '13px', fontWeight: 600, color: '#F5F5F7', marginTop: '4px' }}>WCAG AA / AAA Compliant</div>
+              <div style={{ fontSize: '12px', color: '#A3A3B2', marginTop: '4px' }}>Primary text on dark canvas is 18.0:1 (AAA); signal amber 10.7:1 (AAA); all text passes AA.</div>
             </div>
 
             <div style={{
@@ -819,7 +802,7 @@ export const CaseStudyScreen: React.FC = () => {
                 <th>Standard Mobile Camera</th>
                 <th>Burst Mode</th>
                 <th>Apple Live Photos</th>
-                <th>STILL (Our Proposal)</th>
+                <th>STILL (Proposed)</th>
               </tr>
             </thead>
             <tbody>
@@ -828,19 +811,19 @@ export const CaseStudyScreen: React.FC = () => {
                 <td>Physical button tap on screen</td>
                 <td>Hold shutter button</td>
                 <td>Button tap + auto video</td>
-                <td><strong style={{ color: '#3DDC97' }}>Hold still (0.8s sensor intent)</strong></td>
+                <td><strong style={{ color: '#3DDC97' }}>Hold still (0.8s intent)</strong></td>
               </tr>
               <tr>
                 <td><strong>Tap Camera Shake</strong></td>
-                <td>High (causes ~40% indoor blur)</td>
+                <td>High (tapping screen induces camera shake)</td>
                 <td>High (pressure on glass)</td>
                 <td>Present on initial tap</td>
-                <td><strong style={{ color: '#3DDC97' }}>Zero (physically impossible)</strong></td>
+                <td><strong style={{ color: '#3DDC97' }}>Minimal (capture occurs after phone settles)</strong></td>
               </tr>
               <tr>
                 <td><strong>Capture Timing</strong></td>
                 <td>Lagged behind human reaction</td>
-                <td>Generates 30–50 photos</td>
+                <td>Generates many duplicate photos</td>
                 <td>3s video slice</td>
                 <td><strong style={{ color: '#3DDC97' }}>Rolling buffer (pre-capture)</strong></td>
               </tr>
@@ -849,7 +832,7 @@ export const CaseStudyScreen: React.FC = () => {
                 <td>Manual re-take</td>
                 <td>Painful manual curation</td>
                 <td>Key photo scrubber hidden</td>
-                <td><strong style={{ color: '#3DDC97' }}>Moment Strip with AI Best</strong></td>
+                <td><strong style={{ color: '#3DDC97' }}>Moment Strip with preselected Best frame</strong></td>
               </tr>
               <tr>
                 <td><strong>Group Coordination</strong></td>

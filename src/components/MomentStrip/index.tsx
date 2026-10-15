@@ -43,7 +43,7 @@ export const MomentStrip: React.FC<MomentStripProps> = ({
               className={styles.thumbnailCard}
               data-selected={isSelected}
               onClick={() => onSelectFrame?.(index)}
-              aria-label={`Frame ${index + 1} of 7${isBest ? ' (AI Best)' : ''}`}
+              aria-label={`Frame ${index + 1} of 7${isBest ? ' (Best)' : ''}`}
             >
               <img src={src} alt={`Moment ${index + 1}`} className={styles.thumbImg} />
               {isBest && <span className={styles.bestBadge}>Best</span>}

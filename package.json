@@ -13,7 +13,12 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:machine": "tsx scripts/test-machine.ts",
+    "test:e2e": "node scripts/test-interactive.mjs",
+    "test:motion": "node scripts/test-reduced-motion.mjs",
+    "test": "tsx scripts/test-machine.ts && node scripts/test-interactive.mjs && node scripts/test-reduced-motion.mjs",
+    "export": "node scripts/export-screens.mjs"
   },
   "dependencies": {
     "@fontsource/inter": "^5.1.0",
@@ -29,6 +34,7 @@
     "@types/react-dom": "^19.0.4",
     "@vitejs/plugin-react": "^4.3.4",
     "playwright": "^1.50.1",
+    "tsx": "^4.23.15",
     "typescript": "^5.7.3",
     "vite": "^6.1.0"
   }

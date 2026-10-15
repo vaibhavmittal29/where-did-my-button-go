@@ -165,7 +165,7 @@ Create a Variable Collection in Figma named **`STILL-Tokens`** and add the follo
 ### Screen 1: Progressive Onboarding (`screen-01-onboarding`)
 1. **Background Layer:** Place `public/scenes/onboarding-bg.jpg` (or `export/screens/screen-01-onboarding.png`), fill frame `390 × 844 px`, object-fit cover.
 2. **Backdrop Dimmer:** Add a dark overlay rectangle (`#0B0B0F`, Opacity 45%).
-3. **Animated Demo Ring:** Place `LockRing` component at `X: 143, Y: 240` (Progress 40%, dimensions `104 × 104 px`). Below it, add a `GlassChip` with "Hold steady · 0.5s".
+3. **Animated Demo Ring:** Place `LockRing` component at `X: 143, Y: 240` (Progress 60%, dimensions `104 × 104 px`). Below it, add a `GlassChip` with "Hold steady · 0.5s".
 4. **Bottom Onboarding Card:**
    - Frame at bottom: Width `358 px`, X: `16 px`, Y: `490 px`.
    - Radius: `28 px`.
@@ -207,7 +207,7 @@ Create a Variable Collection in Figma named **`STILL-Tokens`** and add the follo
    - Dynamic timing chip placed `12 px` below ring: `GlassChip` (Hand icon + **"Hold steady · 0.3s"**).
 5. **Bottom Steadiness Waveform Meter (Replaces shutter location):**
    - Container centered at `Y: 670 px`, Width `180 px`.
-   - Label: `Activity` icon + "Gyroscope Steadiness: 94%" (`12 px`, Inter Medium, `#FFB020`).
+   - Label: `Activity` icon + "Device Steadiness Meter" (`12 px`, Inter Medium, `#FFB020`).
    - SVG Waveform Line: Sine wave path that straightens horizontally, Stroke `2.5 px` `#FFB020`, Width `160 px`.
 6. **Bottom Controls Bar:** Gallery thumbnail, ModeCarousel ("Still"), and lens switcher.
 7. *(Optional Annotation Version):* Add circular amber numbered badges ①, ②, ③ as detailed in the Case Study.
@@ -217,7 +217,7 @@ Create a Variable Collection in Figma named **`STILL-Tokens`** and add the follo
 ### Screen 4: Moment Strip (`screen-04-moments`)
 1. **Top 62% Image Canvas:**
    - Display full-resolution chosen frame: `public/scenes/moment-3.jpg` (or selected index).
-   - Top Bar: Left `IconButton` (`X` close), Center `GlassChip` (Sparkles icon + **"AI Recommended Best"**), Right `IconButton` (`Share2` share).
+   - Top Bar: Left `IconButton` (`X` close), Center `GlassChip` (Sparkles icon + **"Best Moment"**), Right `IconButton` (`Share2` share).
 2. **Bottom 38% Moment Strip Sheet:**
    - Bottom sheet container docked from `Y: 520 px` to `844 px`.
    - Mount `MomentStrip` component.

@@ -8,14 +8,14 @@
 
 | Token | Hex / Value | Role | Tested Against | Contrast Ratio | WCAG Compliance |
 |---|---|---|---|---|---|
-| `--text` | `#F5F5F7` | Primary text & headlines | `--bg` (`#0B0B0F`) | **17.0 : 1** | **AAA** (Exceeds 7:1) |
-| `--text` | `#F5F5F7` | Card text | `--surface-1` (`#15151C`) | **15.6 : 1** | **AAA** (Exceeds 7:1) |
-| `--text-dim` | `#A3A3B2` | Secondary labels & microcopy | `--bg` (`#0B0B0F`) | **7.36 : 1** | **AAA** (Exceeds 7:1) |
-| `--text-dim` | `#A3A3B2` | Surface secondary | `--surface-1` (`#15151C`) | **6.77 : 1** | **AA** (Exceeds 4.5:1) |
-| `--accent` | `#FFB020` | Signal Amber (Ring arc, badges) | `--bg` (`#0B0B0F`) | **10.5 : 1** | **AAA** (Exceeds 7:1) |
-| `--accent` | `#FFB020` | Interactive chip label | `--surface-1` (`#15151C`) | **9.67 : 1** | **AAA** (Exceeds 7:1) |
-| `--success` | `#3DDC97` | Status Ready / Saved | `--bg` (`#0B0B0F`) | **10.8 : 1** | **AAA** (Exceeds 7:1) |
-| `--danger` | `#FF6B5E` | Movement warning / cancel | `--bg` (`#0B0B0F`) | **6.49 : 1** | **AA** (Exceeds 4.5:1) |
+| `--text` | `#F5F5F7` | Primary text & headlines | `--bg` (`#0B0B0F`) | **18.0 : 1** | **AAA** (Exceeds 7:1) |
+| `--text` | `#F5F5F7` | Card text | `--surface-1` (`#15151C`) | **15.7 : 1** | **AAA** (Exceeds 7:1) |
+| `--text-dim` | `#A3A3B2` | Secondary labels & microcopy | `--bg` (`#0B0B0F`) | **7.9 : 1** | **AAA** (Exceeds 7:1) |
+| `--text-dim` | `#A3A3B2` | Surface secondary | `--surface-1` (`#15151C`) | **6.9 : 1** | **AA** (Exceeds 4.5:1) |
+| `--accent` | `#FFB020` | Signal Amber (Ring arc, badges) | `--bg` (`#0B0B0F`) | **10.7 : 1** | **AAA** (Exceeds 7:1) |
+| `--accent` | `#FFB020` | Interactive chip label | `--surface-1` (`#15151C`) | **9.3 : 1** | **AAA** (Exceeds 7:1) |
+| `--success` | `#3DDC97` | Status Ready / Saved | `--bg` (`#0B0B0F`) | **11.1 : 1** | **AAA** (Exceeds 7:1) |
+| `--danger` | `#FF6B5E` | Movement warning / cancel | `--bg` (`#0B0B0F`) | **7.0 : 1** | **AA / AAA** (Exceeds 4.5:1 / 7:1 large) |
 | `--glass` | `rgba(20,20,28,0.55)` | Overlays & controls | Varied photo viewfinders | Verified with `backdrop-filter: blur(16px)` + 1px border scrim | Pass |
 
 ---
@@ -48,6 +48,6 @@
 
 ## 4. Accessibility Principles
 
-1. **44×44 px Touch Targets:** All interactive icons and buttons enforce strict minimum bounding boxes of 44×44px, compliant with Apple Human Interface Guidelines and WCAG 2.5.5 (Target Size).
+1. **44×44 px Touch Targets:** All interactive icons and buttons enforce strict minimum bounding boxes of 44×44px, compliant with Apple Human Interface Guidelines and exceeding WCAG 2.2 Success Criterion 2.5.8 (Level AA, 24×24px) as well as satisfying 2.5.5 (Level AAA, 44×44px).
 2. **Accessible Focus States:** All actionable elements provide high-visibility `2px solid var(--accent)` outlines when navigated via keyboard.
 3. **Motion Sensitivity:** Components respect `prefers-reduced-motion: reduce`, dropping spring dynamics and continuous pulses in favor of immediate discrete state transitions.

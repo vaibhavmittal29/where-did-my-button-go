@@ -418,7 +418,7 @@ export const InteractiveCameraScreen: React.FC = () => {
               </GlassChip>
             ) : (
               <GlassChip icon={<Sparkles size={14} />} variant="default">
-                AI Best Shot Active
+                Best Moment Active
               </GlassChip>
             )}
 

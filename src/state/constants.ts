@@ -1,8 +1,10 @@
 export const HOLD_TIME_MS = 800;          // Base hold time required for stillness (ms)
+export const HOLD_TIME_MIN_MS = 400;      // Minimum tunable hold time setting (ms)
+export const HOLD_TIME_MAX_MS = 1500;     // Maximum tunable hold time setting (ms)
 export const UNSTEADY_GRACE_MS = 250;     // Permitted micro-jitter window before cancelling (ms)
 export const STEADY_THRESHOLD = 0.7;      // Steadiness score threshold 0.0 - 1.0
-export const LOW_LIGHT_MULTIPLIER = 1.5;  // Multiplier for hold time in low light conditions
-export const BUFFER_SECONDS = 3;          // Duration of rolling buffer (seconds)
+export const LOW_LIGHT_MULTIPLIER = 1.5;  // Multiplier for hold time in low light conditions (1200 ms)
+export const BUFFER_SECONDS = 3;          // Duration of simulated rolling buffer (seconds)
 export const CANDIDATE_FRAMES = 7;        // Number of frames presented in Moment Strip
 export const AUTOSAVE_MS = 4000;          // Autosave countdown in review mode (ms)
 export const UNDO_WINDOW_MS = 5000;       // Window in which an undo can revert the save (ms)
