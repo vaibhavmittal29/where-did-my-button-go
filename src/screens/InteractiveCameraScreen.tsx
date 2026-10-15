@@ -91,6 +91,10 @@ export const InteractiveCameraScreen: React.FC = () => {
   const groupHoldTimerRef = useRef<number | null>(null);
 
   const viewfinderRef = useRef<HTMLDivElement>(null);
+  const steadinessRef = useRef<number>(steadiness);
+  useEffect(() => {
+    steadinessRef.current = steadiness;
+  }, [steadiness]);
 
   // Determine current scene background based on mode and state
   const getSceneSrc = () => {
@@ -110,6 +114,13 @@ export const InteractiveCameraScreen: React.FC = () => {
   const handleViewfinderTap = (e: React.MouseEvent<HTMLDivElement>) => {
     // Only allow tapping when idle, focused, or locking
     if (state.status === 'REVIEW' || state.status === 'SAVED') return;
+
+    // P0-01: Tap to focus MUST only fire when clicking the viewfinder background,
+    // not header, footer, controls, chips, buttons, carousel, demo panel, or dialogs.
+    const target = e.target as HTMLElement | null;
+    if (target && target.closest('button, [role="button"], [role="tab"], [role="dialog"], header, footer, [data-no-focus], input, select, textarea')) {
+      return;
+    }
 
     if (!viewfinderRef.current) return;
     const rect = viewfinderRef.current.getBoundingClientRect();
@@ -141,7 +152,9 @@ export const InteractiveCameraScreen: React.FC = () => {
       const dt = now - lastTickTimeRef.current;
       lastTickTimeRef.current = now;
 
-      if (steadiness >= 0.7) {
+      // P0-03: Read steadiness from ref so RAF loop is not torn down on every sensor update
+      const currentSteadiness = steadinessRef.current;
+      if (currentSteadiness >= 0.7) {
         unsteadySinceRef.current = null;
         dispatch({ type: 'STEADY_TICK', dt });
       } else {
@@ -161,7 +174,7 @@ export const InteractiveCameraScreen: React.FC = () => {
 
     animId = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(animId);
-  }, [state.status, steadiness, triggerHaptic]);
+  }, [state.status, triggerHaptic]);
 
   // 4. Capture flash and transition from CAPTURED to REVIEW
   useEffect(() => {
@@ -183,6 +196,19 @@ export const InteractiveCameraScreen: React.FC = () => {
       };
     }
   }, [state.status, triggerHaptic]);
+
+  // 4b. Auto-recovery from CANCELLED state back to FOCUSED (P0-02)
+  useEffect(() => {
+    if (state.status === 'CANCELLED') {
+      const recoveryTimer = window.setTimeout(() => {
+        dispatch({ type: 'ANIM_DONE' });
+      }, 800);
+
+      return () => {
+        clearTimeout(recoveryTimer);
+      };
+    }
+  }, [state.status]);
 
   // 5. REVIEW Autosave 4-second Countdown (Max 1 reset on frame scrub)
   useEffect(() => {
@@ -248,14 +274,24 @@ export const InteractiveCameraScreen: React.FC = () => {
     }
   }, [state.status]);
 
-  // 7. Group Mode Hands-Free Auto-Capture
+  // 7. Group Mode Hands-Free Auto-Capture (P0-04)
   useEffect(() => {
-    if (state.mode !== 'group' || state.status === 'REVIEW' || state.status === 'SAVED') return;
+    if (state.mode !== 'group' || state.status === 'REVIEW' || state.status === 'SAVED') {
+      if (groupHoldTimerRef.current) {
+        clearTimeout(groupHoldTimerRef.current);
+        groupHoldTimerRef.current = null;
+      }
+      return;
+    }
 
-    if (groupReadyCount >= 4 && steadiness >= 0.7) {
+    const isSteady = steadiness >= 0.7;
+    const isGroupReady = groupReadyCount >= 4;
+
+    if (isGroupReady && isSteady) {
       if (!groupHoldTimerRef.current) {
         groupHoldTimerRef.current = window.setTimeout(() => {
           dispatch({ type: 'PROGRESS_COMPLETE' });
+          groupHoldTimerRef.current = null;
         }, 600);
       }
     } else {
@@ -264,14 +300,17 @@ export const InteractiveCameraScreen: React.FC = () => {
         groupHoldTimerRef.current = null;
       }
     }
+  }, [state.mode, state.status, groupReadyCount, steadiness >= 0.7]);
 
+  // Clean up group timer on unmount
+  useEffect(() => {
     return () => {
       if (groupHoldTimerRef.current) {
         clearTimeout(groupHoldTimerRef.current);
         groupHoldTimerRef.current = null;
       }
     };
-  }, [state.mode, state.status, groupReadyCount, steadiness]);
+  }, []);
 
   // Guarded triggers for Volume Key & Voice
   const handleVolumeKeyTrigger = useCallback(() => {

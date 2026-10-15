@@ -140,11 +140,15 @@ export function cameraReducer(state: CameraState, action: CameraAction): CameraS
     }
 
     case 'PROGRESS_COMPLETE': {
-      // Only capture if currently in an active capture-eligible state
-      if (!['LOCKING', 'FOCUSED', 'IDLE'].includes(state.status)) return state;
-      // In group mode, only allow capture if everyone is ready
-      if (state.mode === 'group' && state.groupReadyCount < state.groupTotalCount) {
-        return state;
+      // P0-06: In normal still/doc mode, capture can ONLY complete from 'LOCKING'
+      // In group mode, auto-capture can complete from IDLE or FOCUSED hands-free ONLY IF all faces are ready
+      if (state.mode === 'group') {
+        if (!['LOCKING', 'FOCUSED', 'IDLE'].includes(state.status)) return state;
+        if (state.groupReadyCount < state.groupTotalCount) {
+          return state;
+        }
+      } else {
+        if (state.status !== 'LOCKING') return state;
       }
       return {
         ...state,
@@ -208,13 +212,21 @@ export function cameraReducer(state: CameraState, action: CameraAction): CameraS
     }
 
     case 'VOICE_TRIGGER': {
-      // Guarded hands-free capture flow:
+      // Guarded hands-free capture flow (P0-05):
       // 1. Reject if already captured, in review, or saved
       if (!['IDLE', 'FOCUSED', 'LOCKING'].includes(state.status)) {
         return state;
       }
 
-      // 2. Accept only supported phrases ('Capture' or 'Cheese')
+      // 2. In Group Mode, require groupReadyCount >= groupTotalCount
+      if (state.mode === 'group' && state.groupReadyCount < state.groupTotalCount) {
+        return {
+          ...state,
+          statusMessage: `Group not ready (${state.groupReadyCount}/${state.groupTotalCount} faces ready) — hold steady`,
+        };
+      }
+
+      // 3. Accept only supported phrases ('Capture' or 'Cheese')
       const phrase = (action.phrase || 'Cheese').trim().toLowerCase();
       const isSupported = (VOICE_SUPPORTED_PHRASES as readonly string[]).includes(phrase);
       if (!isSupported) {
@@ -224,15 +236,15 @@ export function cameraReducer(state: CameraState, action: CameraAction): CameraS
         };
       }
 
-      // 3. Reject if unsteady when explicitly checked
-      if (action.isSteady === false) {
+      // 4. Require action.isSteady === true (strict boolean check)
+      if (action.isSteady !== true) {
         return {
           ...state,
           statusMessage: 'Device moving — hold steady for voice capture',
         };
       }
 
-      // 4. Capture cleanly
+      // 5. Capture cleanly
       return {
         ...state,
         status: 'CAPTURED',
@@ -243,14 +255,22 @@ export function cameraReducer(state: CameraState, action: CameraAction): CameraS
     }
 
     case 'VOLUME_KEY': {
-      // Accessibility fallback trigger:
-      // Reject if camera is already captured, reviewing, or saved
+      // Accessibility fallback trigger (P0-05):
+      // 1. Reject if camera is already captured, reviewing, or saved
       if (!['IDLE', 'FOCUSED', 'LOCKING'].includes(state.status)) {
         return state;
       }
 
-      // Reject if device is unsteady when explicitly checked
-      if (action.isSteady === false) {
+      // 2. In Group Mode, require groupReadyCount >= groupTotalCount
+      if (state.mode === 'group' && state.groupReadyCount < state.groupTotalCount) {
+        return {
+          ...state,
+          statusMessage: `Group not ready (${state.groupReadyCount}/${state.groupTotalCount} faces ready) — hold steady`,
+        };
+      }
+
+      // 3. Require action.isSteady === true (strict boolean check)
+      if (action.isSteady !== true) {
         return {
           ...state,
           statusMessage: 'Device moving — hold steady for fallback capture',

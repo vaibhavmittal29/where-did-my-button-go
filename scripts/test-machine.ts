@@ -142,6 +142,11 @@ console.log('--- RUNNING CAMERA STATE MACHINE SANITY TESTS ---\n');
   assert.strictEqual(state.status, 'IDLE');
   assert.ok(state.statusMessage?.includes('Device moving'));
 
+  // Missing/undefined isSteady must also be rejected (P0-05)
+  state = cameraReducer(state, { type: 'VOICE_TRIGGER', phrase: 'Cheese' });
+  assert.strictEqual(state.status, 'IDLE');
+  assert.ok(state.statusMessage?.includes('Device moving'));
+
   // Valid phrase while steady captures
   state = cameraReducer(state, { type: 'VOICE_TRIGGER', phrase: 'Cheese', isSteady: true });
   assert.strictEqual(state.status, 'CAPTURED');
@@ -161,6 +166,11 @@ console.log('--- RUNNING CAMERA STATE MACHINE SANITY TESTS ---\n');
   assert.strictEqual(state.status, 'IDLE');
   assert.ok(state.statusMessage?.includes('Device moving'));
 
+  // Volume key with undefined isSteady rejected (P0-05)
+  state = cameraReducer(state, { type: 'VOLUME_KEY' });
+  assert.strictEqual(state.status, 'IDLE');
+  assert.ok(state.statusMessage?.includes('Device moving'));
+
   // Volume key while steady captures
   state = cameraReducer(state, { type: 'VOLUME_KEY', isSteady: true });
   assert.strictEqual(state.status, 'CAPTURED');
@@ -175,7 +185,7 @@ console.log('--- RUNNING CAMERA STATE MACHINE SANITY TESTS ---\n');
   console.log('✔ Test 6 Passed: Volume key accessibility fallback verified with guards.\n');
 }
 
-// SCENARIO 7: Group Mode Readiness Guards
+// SCENARIO 7: Group Mode Readiness Guards & PROGRESS_COMPLETE restrictions
 {
   console.log('Test 7: Group Mode Readiness Guards');
   let state: typeof initialCameraState = {
@@ -189,7 +199,26 @@ console.log('--- RUNNING CAMERA STATE MACHINE SANITY TESTS ---\n');
   state = cameraReducer(state, { type: 'PROGRESS_COMPLETE' });
   assert.strictEqual(state.status, 'IDLE'); // Not captured!
 
-  // When 4 of 4 are ready, PROGRESS_COMPLETE triggers capture
+  // In Group Mode, VOICE_TRIGGER and VOLUME_KEY must also be blocked when group is not ready (P0-05)
+  const blockedVoice = cameraReducer(state, { type: 'VOICE_TRIGGER', phrase: 'Cheese', isSteady: true });
+  assert.strictEqual(blockedVoice.status, 'IDLE');
+  assert.ok(blockedVoice.statusMessage?.includes('Group not ready'));
+
+  const blockedVol = cameraReducer(state, { type: 'VOLUME_KEY', isSteady: true });
+  assert.strictEqual(blockedVol.status, 'IDLE');
+  assert.ok(blockedVol.statusMessage?.includes('Group not ready'));
+
+  // In Still Mode, PROGRESS_COMPLETE from IDLE or FOCUSED must be rejected (P0-06)
+  let stillState = initialCameraState;
+  stillState = cameraReducer(stillState, { type: 'PROGRESS_COMPLETE' });
+  assert.strictEqual(stillState.status, 'IDLE'); // Must not capture!
+
+  stillState = cameraReducer(stillState, { type: 'TAP_SUBJECT', x: 50, y: 50 });
+  assert.strictEqual(stillState.status, 'FOCUSED');
+  stillState = cameraReducer(stillState, { type: 'PROGRESS_COMPLETE' });
+  assert.strictEqual(stillState.status, 'FOCUSED'); // Must not capture from FOCUSED in still mode!
+
+  // When 4 of 4 are ready in group mode, PROGRESS_COMPLETE triggers capture
   state = cameraReducer(state, { type: 'SET_GROUP_READY', count: 4 });
   assert.strictEqual(state.groupReadyCount, 4);
   state = cameraReducer(state, { type: 'PROGRESS_COMPLETE' });

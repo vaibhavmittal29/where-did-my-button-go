@@ -36,15 +36,19 @@ async function main() {
     await download(url, dest);
   }
 
-  // Generate 7 sequential moment frames from the portrait/action scene
-  // To simulate realistic 3-second camera burst frames, we copy base images with slight shifts/variations
-  console.log('Generating 7 Moment Strip burst frames...');
-  const baseImg = fs.readFileSync(path.join(scenesDir, 'portrait-subject.jpg'));
-  for (let i = 0; i < 7; i++) {
-    const frameDest = path.join(scenesDir, `moment-${i}.jpg`);
-    fs.writeFileSync(frameDest, baseImg);
+  // P0-08: Preserve distinct moment burst frames; do NOT overwrite them with identical copies
+  const allMomentsExist = [0, 1, 2, 3, 4, 5, 6].every(i =>
+    fs.existsSync(path.join(scenesDir, `moment-${i}.jpg`))
+  );
+
+  if (allMomentsExist) {
+    console.log('Preserving existing distinct Moment Strip frames in public/scenes/');
+  } else {
+    console.log('Generating distinct Moment Strip burst frames via generate-moments.mjs...');
+    const { execSync } = await import('node:child_process');
+    execSync('node scripts/generate-moments.mjs', { stdio: 'inherit' });
   }
-  console.log('All 7 moment frames ready in public/scenes/');
+  console.log('All 7 moment frames verified in public/scenes/');
 }
 
 main().catch(err => {

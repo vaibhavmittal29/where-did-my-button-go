@@ -107,17 +107,21 @@ async function testInteractive() {
   await page.locator('button:has-text("Reset")').click();
   await page.waitForTimeout(400);
 
-  // Set steadiness to 0.4 via DemoPanel slider or click shake
+  // Tap subject to enter FOCUSED -> LOCKING
   await viewfinder.click({ position: { x: 195, y: 350 } });
-  await page.waitForTimeout(200);
+  await page.waitForTimeout(250);
+
   // Trigger sudden shake
   await page.locator('button:has-text("Simulate Sudden Shake")').click();
-  await page.waitForTimeout(200);
+  // UNSTEADY_GRACE_MS is 250ms; wait 350ms for UNSTEADY transition
+  await page.waitForTimeout(350);
 
   const shakeBody = await page.textContent('body');
-  console.log('Shake state feedback:', shakeBody.includes('Too much movement') ? 'Too much movement detected' : 'State updated');
+  if (!shakeBody.includes('Too much movement')) {
+    throw new Error(`Scenario 4 Failed: Expected "Too much movement" cancellation feedback in UI, but got: ${shakeBody.slice(0, 300)}`);
+  }
   await saveScreen(page, 'phase5-06-shake.png');
-  console.log('✓ Scenario 4 Passed: Sudden movement cancels lock and drains ring');
+  console.log('✓ Scenario 4 Passed: Sudden movement cancels lock and drains ring with "Too much movement" feedback');
 
   // 6. Scenario 5: Group Mode & Voice Trigger
   await page.locator('button:has-text("Reset")').click();
@@ -132,14 +136,26 @@ async function testInteractive() {
   console.log('✓ Scenario 5a Passed: Group Mode active with 3 of 4 ready and Tara blinking');
   await saveScreen(page, 'phase5-07-group.png');
 
-  // Test voice trigger
+  // Test voice trigger guard in group mode (must be blocked when Tara is blinking)
+  await page.locator('button:has-text("Cheese")').click();
+  await page.waitForTimeout(300);
+  const blockedBody = await page.textContent('body');
+  if (!blockedBody.includes('Group not ready') && !blockedBody.includes('3 of 4 ready')) {
+    throw new Error('Voice trigger was not guarded when group member was blinking');
+  }
+
+  // Toggle group to All 4 Ready
+  await page.locator('button:has-text("3 of 4 Ready")').click();
+  await page.waitForTimeout(300);
+
+  // Trigger voice capture when all 4 are ready
   await page.locator('button:has-text("Cheese")').click();
   await page.waitForTimeout(500);
   const voiceBody = await page.textContent('body');
   if (!voiceBody.includes('Pick your favourite moment')) {
-    throw new Error('Voice trigger did not trigger capture');
+    throw new Error('Voice trigger did not trigger capture when all 4 ready');
   }
-  console.log('✓ Scenario 5b Passed: Voice trigger ("Cheese") immediately captures');
+  console.log('✓ Scenario 5b Passed: Voice trigger properly guarded by group readiness, then captures when all 4 ready');
 
   await browser.close();
   console.log('\n🎉 ALL PHASE 5 INTERACTION SCENARIOS PASSED WITH FLYING COLORS!');
