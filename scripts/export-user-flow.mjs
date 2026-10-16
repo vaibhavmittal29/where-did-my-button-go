@@ -1,12 +1,17 @@
 import { chromium } from 'playwright';
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const PROJECT_DIR = path.resolve(__dirname, '..');
 
 async function main() {
-  const mmdPath = path.resolve('docs/D2-user-flow.mmd');
+  const mmdPath = path.join(PROJECT_DIR, 'docs/D2-user-flow.mmd');
   const mmdContent = fs.readFileSync(mmdPath, 'utf8');
 
-  const exportDir = path.resolve('export');
+  const exportDir = path.join(PROJECT_DIR, 'export');
   if (!fs.existsSync(exportDir)) {
     fs.mkdirSync(exportDir, { recursive: true });
   }
@@ -116,12 +121,12 @@ ${mmdContent}
 
   // Extract pure SVG
   const svgContent = await page.$eval('#diagram svg', (svg) => svg.outerHTML);
-  const svgPath = path.resolve('export/user-flow.svg');
+  const svgPath = path.join(PROJECT_DIR, 'export/user-flow.svg');
   fs.writeFileSync(svgPath, svgContent);
   console.log('Saved SVG to:', svgPath);
 
   // Take high-res screenshot of diagram container
-  const pngPath = path.resolve('export/user-flow.png');
+  const pngPath = path.join(PROJECT_DIR, 'export/user-flow.png');
   const bodyElement = await page.$('body');
   if (bodyElement) {
     await bodyElement.screenshot({ path: pngPath });
@@ -129,11 +134,12 @@ ${mmdContent}
   }
 
   await browser.close();
+  process.exit(0);
 }
 
 main().catch(err => {
-  const svgPath = path.resolve('export/user-flow.svg');
-  const pngPath = path.resolve('export/user-flow.png');
+  const svgPath = path.join(PROJECT_DIR, 'export/user-flow.svg');
+  const pngPath = path.join(PROJECT_DIR, 'export/user-flow.png');
   if (fs.existsSync(svgPath) && fs.existsSync(pngPath)) {
     console.warn('⚠️ Network unavailable to render Mermaid CDN in export-user-flow.mjs; preserving existing export/user-flow assets.');
     process.exit(0);

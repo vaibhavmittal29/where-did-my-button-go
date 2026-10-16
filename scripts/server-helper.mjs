@@ -27,7 +27,12 @@ export function killProcessTree(pid) {
     if (process.platform === 'win32') {
       execSync(`taskkill /pid ${pid} /T /F`, { stdio: 'ignore' });
     } else {
-      process.kill(-pid, 'SIGKILL');
+      try {
+        execSync(`pkill -P ${pid}`, { stdio: 'ignore' });
+      } catch {}
+      try {
+        process.kill(pid, 'SIGKILL');
+      } catch {}
     }
   } catch {}
 }
@@ -43,6 +48,9 @@ export async function ensureServer(port = 5173) {
   const serverProcess = spawn(process.execPath, [viteBin, '--port', String(port), '--host', '127.0.0.1'], {
     stdio: 'ignore',
   });
+  if (typeof serverProcess.unref === 'function') {
+    serverProcess.unref();
+  }
 
   const wrappedProcess = {
     pid: serverProcess.pid,

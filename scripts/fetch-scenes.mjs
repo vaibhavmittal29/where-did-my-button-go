@@ -1,7 +1,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const scenesDir = path.resolve('public/scenes');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const scenesDir = path.resolve(__dirname, '../public/scenes');
+
 if (!fs.existsSync(scenesDir)) {
   fs.mkdirSync(scenesDir, { recursive: true });
 }
@@ -30,10 +34,18 @@ async function download(url, dest) {
 }
 
 async function main() {
-  console.log('Downloading high-res scenes from Unsplash...');
+  console.log('Checking high-res scenes in public/scenes...');
   for (const [filename, url] of Object.entries(IMAGES)) {
     const dest = path.join(scenesDir, filename);
-    await download(url, dest);
+    if (fs.existsSync(dest)) {
+      console.log(`Preserving existing scene: ${filename}`);
+      continue;
+    }
+    try {
+      await download(url, dest);
+    } catch (err) {
+      console.warn(`Could not download ${url}: ${err.message}`);
+    }
   }
 
   // P0-08: Preserve distinct moment burst frames; do NOT overwrite them with identical copies

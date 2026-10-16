@@ -45,7 +45,7 @@ flowchart TD
     M -- "No (e.g. 3 of 4)" --> G
     M -- "Yes (4 of 4 ready)" --> L
     
-    L --> N["Screen 4 · Moment Strip<br/>(3s rolling buffer, 'Best' frame preselected)"]:::hero
+    L --> N["Screen 4 · Moment Strip<br/>(3s rolling buffer, 'Suggested' frame preselected)"]:::hero
     
     N --> O{"User action in review"}:::decision
     O -- "Tap another candidate frame" --> P["Swap primary preview<br/>(Autosave reset)"]

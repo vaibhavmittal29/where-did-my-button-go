@@ -39,8 +39,8 @@ async function testInteractive() {
     const page = await context.newPage();
 
     // Load root interactive route
-    await page.goto('http://localhost:5173/', { waitUntil: 'networkidle' });
-  await page.waitForTimeout(500);
+    await page.goto('http://127.0.0.1:5173/', { waitUntil: 'networkidle' });
+    await page.waitForTimeout(500);
 
   // 1. Check initial Idle State
   const initialText = await page.textContent('body');
@@ -205,6 +205,7 @@ async function testInteractive() {
       serverProcess.kill();
     }
   }
+  process.exit(0);
 }
 
 testInteractive().catch((err) => {

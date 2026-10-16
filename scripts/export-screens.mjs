@@ -14,12 +14,12 @@ const BRAIN_DIR = process.env.BRAIN_DIR || (fs.existsSync(DEFAULT_BRAIN) ? DEFAU
 
 // Hi-Fi Screens to capture at 1170x2532 (390x844 @ 3x)
 const HI_FI_SCREENS = [
-  { name: 'screen-01-onboarding', url: 'http://localhost:5173/?screen=onboarding' },
-  { name: 'screen-02-idle', url: 'http://localhost:5173/?screen=idle' },
-  { name: 'screen-03-locking', url: 'http://localhost:5173/?screen=locking&progress=0.6' },
-  { name: 'screen-03-locking-annotated', url: 'http://localhost:5173/?screen=locking&progress=0.6&annotate=1' },
-  { name: 'screen-04-moments', url: 'http://localhost:5173/?screen=moments&selected=3' },
-  { name: 'screen-05-group', url: 'http://localhost:5173/?screen=group&ready=3' },
+  { name: 'screen-01-onboarding', url: 'http://127.0.0.1:5173/?screen=onboarding' },
+  { name: 'screen-02-idle', url: 'http://127.0.0.1:5173/?screen=idle' },
+  { name: 'screen-03-locking', url: 'http://127.0.0.1:5173/?screen=locking&progress=0.6' },
+  { name: 'screen-03-locking-annotated', url: 'http://127.0.0.1:5173/?screen=locking&progress=0.6&annotate=1' },
+  { name: 'screen-04-moments', url: 'http://127.0.0.1:5173/?screen=moments&selected=3' },
+  { name: 'screen-05-group', url: 'http://127.0.0.1:5173/?screen=group&ready=3' },
 ];
 
 function safeCopyToBrain(src, dst) {
@@ -82,7 +82,7 @@ async function runExport() {
       const targetProjectFile = path.join(EXPORT_SCREENS_DIR, `${s.name}.png`);
       const targetBrainFile = BRAIN_DIR ? path.join(BRAIN_DIR, `${s.name}.png`) : null;
 
-      await page.screenshot({ path: targetProjectFile, type: 'png' });
+      await page.screenshot({ path: targetProjectFile, type: 'png', animations: 'disabled' });
       if (targetBrainFile) safeCopyToBrain(targetProjectFile, targetBrainFile);
 
       // P2-09: Verify exact exported dimensions (1170x2532)
@@ -107,12 +107,12 @@ async function runExport() {
     });
 
     const heroPage = await heroContext.newPage();
-    await heroPage.goto('http://localhost:5173/?screen=hero-composite', { waitUntil: 'networkidle' });
+    await heroPage.goto('http://127.0.0.1:5173/?screen=hero-composite', { waitUntil: 'networkidle' });
     await heroPage.waitForTimeout(1500);
 
     const heroProjectFile = path.join(EXPORT_DIR, 'hero-composite.png');
     const heroBrainFile = BRAIN_DIR ? path.join(BRAIN_DIR, 'hero-composite.png') : null;
-    await heroPage.screenshot({ path: heroProjectFile, type: 'png' });
+    await heroPage.screenshot({ path: heroProjectFile, type: 'png', animations: 'disabled' });
     if (heroBrainFile) safeCopyToBrain(heroProjectFile, heroBrainFile);
 
     const heroDims = getPngDimensions(heroProjectFile);
@@ -135,7 +135,7 @@ async function runExport() {
     });
 
     const pdfPage = await pdfContext.newPage();
-    await pdfPage.goto('http://localhost:5173/?screen=case-study', { waitUntil: 'networkidle' });
+    await pdfPage.goto('http://127.0.0.1:5173/?screen=case-study', { waitUntil: 'networkidle' });
     await pdfPage.waitForTimeout(2000);
 
     const pdfProjectFile = path.join(EXPORT_DIR, 'case-study.pdf');
@@ -176,6 +176,7 @@ async function runExport() {
       serverProcess.kill();
     }
   }
+  process.exit(0);
 }
 
 runExport().catch(err => {

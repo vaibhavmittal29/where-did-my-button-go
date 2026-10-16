@@ -27,7 +27,7 @@ async function testReducedMotion() {
     });
     const page = await context.newPage();
 
-    await page.goto('http://localhost:5173/', { waitUntil: 'networkidle' });
+    await page.goto('http://127.0.0.1:5173/', { waitUntil: 'networkidle' });
     await page.waitForTimeout(500);
 
     // Tap subject to focus & lock
@@ -43,6 +43,14 @@ async function testReducedMotion() {
       throw new Error('LockRing did not detect reduced motion mode');
     }
 
+    // Verify stepped percentage value (0, 33, 66, or 100%)
+    const ariaValueNow = await lockRing.getAttribute('aria-valuenow');
+    const validSteps = ['0', '33', '66', '100'];
+    console.log(`LockRing aria-valuenow under reduced motion: ${ariaValueNow}%`);
+    if (!validSteps.includes(ariaValueNow || '')) {
+      throw new Error(`LockRing progress ${ariaValueNow}% is not one of expected discrete steps: ${validSteps.join(', ')}`);
+    }
+
     const localPath = path.join(TEST_RESULTS_DIR, 'phase6-reduced-motion.png');
     await page.screenshot({ path: localPath });
     if (BRAIN_DIR && fs.existsSync(BRAIN_DIR)) {
@@ -52,7 +60,14 @@ async function testReducedMotion() {
         // ignore copy errors
       }
     }
-    console.log('✓ Reduced motion test passed!');
+
+    // Wait for full capture -> Moment Strip review under reduced motion
+    await page.waitForTimeout(800);
+    const bodyText = await page.textContent('body');
+    if (!bodyText.includes('Pick your favourite moment')) {
+      throw new Error('Capture did not complete under reduced motion mode');
+    }
+    console.log('✓ Reduced motion test passed (stepped ring + capture -> review)!');
 
     await browser.close();
   } finally {
@@ -60,6 +75,7 @@ async function testReducedMotion() {
       serverProcess.kill();
     }
   }
+  process.exit(0);
 }
 
 testReducedMotion().catch((err) => {
