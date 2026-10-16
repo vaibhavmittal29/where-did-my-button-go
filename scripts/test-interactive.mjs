@@ -2,12 +2,14 @@ import { chromium } from 'playwright';
 import path from 'node:path';
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { ensureServer } from './server-helper.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const PROJECT_DIR = path.resolve(__dirname, '..');
 const TEST_RESULTS_DIR = path.join(PROJECT_DIR, 'test-results');
-const BRAIN_DIR = process.env.BRAIN_DIR || 'C:/Users/vaibh/.gemini/antigravity/brain/d3c251cc-b9ea-4484-982e-138020751b92';
+const DEFAULT_BRAIN = 'C:/Users/vaibh/.gemini/antigravity/brain/d3c251cc-b9ea-4484-982e-138020751b92';
+const BRAIN_DIR = process.env.BRAIN_DIR || (fs.existsSync(DEFAULT_BRAIN) ? DEFAULT_BRAIN : null);
 
 if (!fs.existsSync(TEST_RESULTS_DIR)) {
   fs.mkdirSync(TEST_RESULTS_DIR, { recursive: true });
@@ -27,14 +29,17 @@ async function saveScreen(page, filename) {
 
 async function testInteractive() {
   console.log('Testing Phase 5 Interactive Camera Scenarios...');
-  const browser = await chromium.launch({ headless: true });
-  const context = await browser.newContext({
-    viewport: { width: 1200, height: 950 },
-  });
-  const page = await context.newPage();
+  const serverProcess = await ensureServer(5173);
 
-  // Load root interactive route
-  await page.goto('http://localhost:5173/', { waitUntil: 'networkidle' });
+  try {
+    const browser = await chromium.launch({ headless: true });
+    const context = await browser.newContext({
+      viewport: { width: 1200, height: 950 },
+    });
+    const page = await context.newPage();
+
+    // Load root interactive route
+    await page.goto('http://localhost:5173/', { waitUntil: 'networkidle' });
   await page.waitForTimeout(500);
 
   // 1. Check initial Idle State
@@ -157,8 +162,13 @@ async function testInteractive() {
   }
   console.log('✓ Scenario 5b Passed: Voice trigger properly guarded by group readiness, then captures when all 4 ready');
 
-  await browser.close();
-  console.log('\n🎉 ALL PHASE 5 INTERACTION SCENARIOS PASSED WITH FLYING COLORS!');
+    await browser.close();
+    console.log('\n🎉 ALL PHASE 5 INTERACTION SCENARIOS PASSED WITH FLYING COLORS!');
+  } finally {
+    if (serverProcess) {
+      serverProcess.kill();
+    }
+  }
 }
 
 testInteractive().catch((err) => {

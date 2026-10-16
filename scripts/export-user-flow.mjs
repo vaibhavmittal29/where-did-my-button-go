@@ -132,6 +132,12 @@ ${mmdContent}
 }
 
 main().catch(err => {
+  const svgPath = path.resolve('export/user-flow.svg');
+  const pngPath = path.resolve('export/user-flow.png');
+  if (fs.existsSync(svgPath) && fs.existsSync(pngPath)) {
+    console.warn('⚠️ Network unavailable to render Mermaid CDN in export-user-flow.mjs; preserving existing export/user-flow assets.');
+    process.exit(0);
+  }
   console.error('Error rendering diagram:', err);
   process.exit(1);
 });

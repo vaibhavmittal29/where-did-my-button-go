@@ -10,8 +10,19 @@ async function generateComposedGroupPhoto() {
   const page = await browser.newPage({
     viewport: { width: W, height: H }
   });
+  const candPath = path.resolve('public/scenes/cand-3.jpg');
+  const targetPath = path.resolve('public/scenes/group-campus.jpg');
 
-  const base64 = fs.readFileSync('public/scenes/cand-3.jpg').toString('base64');
+  if (!fs.existsSync(candPath)) {
+    if (fs.existsSync(targetPath)) {
+      console.log('✓ Group scene group-campus.jpg already exists; cand-3.jpg source is not required.');
+      await browser.close();
+      return;
+    }
+    throw new Error(`Missing source image ${candPath} to generate group scene.`);
+  }
+
+  const base64 = fs.readFileSync(candPath).toString('base64');
 
   // cand-3.jpg: 900x1164.
   // The 4 friends on the left are from X=0 to X=730.

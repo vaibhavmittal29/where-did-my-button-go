@@ -2,12 +2,14 @@ import { chromium } from 'playwright';
 import path from 'node:path';
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { ensureServer } from './server-helper.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const PROJECT_DIR = path.resolve(__dirname, '..');
 const TEST_RESULTS_DIR = path.join(PROJECT_DIR, 'test-results');
-const BRAIN_DIR = process.env.BRAIN_DIR || 'C:/Users/vaibh/.gemini/antigravity/brain/d3c251cc-b9ea-4484-982e-138020751b92';
+const DEFAULT_BRAIN = 'C:/Users/vaibh/.gemini/antigravity/brain/d3c251cc-b9ea-4484-982e-138020751b92';
+const BRAIN_DIR = process.env.BRAIN_DIR || (fs.existsSync(DEFAULT_BRAIN) ? DEFAULT_BRAIN : null);
 
 if (!fs.existsSync(TEST_RESULTS_DIR)) {
   fs.mkdirSync(TEST_RESULTS_DIR, { recursive: true });
@@ -15,41 +17,49 @@ if (!fs.existsSync(TEST_RESULTS_DIR)) {
 
 async function testReducedMotion() {
   console.log('Testing Phase 6 Prefers-Reduced-Motion Compliance...');
-  const browser = await chromium.launch({ headless: true });
-  const context = await browser.newContext({
-    viewport: { width: 1200, height: 950 },
-    reducedMotion: 'reduce', // Emulate prefers-reduced-motion: reduce
-  });
-  const page = await context.newPage();
+  const serverProcess = await ensureServer(5173);
 
-  await page.goto('http://localhost:5173/', { waitUntil: 'networkidle' });
-  await page.waitForTimeout(500);
+  try {
+    const browser = await chromium.launch({ headless: true });
+    const context = await browser.newContext({
+      viewport: { width: 1200, height: 950 },
+      reducedMotion: 'reduce', // Emulate prefers-reduced-motion: reduce
+    });
+    const page = await context.newPage();
 
-  // Tap subject to focus & lock
-  const viewfinder = page.locator('img[alt="Camera viewfinder scene"]');
-  await viewfinder.click({ position: { x: 195, y: 350 } });
-  await page.waitForTimeout(300);
+    await page.goto('http://localhost:5173/', { waitUntil: 'networkidle' });
+    await page.waitForTimeout(500);
 
-  // Check data-reduced-motion attribute on LockRing
-  const lockRing = page.locator('div[role="progressbar"]');
-  const isReduced = await lockRing.getAttribute('data-reduced-motion');
-  console.log('LockRing data-reduced-motion:', isReduced);
-  if (isReduced !== 'true') {
-    throw new Error('LockRing did not detect reduced motion mode');
-  }
+    // Tap subject to focus & lock
+    const viewfinder = page.locator('img[alt="Camera viewfinder scene"]');
+    await viewfinder.click({ position: { x: 195, y: 350 } });
+    await page.waitForTimeout(300);
 
-  const localPath = path.join(TEST_RESULTS_DIR, 'phase6-reduced-motion.png');
-  await page.screenshot({ path: localPath });
-  if (BRAIN_DIR && fs.existsSync(BRAIN_DIR)) {
-    try {
-      fs.copyFileSync(localPath, path.join(BRAIN_DIR, 'phase6-reduced-motion.png'));
-    } catch {
-      // ignore copy errors
+    // Check data-reduced-motion attribute on LockRing
+    const lockRing = page.locator('div[role="progressbar"]');
+    const isReduced = await lockRing.getAttribute('data-reduced-motion');
+    console.log('LockRing data-reduced-motion:', isReduced);
+    if (isReduced !== 'true') {
+      throw new Error('LockRing did not detect reduced motion mode');
+    }
+
+    const localPath = path.join(TEST_RESULTS_DIR, 'phase6-reduced-motion.png');
+    await page.screenshot({ path: localPath });
+    if (BRAIN_DIR && fs.existsSync(BRAIN_DIR)) {
+      try {
+        fs.copyFileSync(localPath, path.join(BRAIN_DIR, 'phase6-reduced-motion.png'));
+      } catch {
+        // ignore copy errors
+      }
+    }
+    console.log('✓ Reduced motion test passed!');
+
+    await browser.close();
+  } finally {
+    if (serverProcess) {
+      serverProcess.kill();
     }
   }
-  console.log('✓ Reduced motion test passed!');
-
-  await browser.close();
 }
 
 testReducedMotion().catch((err) => {
