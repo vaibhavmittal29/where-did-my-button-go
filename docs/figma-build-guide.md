@@ -41,7 +41,7 @@ Create a Variable Collection in Figma named **`STILL-Tokens`** and add the follo
 | `color/text-primary` | `#F5F5F7` | 100% | Main headlines, body copy, active icons |
 | `color/text-dim` | `#A3A3B2` | 100% | Secondary labels, captions, inactive states |
 | `color/text-muted` | `#A3A3B2` | 100% | Accessible footers, micro-copy, timestamps (7.89:1 AAA) |
-| `color/accent-amber` | `#FFB020` | 100% | **Signal Amber**: ring fill, Best badge, active mode |
+| `color/accent-amber` | `#FFB020` | 100% | **Signal Amber**: ring fill, Suggested badge, active mode |
 | `color/accent-soft` | `#FFB020` | 14% | Background tint for accent chips & callouts |
 | `color/accent-glow` | `#FFB020` | 30% | Drop-shadow glow for hero ring & active frame |
 | `color/success-green` | `#3DDC97` | 100% | Ready status, face detection confirmed, save tick |
@@ -129,14 +129,14 @@ Create a Variable Collection in Figma named **`STILL-Tokens`** and add the follo
 - **Frame:** Auto Layout (Vertical, Center), Width `358 px`, Hug height.
 - **Top Bar:** Auto Layout (Horizontal, Space Between), Width `100%`.
   - Left Text: "Pick your favourite moment" (`13 px`, Inter Medium, `#F5F5F7`).
-  - Right Chip: "Rewind 3s" (`12 px`, `#FFB020`, Sparkles icon).
-- **Card Strip Row:** Auto Layout (Horizontal, Center), Gap `8 px`, Clip content: Off.
-  - Contains **7 Thumbnail Cards**:
-    - Normal Thumbnails (1, 2, 4, 5, 6, 7): Width `46 px`, Height `68 px`, Radius `10 px`, Stroke 1px `rgba(255,255,255,0.12)`.
-    - **Selected Best Thumbnail (Frame 3)**: Width `52 px`, Height `76 px` (Scale 1.08), Radius `12 px`, Stroke `2.5 px` `#FFB020`, Drop Shadow `0 8px 24px rgba(255, 176, 32, 0.35)`. Top badge: "BEST" (`9 px`, Bold, Black on Amber).
+  - Right Chip: "Rewind 3s (simulated)" (`12 px`, `#FFB020`, Sparkles icon).
+- **Card Strip Row:** Auto Layout (Horizontal, Center), Gap `6 px`, Clip content: Off.
+  - Contains **7 Thumbnail Cards** (compact 44px base fitting 390px viewports without horizontal clipping):
+    - Normal Thumbnails (1, 2, 4, 5, 6, 7): Width `44 px`, Height `64 px`, Radius `10 px`, Stroke 1px `rgba(255,255,255,0.12)`.
+    - **Selected Suggested Thumbnail (Frame 4)**: Width `48 px`, Height `70 px` (Scale 1.05), Radius `10 px`, Stroke `2 px` `#FFB020`, Drop Shadow `0 6px 20px rgba(255, 176, 32, 0.35)`. Top badge: "SUGGESTED" (`8 px`, SemiBold, Black on Amber).
 - **Autosave Countdown Line:** Width `100%`, Height `3 px`, Radius `999 px`, Background `rgba(255,255,255,0.1)`. Inside fill: `#FFB020` with Width `70%`.
-- **Micro-copy row:** "Saving best moment..." (`12 px`, `#A3A3B2`) and "1.2s" right-aligned.
-- **Action Button:** Auto Layout (Center), Width `100%`, Height `44 px`, Radius `999 px`, Fill `#FFB020`, Text: "Save Selection" (`14 px`, Inter Bold, `#0B0B0F`).
+- **Micro-copy row:** "Saving suggested moment..." (`12 px`, `#A3A3B2`) and "1.2s" right-aligned.
+- **Action Button:** Auto Layout (Center), Width `100%`, Height `44 px`, Radius `999 px`, Fill `#FFB020`, Text: "Save Selection (prototype)" (`14 px`, Inter Bold, `#0B0B0F`).
 
 ---
 
@@ -174,7 +174,7 @@ Create a Variable Collection in Figma named **`STILL-Tokens`** and add the follo
    - 3-Step List (Auto Layout Vertical, Gap `12 px`):
      - Step 1: Amber badge "1" + "Tap what matters to set focus."
      - Step 2: Amber badge "2" + "Hold still while the ring fills (~0.8s)."
-     - Step 3: Amber badge "3" + "Rewind to pick your best moment afterwards."
+     - Step 3: Amber badge "3" + "Rewind to pick your favourite moment afterwards."
    - Primary CTA Button: Width `100%`, Height `48 px`, Radius `999 px`, Fill `#FFB020`, Text: **"Got it"** (Black `#0B0B0F`, Bold 15px).
    - Secondary link: "Adjust steadiness sensitivity" (`12 px`, `#A3A3B2`).
 
