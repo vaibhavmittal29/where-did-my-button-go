@@ -234,6 +234,38 @@ async function testInteractive() {
   }
   console.log('✓ Scenario 5e Passed (1.2): Group readiness is single-sourced in reducer without desync');
 
+  // Scenario 5f (F1): Mode switching during SAVED / CAPTURED is disabled and does not break Undo
+  await page.locator('button#tab-still').click();
+  await page.waitForTimeout(300);
+
+  // Focus and capture in Still mode
+  await viewfinder.click({ position: { x: 195, y: 350 } });
+  await page.waitForFunction(() => document.body.innerText.includes('Pick your favourite moment'), { timeout: 4000 });
+  await page.waitForFunction(() => document.body.innerText.includes('Saved · Undo'), { timeout: 6000 });
+
+  // While in SAVED (Undo window):
+  const groupTab = page.locator('button#tab-group');
+  const isAriaDisabled = await groupTab.getAttribute('aria-disabled');
+  if (isAriaDisabled !== 'true') {
+    throw new Error('ModeCarousel tab must have aria-disabled="true" during SAVED state!');
+  }
+
+  // Attempt click on disabled tab with force: true
+  await groupTab.click({ force: true });
+  await page.waitForTimeout(200);
+
+  // Check mode remains STILL in status card
+  const statusAfterClick = await page.locator('text=Mode:').locator('..').textContent();
+  if (!statusAfterClick.includes('STILL')) {
+    throw new Error('Mode switched during SAVED state! F1 violation.');
+  }
+
+  // Click Undo to ensure Undo still works properly
+  const undoSavedBtn = page.locator('button:has-text("Undo")');
+  await undoSavedBtn.click();
+  await page.waitForFunction(() => document.body.innerText.includes('Photo removed'), { timeout: 2000 });
+  console.log('✓ Scenario 5f Passed (F1): Mode carousel disabled during SAVED state; mode switch blocked and Undo succeeds');
+
   console.log('\n🎉 ALL PHASE 5 INTERACTION SCENARIOS PASSED WITH FLYING COLORS!');
 } finally {
   if (browser) {

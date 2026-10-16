@@ -346,6 +346,8 @@ export const InteractiveCameraScreen: React.FC = () => {
       return () => {
         if (undoTimeoutRef.current) clearTimeout(undoTimeoutRef.current);
       };
+    } else if (state.status !== 'IDLE') {
+      setToastMessage((prev) => (prev === 'Saved · Undo' ? null : prev));
     }
   }, [state.status]);
 
@@ -485,6 +487,7 @@ export const InteractiveCameraScreen: React.FC = () => {
 
   // Handlers for Undo and Reset (P1-17: track and clean up secondary timeout)
   const handleUndo = useCallback(() => {
+    if (state.status !== 'SAVED' || !state.canUndo) return;
     triggerHaptic('tap');
     lastCooldownTimeRef.current = performance.now();
     if (undoTimeoutRef.current) clearTimeout(undoTimeoutRef.current);
@@ -500,7 +503,7 @@ export const InteractiveCameraScreen: React.FC = () => {
       dispatch({ type: 'RESET' });
       undoSecondaryTimerRef.current = null;
     }, 1800);
-  }, [triggerHaptic]);
+  }, [state.status, state.canUndo, triggerHaptic]);
 
   const handleReset = useCallback(() => {
     triggerHaptic('tap');
@@ -1044,6 +1047,7 @@ export const InteractiveCameraScreen: React.FC = () => {
                 {/* Mode Carousel (No shutter button here — carousel takes bottom center) */}
                 <ModeCarousel
                   activeMode={state.mode}
+                  disabled={state.status === 'CAPTURED' || state.status === 'SAVED'}
                   onModeChange={(m) => {
                     triggerHaptic('tap');
                     dispatch({ type: 'MODE_CHANGE', mode: m });

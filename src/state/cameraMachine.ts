@@ -334,6 +334,7 @@ export function cameraReducer(state: CameraState, action: CameraAction): CameraS
     }
 
     case 'MODE_CHANGE': {
+      if (state.status === 'CAPTURED' || state.status === 'SAVED') return state;
       return {
         ...state,
         mode: action.mode,

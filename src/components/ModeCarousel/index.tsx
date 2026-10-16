@@ -7,6 +7,7 @@ export interface ModeCarouselProps {
   activeMode: CameraMode;
   onModeChange?: (mode: CameraMode) => void;
   className?: string;
+  disabled?: boolean;
 }
 
 const MODES: { id: CameraMode; label: string }[] = [
@@ -19,10 +20,12 @@ export const ModeCarousel: React.FC<ModeCarouselProps> = ({
   activeMode,
   onModeChange,
   className = '',
+  disabled = false,
 }) => {
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const handleKeyDown = (e: React.KeyboardEvent, index: number) => {
+    if (disabled) return;
     let nextIndex = index;
 
     if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
@@ -48,9 +51,10 @@ export const ModeCarousel: React.FC<ModeCarouselProps> = ({
 
   return (
     <div
-      className={`${styles.carousel} ${className}`}
+      className={`${styles.carousel} ${disabled ? styles.disabled : ''} ${className}`}
       role="tablist"
       aria-label="Camera Modes"
+      aria-disabled={disabled ? 'true' : undefined}
     >
       {MODES.map((mode, index) => {
         const isSelected = activeMode === mode.id;
@@ -61,10 +65,14 @@ export const ModeCarousel: React.FC<ModeCarouselProps> = ({
             type="button"
             role="tab"
             aria-selected={isSelected}
-            tabIndex={isSelected ? 0 : -1}
+            aria-disabled={disabled ? 'true' : undefined}
+            tabIndex={disabled ? -1 : (isSelected ? 0 : -1)}
             id={`tab-${mode.id}`}
-            className={styles.item}
-            onClick={() => onModeChange?.(mode.id)}
+            className={`${styles.item} ${disabled ? styles.disabled : ''}`}
+            onClick={() => {
+              if (disabled) return;
+              onModeChange?.(mode.id);
+            }}
             onKeyDown={(e) => handleKeyDown(e, index)}
           >
             {mode.label}

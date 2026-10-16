@@ -441,4 +441,40 @@ console.log('--- RUNNING CAMERA STATE MACHINE SANITY TESTS ---\n');
   console.log('✔ Test 13 Passed: Group auto-capture epoch disarmed on capture and through Undo.\n');
 }
 
-console.log('ALL 13 STATE MACHINE TESTS PASSED SUCCESSFULLY! 🎉');
+// SCENARIO 14: MODE_CHANGE during CAPTURED and SAVED is guarded (F1)
+{
+  console.log('Test 14: Guard MODE_CHANGE during CAPTURED and SAVED');
+  let state = initialCameraState;
+  state = cameraReducer(state, { type: 'TAP_SUBJECT', x: 50, y: 50 });
+  state = cameraReducer(state, { type: 'STEADY_OK' });
+  state = cameraReducer(state, { type: 'PROGRESS_COMPLETE' });
+  assert.strictEqual(state.status, 'CAPTURED');
+
+  // Attempt MODE_CHANGE during CAPTURED -> must be ignored!
+  const stateDuringCaptured = cameraReducer(state, { type: 'MODE_CHANGE', mode: 'group' });
+  assert.strictEqual(stateDuringCaptured.status, 'CAPTURED');
+  assert.strictEqual(stateDuringCaptured.mode, 'still');
+  assert.strictEqual(stateDuringCaptured, state);
+
+  // Transition to REVIEW then SAVED
+  state = cameraReducer(state, { type: 'ANIM_DONE' });
+  assert.strictEqual(state.status, 'REVIEW');
+  state = cameraReducer(state, { type: 'TIMEOUT_REVIEW' });
+  assert.strictEqual(state.status, 'SAVED');
+
+  // Attempt MODE_CHANGE during SAVED -> must be ignored!
+  const stateDuringSaved = cameraReducer(state, { type: 'MODE_CHANGE', mode: 'doc' });
+  assert.strictEqual(stateDuringSaved.status, 'SAVED');
+  assert.strictEqual(stateDuringSaved.mode, 'still');
+  assert.strictEqual(stateDuringSaved, state);
+
+  // When reset back to IDLE, MODE_CHANGE works as normal
+  state = cameraReducer(state, { type: 'RESET' });
+  assert.strictEqual(state.status, 'IDLE');
+  state = cameraReducer(state, { type: 'MODE_CHANGE', mode: 'group' });
+  assert.strictEqual(state.mode, 'group');
+
+  console.log('✔ Test 14 Passed: MODE_CHANGE ignored in CAPTURED and SAVED states.\n');
+}
+
+console.log('ALL 14 STATE MACHINE TESTS PASSED SUCCESSFULLY! 🎉');
