@@ -379,4 +379,5 @@ flowchart TD
 ### PHASE 7 — QA, accessibility & edge cases (≈ 45 min)
 ### PHASE 8 — Export deliverables (≈ 45 min)
 ### PHASE 9 — Figma replication (human-led, agent assists) (≈ 90 min)
+- See `scripts/figma-plugin/` and `docs/figma-bridge.md` for the automated Figma plugin generator and manual verification checklist.
 ### PHASE 10 — Final packaging & rehearsal (≈ 45 min)

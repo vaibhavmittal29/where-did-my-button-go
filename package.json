@@ -17,7 +17,8 @@
     "test:machine": "tsx scripts/test-machine.ts",
     "test:e2e": "node scripts/test-interactive.mjs",
     "test:motion": "node scripts/test-reduced-motion.mjs",
-    "test": "tsx scripts/test-machine.ts && node scripts/test-interactive.mjs && node scripts/test-reduced-motion.mjs",
+    "test:figma": "node scripts/test-figma.mjs",
+    "test": "tsx scripts/test-machine.ts && node scripts/test-interactive.mjs && node scripts/test-reduced-motion.mjs && node scripts/test-figma.mjs",
     "export": "node scripts/export-screens.mjs"
   },
   "dependencies": {

@@ -27,31 +27,65 @@ function hexToRgb(hex) {
   };
 }
 
-// Safe font loader with robust fallback
-async function loadFonts() {
-  const fonts = [
+// Safe font loader with robust fallback hierarchy (Phase 3.1)
+// Requested font -> Inter (same style) -> Inter Regular -> Roboto Regular
+const loadedFontsMap = new Map();
+
+async function loadFontWithFallback(requested) {
+  const cacheKey = `${requested.family}::${requested.style}`;
+  if (loadedFontsMap.has(cacheKey)) {
+    return loadedFontsMap.get(cacheKey);
+  }
+
+  const candidates = [
+    requested,
+    { family: 'Inter', style: requested.style },
     { family: 'Inter', style: 'Regular' },
-    { family: 'Inter', style: 'Medium' },
-    { family: 'Inter', style: 'Semi Bold' },
-    { family: 'Inter', style: 'Bold' },
-    { family: 'Space Grotesk', style: 'Regular' },
-    { family: 'Space Grotesk', style: 'SemiBold' },
-    { family: 'Space Grotesk', style: 'Bold' },
     { family: 'Roboto', style: 'Regular' },
-    { family: 'Roboto', style: 'Bold' },
   ];
 
-  for (const f of fonts) {
+  for (const candidate of candidates) {
     try {
-      await figma.loadFontAsync(f);
+      await figma.loadFontAsync(candidate);
+      if (candidate.family !== requested.family || candidate.style !== requested.style) {
+        console.warn(`[STILL Plugin] Font fallback: "${requested.family} ${requested.style}" unavailable in Figma environment, fell back to "${candidate.family} ${candidate.style}"`);
+      }
+      loadedFontsMap.set(cacheKey, candidate);
+      return candidate;
     } catch {
-      // Font not installed locally in Figma desktop/web, will fallback gracefully
+      // Continue through fallback hierarchy
     }
   }
+
+  const defaultFont = { family: 'Inter', style: 'Regular' };
+  loadedFontsMap.set(cacheKey, defaultFont);
+  return defaultFont;
+}
+
+const resolvedFonts = {
+  spaceGroteskBold: { family: 'Inter', style: 'Bold' },
+  spaceGroteskSemi: { family: 'Inter', style: 'Semi Bold' },
+  interBold: { family: 'Inter', style: 'Bold' },
+  interMed: { family: 'Inter', style: 'Medium' },
+  interReg: { family: 'Inter', style: 'Regular' },
+};
+
+async function loadFonts() {
+  resolvedFonts.spaceGroteskBold = await loadFontWithFallback({ family: 'Space Grotesk', style: 'Bold' });
+  resolvedFonts.spaceGroteskSemi = await loadFontWithFallback({ family: 'Space Grotesk', style: 'SemiBold' });
+  resolvedFonts.interBold = await loadFontWithFallback({ family: 'Inter', style: 'Bold' });
+  resolvedFonts.interMed = await loadFontWithFallback({ family: 'Inter', style: 'Medium' });
+  resolvedFonts.interReg = await loadFontWithFallback({ family: 'Inter', style: 'Regular' });
 }
 
 function getSafeFont(family, style) {
-  return { family: 'Inter', style: style === 'Bold' ? 'Bold' : style === 'SemiBold' ? 'Semi Bold' : style === 'Medium' ? 'Medium' : 'Regular' };
+  if (family === 'Space Grotesk') {
+    if (style === 'Bold') return resolvedFonts.spaceGroteskBold;
+    if (style === 'SemiBold') return resolvedFonts.spaceGroteskSemi;
+  }
+  if (style === 'Bold') return resolvedFonts.interBold;
+  if (style === 'Medium') return resolvedFonts.interMed;
+  return resolvedFonts.interReg;
 }
 
 // Helper: Create Text Node
@@ -109,8 +143,25 @@ function createAutoLayout(name, direction = 'VERTICAL', padding = [0, 0, 0, 0], 
   return frame;
 }
 
+// Helper: Clean up existing nodes tagged with still_entity on re-runs (Phase 3.5 Idempotency)
+function cleanExistingStillNodes(page) {
+  if (!page || !page.children) return;
+  const toDelete = page.children.filter((n) => {
+    try {
+      return Boolean(n.getPluginData && n.getPluginData('still_entity'));
+    } catch {
+      return false;
+    }
+  });
+  for (const n of toDelete) {
+    try {
+      n.remove();
+    } catch {}
+  }
+}
+
 // ---------------------------------------------------------------------------
-// 1. GENERATE DESIGN TOKENS & VARIABLES
+// 1. GENERATE DESIGN TOKENS & VARIABLES (Phase 3.5 Idempotent Upsert)
 // ---------------------------------------------------------------------------
 async function generateTokens() {
   let tokensCreated = 0;
@@ -124,6 +175,9 @@ async function generateTokens() {
         collection = figma.variables.createVariableCollection('STILL-Tokens');
       }
       const modeId = collection.modes[0].modeId;
+
+      const existingVars = figma.variables.getLocalVariables().filter((v) => v.variableCollectionId === collection.id);
+      const varMap = new Map(existingVars.map((v) => [v.name, v]));
 
       const colorDefs = [
         ['color/bg', COLORS.bg, 1],
@@ -142,7 +196,10 @@ async function generateTokens() {
 
       for (const [name, rgb, opacity] of colorDefs) {
         try {
-          const v = figma.variables.createVariable(name, collection, 'COLOR');
+          let v = varMap.get(name);
+          if (!v) {
+            v = figma.variables.createVariable(name, collection, 'COLOR');
+          }
           v.setValueForMode(modeId, { ...rgb, a: opacity });
           tokensCreated++;
         } catch {
@@ -166,7 +223,10 @@ async function generateTokens() {
 
       for (const [name, val] of floatDefs) {
         try {
-          const v = figma.variables.createVariable(name, collection, 'FLOAT');
+          let v = varMap.get(name);
+          if (!v) {
+            v = figma.variables.createVariable(name, collection, 'FLOAT');
+          }
           v.setValueForMode(modeId, val);
           tokensCreated++;
         } catch {}
@@ -176,7 +236,10 @@ async function generateTokens() {
     }
   }
 
-  // 1.2 Paint Styles (Figma Color Styles)
+  // 1.2 Paint Styles (Figma Color Styles - Idempotent Upsert)
+  const existingStyles = figma.getLocalPaintStyles();
+  const styleMap = new Map(existingStyles.map((s) => [s.name, s]));
+
   const paintDefs = [
     ['STILL / Background', COLORS.bg, 1],
     ['STILL / Surface 1', COLORS.surface1, 1],
@@ -191,8 +254,11 @@ async function generateTokens() {
 
   for (const [name, rgb, opacity] of paintDefs) {
     try {
-      const style = figma.createPaintStyle();
-      style.name = name;
+      let style = styleMap.get(name);
+      if (!style) {
+        style = figma.createPaintStyle();
+        style.name = name;
+      }
       style.paints = [{ type: 'SOLID', color: rgb, opacity }];
     } catch {}
   }
@@ -201,9 +267,10 @@ async function generateTokens() {
 }
 
 // ---------------------------------------------------------------------------
-// 2. GENERATE MASTER COMPONENTS
+// 2. GENERATE MASTER COMPONENTS (Phase 3.2 including MomentStrip)
 // ---------------------------------------------------------------------------
 async function generateMasterComponents(targetPage) {
+  cleanExistingStillNodes(targetPage);
   figma.currentPage = targetPage;
 
   const fontBold = getSafeFont('Space Grotesk', 'Bold');
@@ -212,10 +279,12 @@ async function generateMasterComponents(targetPage) {
 
   let currentX = 0;
   const compGap = 60;
+  let componentsCount = 0;
 
   // 2.1 Component: IconButton (44 x 44 px Apple HIG)
   const iconBtn = figma.createComponent();
   iconBtn.name = 'Component / IconButton';
+  iconBtn.setPluginData('still_entity', 'component');
   iconBtn.resize(44, 44);
   iconBtn.cornerRadius = 999;
   iconBtn.fills = [{ type: 'SOLID', color: COLORS.surface1, opacity: 0.7 }];
@@ -229,10 +298,12 @@ async function generateMasterComponents(targetPage) {
   iconGlyph.y = (44 - iconGlyph.height) / 2;
   iconBtn.appendChild(iconGlyph);
   currentX += 44 + compGap;
+  componentsCount++;
 
   // 2.2 Component: GlassChip (Pill 32px height)
   const glassChip = figma.createComponent();
   glassChip.name = 'Component / GlassChip';
+  glassChip.setPluginData('still_entity', 'component');
   glassChip.layoutMode = 'HORIZONTAL';
   glassChip.paddingLeft = 14;
   glassChip.paddingRight = 14;
@@ -249,10 +320,12 @@ async function generateMasterComponents(targetPage) {
   const chipText = createTextNode('Rewind Buffer Active (simulated)', fontMed, 12, COLORS.textPrimary);
   glassChip.appendChild(chipText);
   currentX += 260 + compGap;
+  componentsCount++;
 
   // 2.3 Component: LockRing (104 x 104 px focus ring with 4 tracking brackets)
   const lockRing = figma.createComponent();
   lockRing.name = 'Component / LockRing';
+  lockRing.setPluginData('still_entity', 'component');
   lockRing.resize(104, 104);
   lockRing.fills = [];
   lockRing.x = currentX;
@@ -291,10 +364,12 @@ async function generateMasterComponents(targetPage) {
   lockRing.appendChild(centerPin);
 
   currentX += 104 + compGap;
+  componentsCount++;
 
   // 2.4 Component: Toast (358 x 48 px with Undo action)
   const toast = figma.createComponent();
   toast.name = 'Component / Toast';
+  toast.setPluginData('still_entity', 'component');
   toast.layoutMode = 'HORIZONTAL';
   toast.primaryAxisAlignItems = 'SPACE_BETWEEN';
   toast.counterAxisAlignItems = 'CENTER';
@@ -319,10 +394,12 @@ async function generateMasterComponents(targetPage) {
   toast.appendChild(toastUndo);
 
   currentX += 358 + compGap;
+  componentsCount++;
 
   // 2.5 Component: ModeCarousel (Still, Group, Doc)
   const carousel = figma.createComponent();
   carousel.name = 'Component / ModeCarousel';
+  carousel.setPluginData('still_entity', 'component');
   carousel.layoutMode = 'HORIZONTAL';
   carousel.primaryAxisAlignItems = 'CENTER';
   carousel.counterAxisAlignItems = 'CENTER';
@@ -348,12 +425,58 @@ async function generateMasterComponents(targetPage) {
   carousel.appendChild(modeStillCol);
   carousel.appendChild(labelGroup);
   carousel.appendChild(labelDoc);
+  currentX += 220 + compGap;
+  componentsCount++;
+
+  // 2.6 Component: MomentStrip (358 x 80 px frame strip with 7 candidate thumbs) (Phase 3.2)
+  const momentStrip = figma.createComponent();
+  momentStrip.name = 'Component / MomentStrip';
+  momentStrip.setPluginData('still_entity', 'component');
+  momentStrip.layoutMode = 'VERTICAL';
+  momentStrip.itemSpacing = 8;
+  momentStrip.resize(358, 80);
+  momentStrip.fills = [];
+  momentStrip.x = currentX;
+  momentStrip.y = 0;
+
+  const msTitleRow = createAutoLayout('Title Row', 'HORIZONTAL', [0, 0, 0, 0], 0);
+  msTitleRow.resize(358, 16);
+  msTitleRow.primaryAxisAlignItems = 'SPACE_BETWEEN';
+  msTitleRow.counterAxisAlignItems = 'CENTER';
+  msTitleRow.appendChild(createTextNode('Pick your favourite moment', fontMed, 12, COLORS.textPrimary));
+  msTitleRow.appendChild(createTextNode('Rewind 3s (sim)', fontReg, 11, COLORS.accentAmber));
+  momentStrip.appendChild(msTitleRow);
+
+  const msThumbRow = createAutoLayout('Thumbnails Row', 'HORIZONTAL', [0, 0, 0, 0], 6);
+  msThumbRow.counterAxisAlignItems = 'CENTER';
+  for (let i = 0; i < 7; i++) {
+    const isSelected = i === 3;
+    const card = createFrame('Thumb ' + (i + 1), isSelected ? 48 : 44, isSelected ? 56 : 52, 8, COLORS.surface2);
+    if (isSelected) {
+      card.strokes = [{ type: 'SOLID', color: COLORS.accentAmber }];
+      card.strokeWeight = 2;
+      const tag = createAutoLayout('Tag', 'HORIZONTAL', [2, 4, 2, 4], 0, COLORS.accentAmber);
+      tag.cornerRadius = 4;
+      tag.appendChild(createTextNode('SUGGESTED', fontBold, 7, COLORS.bg));
+      card.appendChild(tag);
+    } else {
+      card.strokes = [{ type: 'SOLID', color: COLORS.white, opacity: 0.12 }];
+      card.strokeWeight = 1;
+    }
+    msThumbRow.appendChild(card);
+  }
+  momentStrip.appendChild(msThumbRow);
+  currentX += 358 + compGap;
+  componentsCount++;
+
+  return componentsCount;
 }
 
 // ---------------------------------------------------------------------------
 // 3. GENERATE THE 5 HIGH-FIDELITY MOBILE SCREENS (390 x 844 px)
 // ---------------------------------------------------------------------------
-async function generateScreens(targetPage) {
+async function generateScreens(targetPage, entityType = 'screen') {
+  cleanExistingStillNodes(targetPage);
   figma.currentPage = targetPage;
 
   const fontBold = getSafeFont('Space Grotesk', 'Bold');
@@ -438,6 +561,7 @@ async function generateScreens(targetPage) {
   s1Btn.appendChild(s1BtnText);
   s1Card.appendChild(s1Btn);
 
+  s1.setPluginData('still_entity', entityType);
   s1.appendChild(s1Card);
   screens.push(s1);
 
@@ -445,6 +569,7 @@ async function generateScreens(targetPage) {
   // Screen 2: Viewfinder (Idle)
   // -------------------------------------------------------------------------
   const s2 = createFrame('02 · Viewfinder Idle', screenWidth, screenHeight, 48, COLORS.bg);
+  s2.setPluginData('still_entity', entityType);
   s2.x = (screenWidth + screenGap) * 1;
   s2.y = 0;
 
@@ -499,9 +624,15 @@ async function generateScreens(targetPage) {
 
   const s2Carousel = createAutoLayout('Carousel', 'HORIZONTAL', [0, 0, 0, 0], 20);
   s2Carousel.counterAxisAlignItems = 'CENTER';
-  s2Carousel.appendChild(createTextNode('Still', fontBold, 14, COLORS.accentAmber));
-  s2Carousel.appendChild(createTextNode('Group', fontMed, 14, COLORS.textDim));
-  s2Carousel.appendChild(createTextNode('Doc', fontMed, 14, COLORS.textDim));
+  const s2PillStill = createTextNode('Still', fontBold, 14, COLORS.accentAmber);
+  s2PillStill.name = 'Pill Still';
+  const s2PillGroup = createTextNode('Group', fontMed, 14, COLORS.textDim);
+  s2PillGroup.name = 'Pill Group';
+  const s2PillDoc = createTextNode('Doc', fontMed, 14, COLORS.textDim);
+  s2PillDoc.name = 'Pill Doc';
+  s2Carousel.appendChild(s2PillStill);
+  s2Carousel.appendChild(s2PillGroup);
+  s2Carousel.appendChild(s2PillDoc);
 
   const s2Flip = createTextNode('🔄', fontReg, 18, COLORS.textPrimary);
 
@@ -583,11 +714,13 @@ async function generateScreens(targetPage) {
   s3.appendChild(s3Meter);
 
   screens.push(s3);
+  s3.setPluginData('still_entity', entityType);
 
   // -------------------------------------------------------------------------
   // Screen 4: Moment Strip (Rewind & Review)
   // -------------------------------------------------------------------------
   const s4 = createFrame('04 · Moment Strip Review', screenWidth, screenHeight, 48, COLORS.bg);
+  s4.setPluginData('still_entity', entityType);
   s4.x = (screenWidth + screenGap) * 3;
   s4.y = 0;
 
@@ -674,6 +807,7 @@ async function generateScreens(targetPage) {
   // Screen 5: Group Mode
   // -------------------------------------------------------------------------
   const s5 = createFrame('05 · Group Mode', screenWidth, screenHeight, 48, COLORS.bg);
+  s5.setPluginData('still_entity', entityType);
   s5.x = (screenWidth + screenGap) * 4;
   s5.y = 0;
 
@@ -747,9 +881,15 @@ async function generateScreens(targetPage) {
   const s5Thumb = createFrame('Recent Thumbnail', 44, 44, 12, COLORS.surface2);
   const s5Carousel = createAutoLayout('Carousel', 'HORIZONTAL', [0, 0, 0, 0], 20);
   s5Carousel.counterAxisAlignItems = 'CENTER';
-  s5Carousel.appendChild(createTextNode('Still', fontMed, 14, COLORS.textDim));
-  s5Carousel.appendChild(createTextNode('Group', fontBold, 14, COLORS.accentAmber));
-  s5Carousel.appendChild(createTextNode('Doc', fontMed, 14, COLORS.textDim));
+  const s5PillStill = createTextNode('Still', fontMed, 14, COLORS.textDim);
+  s5PillStill.name = 'Pill Still';
+  const s5PillGroup = createTextNode('Group', fontBold, 14, COLORS.accentAmber);
+  s5PillGroup.name = 'Pill Group';
+  const s5PillDoc = createTextNode('Doc', fontMed, 14, COLORS.textDim);
+  s5PillDoc.name = 'Pill Doc';
+  s5Carousel.appendChild(s5PillStill);
+  s5Carousel.appendChild(s5PillGroup);
+  s5Carousel.appendChild(s5PillDoc);
   const s5Flip = createTextNode('🔄', fontReg, 18, COLORS.textPrimary);
 
   s5Bottom.appendChild(s5Thumb);
@@ -766,8 +906,9 @@ async function generateScreens(targetPage) {
 // 4. INTERACTIVE PROTOTYPE WIRING (Smart Animate)
 // ---------------------------------------------------------------------------
 async function wirePrototype(screens) {
-  if (!screens || screens.length < 5) return;
+  if (!screens || screens.length < 5) return 0;
   const [s1, s2, s3, s4, s5] = screens;
+  let reactionCount = 0;
 
   try {
     // S1 CTA Button ("Got it") -> S2 Idle
@@ -790,6 +931,7 @@ async function wirePrototype(screens) {
           ],
         },
       ];
+      reactionCount++;
     }
 
     // S2 Center Ghost / Canvas Tap -> S3 Locking
@@ -812,6 +954,7 @@ async function wirePrototype(screens) {
           ],
         },
       ];
+      reactionCount++;
     }
 
     // S3 After Delay (800ms) -> S4 Moments
@@ -832,6 +975,7 @@ async function wirePrototype(screens) {
         ],
       },
     ];
+    reactionCount++;
 
     // S4 "Save Selection" -> S2 Idle
     const s4Save = s4.findOne((n) => n.name === 'Save CTA');
@@ -853,21 +997,95 @@ async function wirePrototype(screens) {
           ],
         },
       ];
+      reactionCount++;
+    }
+
+    // S2 Pill Group -> S5 Group Mode
+    const s2Group = s2.findOne((n) => n.name === 'Pill Group');
+    if (s2Group) {
+      s2Group.reactions = [
+        {
+          trigger: { type: 'ON_CLICK' },
+          actions: [
+            {
+              type: 'NODE',
+              destinationId: s5.id,
+              navigation: 'NAVIGATE',
+              transition: {
+                type: 'SMART_ANIMATE',
+                easing: { type: 'EASE_OUT' },
+                duration: 0.3,
+              },
+            },
+          ],
+        },
+      ];
+      reactionCount++;
+    }
+
+    // S5 Pill Still -> S2 Idle
+    const s5Still = s5.findOne((n) => n.name === 'Pill Still');
+    if (s5Still) {
+      s5Still.reactions = [
+        {
+          trigger: { type: 'ON_CLICK' },
+          actions: [
+            {
+              type: 'NODE',
+              destinationId: s2.id,
+              navigation: 'NAVIGATE',
+              transition: {
+                type: 'SMART_ANIMATE',
+                easing: { type: 'EASE_OUT' },
+                duration: 0.3,
+              },
+            },
+          ],
+        },
+      ];
+      reactionCount++;
+    }
+
+    // S5 Ready Face Box -> S4 Moment Strip
+    const s5Face = s5.findOne((n) => n.name === 'Face: Aarav' || n.name.startsWith('Face:'));
+    if (s5Face) {
+      s5Face.reactions = [
+        {
+          trigger: { type: 'ON_CLICK' },
+          actions: [
+            {
+              type: 'NODE',
+              destinationId: s4.id,
+              navigation: 'NAVIGATE',
+              transition: {
+                type: 'SMART_ANIMATE',
+                easing: { type: 'EASE_OUT' },
+                duration: 0.3,
+              },
+            },
+          ],
+        },
+      ];
+      reactionCount++;
     }
   } catch (e) {
     console.warn('Prototype reaction wiring requires Figma Prototype API:', e);
   }
+
+  return reactionCount;
 }
 
 // ---------------------------------------------------------------------------
 // 5. COVER & PRESENTATION PAGE
 // ---------------------------------------------------------------------------
 async function generateCoverPage(targetPage) {
+  cleanExistingStillNodes(targetPage);
   figma.currentPage = targetPage;
   const fontBold = getSafeFont('Space Grotesk', 'Bold');
   const fontReg = getSafeFont('Inter', 'Regular');
 
   const coverFrame = createFrame('STILL — Presentation Banner', 1920, 1080, 0, COLORS.bg);
+  coverFrame.setPluginData('still_entity', 'cover');
   coverFrame.x = 0;
   coverFrame.y = 0;
 
@@ -897,56 +1115,99 @@ async function generateCoverPage(targetPage) {
 // MAIN PLUGIN ENTRY POINT
 // ---------------------------------------------------------------------------
 figma.ui.onmessage = async (msg) => {
-  await loadFonts();
-
-  if (msg.type === 'BUILD_ALL') {
-    figma.notify('🚀 Building STILL complete Figma project...');
-
-    // Ensure pages exist
-    let pCover = figma.root.children.find((p) => p.name.includes('Cover')) || figma.createPage();
-    pCover.name = '01 · Cover & Overview';
-
-    let pTokens = figma.root.children.find((p) => p.name.includes('Tokens')) || figma.createPage();
-    pTokens.name = '02 · Design System & Tokens';
-
-    let pComponents = figma.root.children.find((p) => p.name.includes('Components')) || figma.createPage();
-    pComponents.name = '03 · Master Components';
-
-    let pScreens = figma.root.children.find((p) => p.name.includes('Screens')) || figma.createPage();
-    pScreens.name = '04 · 5 Hi-Fi Screens';
-
-    let pProto = figma.root.children.find((p) => p.name.includes('Prototype')) || figma.createPage();
-    pProto.name = '05 · Interactive Prototype';
-
-    // 1. Tokens
-    await generateTokens();
-
-    // 2. Cover Page
-    await generateCoverPage(pCover);
-
-    // 3. Components Page
-    await generateMasterComponents(pComponents);
-
-    // 4. Screens Page
-    const screens = await generateScreens(pScreens);
-
-    // 5. Prototype Page
-    const protoScreens = await generateScreens(pProto);
-    await wirePrototype(protoScreens);
-
-    figma.currentPage = pScreens;
-    figma.viewport.scrollAndZoomIntoView(screens);
-    figma.notify('✨ STILL project generated successfully! Check all 5 pages.');
+  if (msg.type === 'CLOSE') {
+    figma.closePlugin();
+    return;
   }
 
-  if (msg.type === 'BUILD_TOKENS') {
-    await generateTokens();
-    figma.notify('🎨 STILL-Tokens collection and styles generated!');
-  }
+  try {
+    await loadFonts();
 
-  if (msg.type === 'BUILD_SCREENS') {
-    const screens = await generateScreens(figma.currentPage);
-    figma.viewport.scrollAndZoomIntoView(screens);
-    figma.notify('📱 5 Mobile screens generated on current page!');
+    if (msg.type === 'BUILD_ALL') {
+      figma.notify('🚀 Building STILL complete Figma project...');
+
+      // Ensure pages exist
+      let pCover = figma.root.children.find((p) => p.name.includes('Cover')) || figma.createPage();
+      pCover.name = '01 · Cover & Overview';
+
+      let pTokens = figma.root.children.find((p) => p.name.includes('Tokens')) || figma.createPage();
+      pTokens.name = '02 · Design System & Tokens';
+
+      let pComponents = figma.root.children.find((p) => p.name.includes('Components')) || figma.createPage();
+      pComponents.name = '03 · Master Components';
+
+      let pScreens = figma.root.children.find((p) => p.name.includes('Screens')) || figma.createPage();
+      pScreens.name = '04 · 5 Hi-Fi Screens';
+
+      let pProto = figma.root.children.find((p) => p.name.includes('Prototype')) || figma.createPage();
+      pProto.name = '05 · Interactive Prototype';
+
+      // 1. Tokens
+      const tokensCount = await generateTokens();
+
+      // 2. Cover Page
+      await generateCoverPage(pCover);
+
+      // 3. Components Page
+      const componentsCount = await generateMasterComponents(pComponents);
+
+      // 4. Screens Page
+      const screens = await generateScreens(pScreens, 'screen');
+
+      // 5. Prototype Page
+      const protoScreens = await generateScreens(pProto, 'prototype');
+      const reactionsCount = await wirePrototype(protoScreens);
+
+      figma.currentPage = pScreens;
+      figma.viewport.scrollAndZoomIntoView(screens);
+      figma.notify('✨ STILL project generated successfully! Check all 5 pages.');
+
+      figma.ui.postMessage({
+        type: 'BUILD_COMPLETE',
+        stats: {
+          tokens: tokensCount,
+          components: componentsCount,
+          screens: screens.length,
+          reactions: reactionsCount,
+        },
+      });
+    }
+
+    if (msg.type === 'BUILD_TOKENS') {
+      const tokensCount = await generateTokens();
+      figma.notify('🎨 STILL-Tokens collection and styles generated!');
+      figma.ui.postMessage({
+        type: 'BUILD_COMPLETE',
+        stats: {
+          tokens: tokensCount,
+          components: 0,
+          screens: 0,
+          reactions: 0,
+        },
+      });
+    }
+
+    if (msg.type === 'BUILD_SCREENS') {
+      const screens = await generateScreens(figma.currentPage, 'screen');
+      figma.viewport.scrollAndZoomIntoView(screens);
+      figma.notify('📱 5 Mobile screens generated on current page!');
+      figma.ui.postMessage({
+        type: 'BUILD_COMPLETE',
+        stats: {
+          tokens: 0,
+          components: 0,
+          screens: screens.length,
+          reactions: 0,
+        },
+      });
+    }
+  } catch (err) {
+    const errorMsg = String(err && err.message ? err.message : err);
+    console.error('STILL Figma plugin build failed:', err);
+    figma.notify('❌ Generation failed: ' + errorMsg, { error: true });
+    figma.ui.postMessage({
+      type: 'ERROR',
+      error: errorMsg,
+    });
   }
 };

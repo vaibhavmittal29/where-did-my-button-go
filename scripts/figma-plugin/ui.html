@@ -159,6 +159,56 @@
       display: none;
       line-height: 1.4;
     }
+
+    .error-box {
+      background-color: rgba(255, 75, 75, 0.1);
+      border: 1px solid rgba(255, 75, 75, 0.35);
+      color: #FF6B6B;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 12px;
+      display: none;
+      line-height: 1.4;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .stat-pill {
+      background: var(--surface-2);
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    .stat-pill strong {
+      color: var(--accent);
+      font-size: 13px;
+      display: block;
+    }
+
+    .btn-close {
+      background-color: transparent;
+      color: var(--text-dim);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 12px;
+      cursor: pointer;
+      text-align: center;
+      margin-top: 4px;
+      transition: background-color 0.15s ease;
+    }
+
+    .btn-close:hover {
+      background-color: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+    }
   </style>
 </head>
 <body>
@@ -201,35 +251,88 @@
     </div>
   </div>
 
-  <div id="statusBox" class="status-box">
-    ✓ Generation in progress... Check your Figma canvas!
-  </div>
+  <div id="statusBox" class="status-box"></div>
+  <div id="errorBox" class="error-box"></div>
 
   <script>
     const btnAll = document.getElementById('btnBuildAll');
     const btnTokens = document.getElementById('btnBuildTokens');
     const btnScreens = document.getElementById('btnBuildScreens');
     const statusBox = document.getElementById('statusBox');
+    const errorBox = document.getElementById('errorBox');
+
+    function setButtonsDisabled(disabled) {
+      btnAll.disabled = disabled;
+      btnTokens.disabled = disabled;
+      btnScreens.disabled = disabled;
+      btnAll.style.opacity = disabled ? '0.6' : '1';
+      btnTokens.style.opacity = disabled ? '0.6' : '1';
+      btnScreens.style.opacity = disabled ? '0.6' : '1';
+    }
 
     function showStatus(msg) {
+      errorBox.style.display = 'none';
       statusBox.style.display = 'block';
-      statusBox.textContent = msg;
+      statusBox.innerHTML = msg;
+    }
+
+    function showError(err) {
+      statusBox.style.display = 'none';
+      errorBox.style.display = 'block';
+      errorBox.innerHTML = '⚠️ <strong>Build Error:</strong> ' + err + '<br><small style="color: var(--text-dim); margin-top: 4px; display: block;">Check font availability or permissions and try again.</small>';
+      setButtonsDisabled(false);
+    }
+
+    function showComplete(stats) {
+      setButtonsDisabled(false);
+      let html = '✓ <strong>STILL project generation complete!</strong>';
+      if (stats) {
+        html += '<div class="stats-grid">' +
+          '<div class="stat-pill"><strong>' + (stats.tokens || 0) + '</strong> Tokens / Variables</div>' +
+          '<div class="stat-pill"><strong>' + (stats.components || 0) + '</strong> Master Components</div>' +
+          '<div class="stat-pill"><strong>' + (stats.screens || 0) + '</strong> Screens</div>' +
+          '<div class="stat-pill"><strong>' + (stats.reactions || 0) + '</strong> Prototype Reactions</div>' +
+          '</div>';
+      }
+      html += '<button id="btnClosePlugin" class="btn-close" style="width: 100%; margin-top: 8px;">Close Plugin</button>';
+      statusBox.innerHTML = html;
+      statusBox.style.display = 'block';
+
+      const btnClose = document.getElementById('btnClosePlugin');
+      if (btnClose) {
+        btnClose.addEventListener('click', () => {
+          parent.postMessage({ pluginMessage: { type: 'CLOSE' } }, '*');
+        });
+      }
     }
 
     btnAll.addEventListener('click', () => {
+      setButtonsDisabled(true);
       showStatus('⏳ Generating all 5 pages, tokens, components, and prototype...');
       parent.postMessage({ pluginMessage: { type: 'BUILD_ALL' } }, '*');
     });
 
     btnTokens.addEventListener('click', () => {
+      setButtonsDisabled(true);
       showStatus('🎨 Generating STILL-Tokens collection...');
       parent.postMessage({ pluginMessage: { type: 'BUILD_TOKENS' } }, '*');
     });
 
     btnScreens.addEventListener('click', () => {
+      setButtonsDisabled(true);
       showStatus('📱 Generating 5 mobile screens on current page...');
       parent.postMessage({ pluginMessage: { type: 'BUILD_SCREENS' } }, '*');
     });
+
+    window.onmessage = (event) => {
+      const msg = event.data && event.data.pluginMessage;
+      if (!msg) return;
+      if (msg.type === 'BUILD_COMPLETE') {
+        showComplete(msg.stats);
+      } else if (msg.type === 'ERROR') {
+        showError(msg.error);
+      }
+    };
   </script>
 </body>
 </html>
