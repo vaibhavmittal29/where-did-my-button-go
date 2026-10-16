@@ -30,9 +30,10 @@ async function saveScreen(page, filename) {
 async function testInteractive() {
   console.log('Testing Phase 5 Interactive Camera Scenarios...');
   const serverProcess = await ensureServer(5173);
+  let browser;
 
   try {
-    const browser = await chromium.launch({ headless: true });
+    browser = await chromium.launch({ headless: true });
     const context = await browser.newContext({
       viewport: { width: 1200, height: 950 },
     });
@@ -233,9 +234,11 @@ async function testInteractive() {
   }
   console.log('✓ Scenario 5e Passed (1.2): Group readiness is single-sourced in reducer without desync');
 
-  await browser.close();
   console.log('\n🎉 ALL PHASE 5 INTERACTION SCENARIOS PASSED WITH FLYING COLORS!');
 } finally {
+  if (browser) {
+    await browser.close().catch(() => {});
+  }
   if (serverProcess) {
     serverProcess.kill();
   }

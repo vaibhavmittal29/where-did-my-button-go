@@ -55,7 +55,7 @@ export const DemoPanel: React.FC<DemoPanelProps> = ({
           <span>STILL Lab</span>
           <span className={styles.badge}>Live Demo</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div role="group" aria-label="Demo panel quick actions" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           {onToggleMute && (
             <button
               className={styles.actionBtn}
@@ -122,7 +122,7 @@ export const DemoPanel: React.FC<DemoPanelProps> = ({
           <span>Hold to steady (96%), release to move</span>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+        <div role="group" aria-label="Steadiness simulation controls" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
           <button className={styles.actionBtn} onClick={onTriggerShake}>
             <Activity size={14} color="var(--accent)" />
             <span>Simulate Sudden Shake</span>
@@ -150,7 +150,7 @@ export const DemoPanel: React.FC<DemoPanelProps> = ({
       {/* Mode & Environment Scenarios */}
       <div className={styles.section}>
         <span className={styles.sectionTitle}>Context & Edge Cases</span>
-        <div className={styles.buttonGrid}>
+        <div role="group" aria-label="Context and trigger scenario controls" className={styles.buttonGrid}>
           <button
             className={`${styles.actionBtn} ${isLowLight ? styles.actionBtnPrimary : ''}`}
             onClick={onToggleLowLight}

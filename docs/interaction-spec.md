@@ -129,7 +129,7 @@ In this browser prototype, the 7 frames in the Moment Strip are visual stand-ins
 
 ### 8.2 Production Circular Ring Buffer Specification
 In a production native mobile implementation (iOS AVFoundation / Android CameraX):
-1. **Ring Buffer Allocation:** The camera pipeline allocates an in-memory circular ring buffer of YUV/RAW frames running at 30 fps over 3.0 seconds (a FIFO cache of 90 full-resolution frames).
+1. **Ring Buffer Allocation:** The camera pipeline allocates an in-memory circular ring buffer of YUV/RAW frames running at 30 fps over 3.0 seconds (a continuous FIFO cache of exposures).
 2. **Foreground Gating:** The buffer records frames only when the viewfinder view is visible and the app is active in the foreground, immediately freeing resources when backgrounded.
 3. **Capture & Sharpness Ranking:** When the 0.8s stillness condition is met, the circular buffer freezes. A background worker samples candidate frames at 250ms intervals across the preceding 1.5 seconds, computes Laplacian variance / high-frequency gradient metrics to identify the frame with minimal motion blur, and pre-selects it as the Suggested candidate.
 

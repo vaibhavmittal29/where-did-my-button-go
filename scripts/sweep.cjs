@@ -11,6 +11,7 @@ const FORBIDDEN_CLAIMS = [
   'zero tap tremor',
   'sharpest',
   'production-ready',
+  'production-grade',
   'zero-dependency',
   'Saved to gallery',
   'WCAG Accessible',
@@ -25,6 +26,10 @@ const FORBIDDEN_CLAIMS = [
   '43% reduction',
   '215 ms',
   '215ms',
+  'fully verified',
+  'real camera buffer',
+  'sharpest frame algorithm',
+  'highest sharpness index',
 ];
 
 const SCAN_DIRS = ['src', 'docs'];

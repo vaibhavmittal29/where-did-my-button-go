@@ -47,22 +47,27 @@ async function runExport() {
   // P2-01 / P2-02: Ensure local dev server is responding
   const serverProcess = await ensureServer(5173);
 
+  let browser;
+
   try {
+    if (!fs.existsSync(EXPORT_DIR)) {
+      fs.mkdirSync(EXPORT_DIR, { recursive: true });
+    }
+    if (!fs.existsSync(EXPORT_SCREENS_DIR)) {
+      fs.mkdirSync(EXPORT_SCREENS_DIR, { recursive: true });
+    }
+
     // P2-06: Ensure distinct moment burst frames exist
     const allMomentsExist = [0, 1, 2, 3, 4, 5, 6].every(i =>
       fs.existsSync(path.join(PROJECT_DIR, `public/scenes/moment-${i}.jpg`))
     );
     if (!allMomentsExist) {
       console.log('Generating missing moment burst frames via generate-moments.mjs...');
-      const { execSync } = await import('node:child_process');
-      execSync('node scripts/generate-moments.mjs', { stdio: 'inherit' });
+      const { execFileSync } = await import('node:child_process');
+      execFileSync(process.execPath, ['scripts/generate-moments.mjs'], { stdio: 'inherit' });
     }
 
-    if (!fs.existsSync(EXPORT_SCREENS_DIR)) {
-      fs.mkdirSync(EXPORT_SCREENS_DIR, { recursive: true });
-    }
-
-    const browser = await chromium.launch({ headless: true });
+    browser = await chromium.launch({ headless: true });
 
     // -------------------------------------------------------------
     // STEP 1: Export Hi-Fi Screens at 1170x2532 (Retina 3x)
@@ -168,10 +173,12 @@ async function runExport() {
 
     await pdfPage.close();
     await pdfContext.close();
-    await browser.close();
 
     console.log('\n✨ All Phase 8 Export Deliverables generated and verified successfully!\n');
   } finally {
+    if (browser) {
+      await browser.close().catch(() => {});
+    }
     if (serverProcess) {
       serverProcess.kill();
     }

@@ -18,9 +18,10 @@ if (!fs.existsSync(TEST_RESULTS_DIR)) {
 async function testReducedMotion() {
   console.log('Testing Phase 6 Prefers-Reduced-Motion Compliance...');
   const serverProcess = await ensureServer(5173);
+  let browser;
 
   try {
-    const browser = await chromium.launch({ headless: true });
+    browser = await chromium.launch({ headless: true });
     const context = await browser.newContext({
       viewport: { width: 1200, height: 950 },
       reducedMotion: 'reduce', // Emulate prefers-reduced-motion: reduce
@@ -68,9 +69,10 @@ async function testReducedMotion() {
       throw new Error('Capture did not complete under reduced motion mode');
     }
     console.log('✓ Reduced motion test passed (stepped ring + capture -> review)!');
-
-    await browser.close();
   } finally {
+    if (browser) {
+      await browser.close().catch(() => {});
+    }
     if (serverProcess) {
       serverProcess.kill();
     }

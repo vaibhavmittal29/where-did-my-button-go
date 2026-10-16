@@ -574,7 +574,7 @@ export const InteractiveCameraScreen: React.FC = () => {
             {state.status === 'LOCKING' && `Locking capture. ${Math.round(state.progress * 100)} percent.`}
             {state.status === 'CAPTURED' && 'Photo captured. Reviewing best moment in Moment Strip.'}
             {state.status === 'REVIEW' && `Reviewing frame ${previewFrameIndex + 1} of 7. Autosaving.`}
-            {state.status === 'SAVED' && 'Photo saved to gallery. Undo available.'}
+            {state.status === 'SAVED' && 'Photo saved (simulated). Undo available.'}
             {state.status === 'CANCELLED' && 'Too much movement — hold still.'}
           </div>
 
@@ -647,14 +647,18 @@ export const InteractiveCameraScreen: React.FC = () => {
           }} />
 
           {/* Top Controls Bar */}
-          <header style={{
-            position: 'relative',
-            zIndex: 30,
-            padding: 'var(--safe-top) var(--space-4) 0',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-          }}>
+          <header
+            role="group"
+            aria-label="Camera header controls"
+            style={{
+              position: 'relative',
+              zIndex: 30,
+              padding: 'var(--safe-top) var(--space-4) 0',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}
+          >
             <IconButton
               icon={<Zap size={18} />}
               aria-label={`Flash mode: ${flashMode}`}
@@ -997,12 +1001,16 @@ export const InteractiveCameraScreen: React.FC = () => {
               )}
 
               {/* Main Controls Row */}
-              <div style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-              }}>
+              <div
+                role="group"
+                aria-label="Camera primary controls"
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}
+              >
                 {/* Gallery Thumbnail (P1-15: semantic button) */}
                 <button
                   type="button"

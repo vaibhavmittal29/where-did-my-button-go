@@ -11,7 +11,7 @@
 Note: the timings (0.8 s, 4 s, 5 s) are starting values to tune through usability testing.
 
 ### Moment Strip: Simulated Stand-ins vs. Production Circular Buffer
-In this browser prototype, the 7 candidate frames presented in the Moment Strip are visual stand-ins derived via CSS and canvas geometric/color transformations from a single high-resolution portrait photograph. They exist to demonstrate the rewind, card-scrubbing, and pre-selection UI pattern in a lightweight browser environment. In a production native mobile implementation (iOS AVFoundation or Android CameraX), the camera hardware would maintain a continuous circular ring buffer (e.g., 90 frames at 30 fps over 3.0 seconds). Upon stillness-triggered capture, the native pipeline would read directly from this hardware buffer, compute variance/edge gradients across candidate frames to identify peak sharpness, and surface genuine high-resolution photographic exposures.
+In this browser prototype, the 7 candidate frames presented in the Moment Strip are visual stand-ins derived via CSS and canvas geometric/color transformations from a single high-resolution portrait photograph. They exist to demonstrate the rewind, card-scrubbing, and pre-selection UI pattern in a lightweight browser environment. In a production native mobile implementation (iOS AVFoundation or Android CameraX), the camera hardware would maintain a continuous circular ring buffer (e.g., a continuous FIFO buffer at 30 fps over 3.0 seconds). Upon stillness-triggered capture, the native pipeline would read directly from this hardware buffer, compute variance/edge gradients across candidate frames to identify peak sharpness, and surface genuine high-resolution photographic exposures.
 
 ---
 
