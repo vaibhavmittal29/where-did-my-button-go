@@ -205,8 +205,11 @@ export const InteractiveCameraScreen: React.FC = () => {
     unsteadySinceRef.current = null;
 
     const tick = (now: number) => {
-      const dt = now - lastTickTimeRef.current;
+      const rawDt = now - lastTickTimeRef.current;
       lastTickTimeRef.current = now;
+
+      // Phase 2.1: Clamp RAF delta to 100ms to prevent instant lock ring jumps after background tab resume
+      const dt = Math.min(100, Math.max(0, rawDt));
 
       // P0-03: Read steadiness from ref so RAF loop is not torn down on every sensor update
       const currentSteadiness = steadinessRef.current;
@@ -231,6 +234,21 @@ export const InteractiveCameraScreen: React.FC = () => {
     animId = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(animId);
   }, [state.status, triggerHaptic]);
+
+  // Phase 2.1: Reset lock accumulation and cancel when tab is backgrounded
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        if (state.status === 'LOCKING') {
+          dispatch({ type: 'UNSTEADY' });
+        }
+      } else {
+        lastTickTimeRef.current = performance.now();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [state.status]);
 
   // 4. Capture flash and transition from CAPTURED to REVIEW
   useEffect(() => {
@@ -406,7 +424,7 @@ export const InteractiveCameraScreen: React.FC = () => {
     dispatch({ type: 'VOLUME_KEY', isSteady });
     if (isSteady) {
       lastCooldownTimeRef.current = performance.now();
-      triggerHaptic('capture');
+      // Single-source capture feedback: triggered once in CAPTURED status effect
     } else {
       triggerHaptic('error');
     }
@@ -443,7 +461,7 @@ export const InteractiveCameraScreen: React.FC = () => {
     dispatch({ type: 'VOICE_TRIGGER', phrase, isSteady });
     if (isSteady) {
       lastCooldownTimeRef.current = performance.now();
-      triggerHaptic('capture');
+      // Single-source capture feedback: triggered once in CAPTURED status effect
     } else {
       triggerHaptic('error');
     }
@@ -768,8 +786,8 @@ export const InteractiveCameraScreen: React.FC = () => {
                 {/* Hardware Sensors Toggle */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderTop: '1px solid var(--glass-border)' }}>
                   <div>
-                    <div style={{ fontSize: '13px', fontWeight: 500, color: 'var(--text)' }}>Hardware Gyroscope</div>
-                    <div style={{ fontSize: '11px', color: 'var(--text-dim)' }}>{sensorError || 'Use real physical device motion if supported'}</div>
+                    <div style={{ fontSize: '13px', fontWeight: 500, color: 'var(--text)' }}>Device Motion Heuristic</div>
+                    <div style={{ fontSize: '11px', color: 'var(--text-dim)' }}>{sensorError || 'Device motion (acceleration heuristic) if supported'}</div>
                   </div>
                   <button
                     onClick={toggleRealSensor}

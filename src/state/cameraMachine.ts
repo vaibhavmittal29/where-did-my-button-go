@@ -128,10 +128,11 @@ export function cameraReducer(state: CameraState, action: CameraAction): CameraS
 
     case 'STEADY_TICK': {
       if (state.status !== 'LOCKING') return state;
-      // P2-02: Reject negative or non-finite deltas
+      // P2-02 / Phase 2.1: Reject negative or non-finite deltas, clamp massive dt (e.g. background tab resume) to max 100ms
       if (typeof action.dt !== 'number' || !Number.isFinite(action.dt) || action.dt <= 0) {
         return state;
       }
+      const clampedDt = Math.min(100, action.dt);
       // P0-01: In group mode, if readiness is lost mid-lock, cancel lock back to CANCELLED
       if (state.mode === 'group' && state.groupReadyCount < state.groupTotalCount) {
         return {
@@ -141,7 +142,7 @@ export function cameraReducer(state: CameraState, action: CameraAction): CameraS
         };
       }
       const holdTime = getEffectiveHoldTime(state.isLowLight, state.baseHoldTime);
-      const nextProgress = Math.min(1, Math.max(0, state.progress + action.dt / holdTime));
+      const nextProgress = Math.min(1, Math.max(0, state.progress + clampedDt / holdTime));
       if (nextProgress >= 1) {
         // P0-01: Centralized canCapture check before transitioning to CAPTURED
         if (!canCapture(state)) {

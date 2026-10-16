@@ -24,13 +24,17 @@ console.log('--- RUNNING CAMERA STATE MACHINE SANITY TESTS ---\n');
   state = cameraReducer(state, { type: 'STEADY_OK' });
   assert.strictEqual(state.status, 'LOCKING');
 
-  // Step 3: Steady ticks accumulate progress
-  state = cameraReducer(state, { type: 'STEADY_TICK', dt: 400 });
+  // Step 3: Steady ticks accumulate progress (clamped to max 100ms per tick)
+  for (let i = 0; i < 4; i++) {
+    state = cameraReducer(state, { type: 'STEADY_TICK', dt: 100 });
+  }
   assert.strictEqual(state.status, 'LOCKING');
   assert.strictEqual(state.progress, 400 / HOLD_TIME_MS);
 
   // Step 4: Completing hold time triggers CAPTURED
-  state = cameraReducer(state, { type: 'STEADY_TICK', dt: 400 });
+  for (let i = 0; i < 4; i++) {
+    state = cameraReducer(state, { type: 'STEADY_TICK', dt: 100 });
+  }
   assert.strictEqual(state.status, 'CAPTURED');
   assert.strictEqual(state.progress, 1);
 
@@ -58,7 +62,9 @@ console.log('--- RUNNING CAMERA STATE MACHINE SANITY TESTS ---\n');
   let state = initialCameraState;
   state = cameraReducer(state, { type: 'TAP_SUBJECT', x: 40, y: 60 });
   state = cameraReducer(state, { type: 'STEADY_OK' });
-  state = cameraReducer(state, { type: 'STEADY_TICK', dt: 300 });
+  for (let i = 0; i < 3; i++) {
+    state = cameraReducer(state, { type: 'STEADY_TICK', dt: 100 });
+  }
   assert.strictEqual(state.status, 'LOCKING');
 
   // Device movement detected mid-lock
@@ -81,7 +87,9 @@ console.log('--- RUNNING CAMERA STATE MACHINE SANITY TESTS ---\n');
   let state = initialCameraState;
   state = cameraReducer(state, { type: 'TAP_SUBJECT', x: 50, y: 50 });
   state = cameraReducer(state, { type: 'STEADY_OK' });
-  state = cameraReducer(state, { type: 'STEADY_TICK', dt: HOLD_TIME_MS });
+  for (let i = 0; i < 8; i++) {
+    state = cameraReducer(state, { type: 'STEADY_TICK', dt: 100 });
+  }
   assert.strictEqual(state.status, 'CAPTURED');
   state = cameraReducer(state, { type: 'ANIM_DONE' });
   state = cameraReducer(state, { type: 'TIMEOUT_REVIEW' });
@@ -115,12 +123,16 @@ console.log('--- RUNNING CAMERA STATE MACHINE SANITY TESTS ---\n');
   assert.strictEqual(state.statusMessage, 'Low light — hold a bit longer');
 
   // At 800ms in low-light, progress is only 800/1200 = 66.6%
-  state = cameraReducer(state, { type: 'STEADY_TICK', dt: 800 });
+  for (let i = 0; i < 8; i++) {
+    state = cameraReducer(state, { type: 'STEADY_TICK', dt: 100 });
+  }
   assert.strictEqual(state.status, 'LOCKING');
   assert.ok(Math.abs(state.progress - (800 / 1200)) < 0.001);
 
   // Needs remaining 400ms to complete
-  state = cameraReducer(state, { type: 'STEADY_TICK', dt: 400 });
+  for (let i = 0; i < 4; i++) {
+    state = cameraReducer(state, { type: 'STEADY_TICK', dt: 100 });
+  }
   assert.strictEqual(state.status, 'CAPTURED');
   assert.strictEqual(state.progress, 1);
 
@@ -317,7 +329,9 @@ console.log('--- RUNNING CAMERA STATE MACHINE SANITY TESTS ---\n');
   assert.strictEqual(fullReadyState.status, 'LOCKING');
 
   // Advance ticks until capture (baseHoldTime = 800ms)
-  fullReadyState = cameraReducer(fullReadyState, { type: 'STEADY_TICK', dt: 900 });
+  for (let i = 0; i < 8; i++) {
+    fullReadyState = cameraReducer(fullReadyState, { type: 'STEADY_TICK', dt: 100 });
+  }
   assert.strictEqual(fullReadyState.status, 'CAPTURED');
   assert.strictEqual(fullReadyState.progress, 1);
 
@@ -349,11 +363,19 @@ console.log('--- RUNNING CAMERA STATE MACHINE SANITY TESTS ---\n');
   state = cameraReducer(state, { type: 'STEADY_TICK', dt: Infinity });
   assert.strictEqual(state.progress, 0);
 
-  // Valid positive dt advances progress
-  state = cameraReducer(state, { type: 'STEADY_TICK', dt: 400 });
-  assert.strictEqual(state.progress, 0.5);
+  // Valid positive dt advances progress (clamped to max 100ms per tick)
+  state = cameraReducer(state, { type: 'STEADY_TICK', dt: 100 });
+  assert.strictEqual(state.progress, 100 / HOLD_TIME_MS);
 
-  console.log('✔ Test 11 Passed: STEADY_TICK non-positive/non-finite dt rejected.\n');
+  // Massive dt (e.g. 5000ms from background tab resume) clamped to max 100ms (100 / 800 = 0.125)
+  const resetLock = cameraReducer(initialCameraState, { type: 'TAP_SUBJECT', x: 50, y: 50 });
+  const lockFresh = cameraReducer(resetLock, { type: 'STEADY_OK' });
+  assert.strictEqual(lockFresh.progress, 0);
+  const clampedState = cameraReducer(lockFresh, { type: 'STEADY_TICK', dt: 5000 });
+  assert.strictEqual(clampedState.progress, 100 / 800);
+  assert.strictEqual(clampedState.status, 'LOCKING');
+
+  console.log('✔ Test 11 Passed: STEADY_TICK invalid dt rejected and massive dt clamped to 100ms.\n');
 }
 
 // SCENARIO 12: Comprehensive State Verification

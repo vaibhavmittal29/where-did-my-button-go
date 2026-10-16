@@ -2,6 +2,27 @@ import { useState, useCallback } from 'react';
 
 export type HapticType = 'tap' | 'tick' | 'capture' | 'error' | 'save';
 
+// Module-level lazy singleton AudioContext to prevent hitting browser context limits (Phase 2.3)
+let sharedAudioContext: AudioContext | null = null;
+
+function getSharedAudioContext(): AudioContext | null {
+  if (typeof window === 'undefined') return null;
+  if (!sharedAudioContext) {
+    const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    if (AudioCtx) {
+      try {
+        sharedAudioContext = new AudioCtx();
+      } catch {
+        // AudioContext initialization blocked or unavailable
+      }
+    }
+  }
+  if (sharedAudioContext && sharedAudioContext.state === 'suspended') {
+    sharedAudioContext.resume().catch(() => {});
+  }
+  return sharedAudioContext;
+}
+
 export function useHaptics() {
   const [isMuted, setIsMuted] = useState<boolean>(false);
 
@@ -43,14 +64,23 @@ export function useHaptics() {
     // Produces a subtle, authentic camera mechanical/haptic impulse click
     if (typeof window !== 'undefined') {
       try {
-        const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-        if (AudioCtx) {
-          const ctx = new AudioCtx();
+        const ctx = getSharedAudioContext();
+        if (ctx) {
           const osc = ctx.createOscillator();
           const gain = ctx.createGain();
 
           osc.connect(gain);
           gain.connect(ctx.destination);
+
+          // Cleanly disconnect nodes on completion to prevent memory/context leaks
+          osc.onended = () => {
+            try {
+              osc.disconnect();
+              gain.disconnect();
+            } catch {
+              // Ignore disconnect exceptions
+            }
+          };
 
           const now = ctx.currentTime;
 

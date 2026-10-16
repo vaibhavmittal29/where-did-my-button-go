@@ -132,10 +132,10 @@ export const DemoPanel: React.FC<DemoPanelProps> = ({
             <button
               className={`${styles.actionBtn} ${isRealSensorEnabled ? styles.actionBtnPrimary : ''}`}
               onClick={onToggleRealSensor}
-              title="Toggle hardware device motion sensor (accelerometer / gyroscope)"
+              title="Device motion heuristic (uses browser devicemotion acceleration when supported/permitted; coarse heuristic in mobile browsers)"
             >
               <Activity size={14} />
-              <span>Hardware Motion Sensor ({sensorStatusText || (isRealSensorEnabled ? 'Active' : 'Off')})</span>
+              <span>Device motion (acceleration heuristic) ({sensorStatusText || (isRealSensorEnabled ? 'Active' : 'Off')})</span>
             </button>
           )}
 
