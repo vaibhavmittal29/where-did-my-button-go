@@ -82,13 +82,13 @@ export const LockingScreen: React.FC<LockingScreenProps> = ({ pureDevice = false
           alignItems: 'center',
           justifyContent: 'space-between',
         }}>
-          <IconButton icon={<Zap size={18} />} aria-label="Flash mode" />
+          <IconButton icon={<Zap size={18} />} aria-label="Flash mode (prototype)" />
           
           <GlassChip icon={<Sun size={14} />} variant="accent">
             Locking Focus · 1×
           </GlassChip>
 
-          <IconButton icon={<Settings2 size={18} />} aria-label="Settings" />
+          <IconButton icon={<Settings2 size={18} />} aria-label="Settings (prototype)" />
         </header>
 
         {/* Core Hero Interaction: Anchored LockRing + Real-Time Status */}
@@ -258,7 +258,7 @@ export const LockingScreen: React.FC<LockingScreenProps> = ({ pureDevice = false
             <ModeCarousel activeMode="still" />
 
             {/* Lens Switcher */}
-            <IconButton icon={<RotateCcw size={18} />} aria-label="Switch lens" />
+            <IconButton icon={<RotateCcw size={18} />} aria-label="Switch lens (prototype simulation)" />
           </div>
         </footer>
       </div>

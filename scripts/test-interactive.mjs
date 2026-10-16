@@ -49,6 +49,20 @@ async function testInteractive() {
   }
   console.log('✓ Scenario 0 Passed: Interactive screen loaded with Viewfinder & DemoPanel');
 
+  // Verify touch target sizes on DemoPanel buttons (Apple HIG / WCAG >= 44x44px)
+  const demoButtons = page.locator('aside[aria-label="STILL Interaction Demo Panel"] button');
+  const btnCount = await demoButtons.count();
+  for (let i = 0; i < btnCount; i++) {
+    const box = await demoButtons.nth(i).boundingBox();
+    if (box) {
+      if (box.width < 43.5 || box.height < 43.5) {
+        const text = await demoButtons.nth(i).textContent();
+        throw new Error(`DemoPanel button "${text?.trim()}" has size ${box.width}x${box.height}, expected >= 44x44px`);
+      }
+    }
+  }
+  console.log(`✓ Touch Target Size Verification: All ${btnCount} DemoPanel buttons meet >= 44x44px target standard`);
+
   // Take screenshot of idle interactive state
   await saveScreen(page, 'phase5-01-idle.png');
 
@@ -161,6 +175,28 @@ async function testInteractive() {
     throw new Error('Voice trigger did not trigger capture when all 4 ready');
   }
   console.log('✓ Scenario 5b Passed: Voice trigger properly guarded by group readiness, then captures when all 4 ready');
+
+  // Scenario 5c (P0-01): Tap viewfinder in Group Mode with 3/4 ready -> steady hold does NOT capture
+  await page.locator('button:has-text("Reset")').click();
+  await page.waitForTimeout(300);
+  const groupBtn = page.locator('button:has-text("Group Mode")');
+  if (await groupBtn.count() > 0) {
+    await groupBtn.click();
+    await page.waitForTimeout(300);
+  }
+  const all4ReadyBtn = page.locator('button:has-text("All 4 Ready")');
+  if (await all4ReadyBtn.count() > 0) {
+    await all4ReadyBtn.click(); // toggle back to 3 of 4 ready
+    await page.waitForTimeout(300);
+  }
+  // Viewfinder tap
+  await viewfinder.click({ position: { x: 195, y: 350 } });
+  await page.waitForTimeout(1200); // Wait longer than 800ms base hold time
+  const groupHoldBody = await page.textContent('body');
+  if (groupHoldBody.includes('Pick your favourite moment')) {
+    throw new Error('Group Mode with 3/4 ready captured on steady hold! P0-01 violation.');
+  }
+  console.log('✓ Scenario 5c Passed (P0-01): Group Mode with 3 of 4 ready strictly blocks steady hold capture');
 
     await browser.close();
     console.log('\n🎉 ALL PHASE 5 INTERACTION SCENARIOS PASSED WITH FLYING COLORS!');

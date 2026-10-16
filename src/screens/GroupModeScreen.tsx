@@ -98,17 +98,17 @@ export const GroupModeScreen: React.FC<GroupModeScreenProps> = ({ pureDevice = f
           alignItems: 'center',
           justifyContent: 'space-between',
         }}>
-          <IconButton icon={<Zap size={18} />} aria-label="Flash" />
+          <IconButton icon={<Zap size={18} />} aria-label="Flash (prototype)" />
 
           {/* Group Ready Counter Chip */}
           <GlassChip
             icon={<Users size={14} />}
             variant={readyCount >= 4 ? 'success' : 'accent'}
           >
-            {readyCount >= 4 ? 'All 4 Ready · Auto-Capturing' : `${readyCount} of 4 ready`}
+            {readyCount >= 4 ? 'All 4 Ready (simulated) · Hold still to capture' : `${readyCount} of 4 ready (simulated)`}
           </GlassChip>
 
-          <IconButton icon={<Settings2 size={18} />} aria-label="Settings" />
+          <IconButton icon={<Settings2 size={18} />} aria-label="Settings (prototype)" />
         </header>
 
         {/* Face Tracking Bounding Boxes with Status Indicators */}
@@ -185,7 +185,7 @@ export const GroupModeScreen: React.FC<GroupModeScreenProps> = ({ pureDevice = f
             />
 
             {/* Switch Camera */}
-            <IconButton icon={<RotateCcw size={18} />} aria-label="Switch lens" />
+            <IconButton icon={<RotateCcw size={18} />} aria-label="Switch lens (prototype simulation)" />
           </div>
         </footer>
       </div>

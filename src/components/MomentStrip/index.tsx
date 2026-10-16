@@ -44,11 +44,11 @@ export const MomentStrip: React.FC<MomentStripProps> = ({
               className={styles.thumbnailCard}
               data-selected={isSelected}
               onClick={() => onSelectFrame?.(index)}
-              aria-label={`Frame ${index + 1} of 7${isBest ? ' (Best moment)' : ''}${isSelected ? ' (Selected)' : ''}`}
+              aria-label={`Frame ${index + 1} of 7${isBest ? ' (Suggested moment)' : ''}${isSelected ? ' (Selected)' : ''}`}
               aria-pressed={isSelected}
             >
               <img src={src} alt={`Moment ${index + 1}`} className={styles.thumbImg} />
-              {isBest && <span className={styles.bestBadge}>Best</span>}
+              {isBest && <span className={styles.bestBadge}>Suggested</span>}
               {isLockMoment && !isBest && <span className={styles.centerMarker} />}
             </button>
           );
@@ -71,7 +71,7 @@ export const MomentStrip: React.FC<MomentStripProps> = ({
       </div>
 
       <div className={styles.savingText}>
-        <span>{selectedIndex === bestIndex ? 'Saving best moment…' : 'Saving selection…'}</span>
+        <span>{selectedIndex === bestIndex ? 'Saving suggested moment…' : 'Saving selection…'}</span>
         <span className="tabular-nums">{(4 * Math.max(0, 1 - countdownProgress)).toFixed(1)}s</span>
       </div>
     </div>

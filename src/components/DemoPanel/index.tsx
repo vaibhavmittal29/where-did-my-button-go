@@ -12,6 +12,7 @@ export interface DemoPanelProps {
   groupReadyCount: number;
   isMuted?: boolean;
   isRealSensorEnabled?: boolean;
+  sensorStatusText?: string;
   sensorError?: string | null;
   onToggleMute?: () => void;
   onToggleRealSensor?: () => void;
@@ -34,6 +35,7 @@ export const DemoPanel: React.FC<DemoPanelProps> = ({
   groupReadyCount,
   isMuted = false,
   isRealSensorEnabled = false,
+  sensorStatusText,
   sensorError,
   onToggleMute,
   onToggleRealSensor,
@@ -53,15 +55,15 @@ export const DemoPanel: React.FC<DemoPanelProps> = ({
           <span>STILL Lab</span>
           <span className={styles.badge}>Live Demo</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           {onToggleMute && (
             <button
               className={styles.actionBtn}
               onClick={onToggleMute}
               title={isMuted ? 'Unmute Audio & Haptics' : 'Mute Audio & Haptics'}
-              style={{ padding: '4px 8px', fontSize: '11px', color: isMuted ? 'var(--text-muted)' : 'var(--accent)' }}
+              style={{ minHeight: '44px', minWidth: '44px', padding: '8px 12px', fontSize: '11px', color: isMuted ? 'var(--text-muted)' : 'var(--accent)' }}
             >
-              {isMuted ? <VolumeX size={13} /> : <Volume2 size={13} />}
+              {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
               <span>{isMuted ? 'Muted' : 'Sound'}</span>
             </button>
           )}
@@ -69,9 +71,9 @@ export const DemoPanel: React.FC<DemoPanelProps> = ({
             className={styles.actionBtn}
             onClick={onReset}
             title="Reset to idle"
-            style={{ padding: '4px 8px', fontSize: '11px' }}
+            style={{ minHeight: '44px', minWidth: '44px', padding: '8px 12px', fontSize: '11px' }}
           >
-            <RotateCcw size={13} />
+            <RotateCcw size={14} />
             <span>Reset</span>
           </button>
         </div>
@@ -130,10 +132,10 @@ export const DemoPanel: React.FC<DemoPanelProps> = ({
             <button
               className={`${styles.actionBtn} ${isRealSensorEnabled ? styles.actionBtnPrimary : ''}`}
               onClick={onToggleRealSensor}
-              title="Toggle real device accelerometer/gyroscope sensors (requires mobile browser permission)"
+              title="Toggle hardware device motion sensor (accelerometer / gyroscope)"
             >
               <Activity size={14} />
-              <span>{isRealSensorEnabled ? 'Real Sensor (Active)' : 'Enable Real Device Sensor'}</span>
+              <span>Hardware Motion Sensor ({sensorStatusText || (isRealSensorEnabled ? 'Active' : 'Off')})</span>
             </button>
           )}
 

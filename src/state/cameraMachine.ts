@@ -73,6 +73,16 @@ export function getEffectiveHoldTime(isLowLight: boolean, baseHoldTime: number =
   return isLowLight ? baseHoldTime * LOW_LIGHT_MULTIPLIER : baseHoldTime;
 }
 
+export function canCapture(state: CameraState): boolean {
+  if (['CAPTURED', 'REVIEW', 'SAVED'].includes(state.status)) {
+    return false;
+  }
+  if (state.mode === 'group' && state.groupReadyCount < state.groupTotalCount) {
+    return false;
+  }
+  return true;
+}
+
 export function cameraReducer(state: CameraState, action: CameraAction): CameraState {
   switch (action.type) {
     case 'TAP_SUBJECT': {
@@ -94,6 +104,13 @@ export function cameraReducer(state: CameraState, action: CameraAction): CameraS
     case 'STEADY_OK': {
       // Can only start locking from FOCUSED state
       if (state.status !== 'FOCUSED') return state;
+      // P0-01: In group mode, cannot start locking unless all faces are ready
+      if (state.mode === 'group' && state.groupReadyCount < state.groupTotalCount) {
+        return {
+          ...state,
+          statusMessage: `Group not ready (${state.groupReadyCount}/${state.groupTotalCount} faces ready) — hold steady`,
+        };
+      }
       return {
         ...state,
         status: 'LOCKING',
@@ -103,9 +120,25 @@ export function cameraReducer(state: CameraState, action: CameraAction): CameraS
 
     case 'STEADY_TICK': {
       if (state.status !== 'LOCKING') return state;
+      // P2-02: Reject negative or non-finite deltas
+      if (typeof action.dt !== 'number' || !Number.isFinite(action.dt) || action.dt <= 0) {
+        return state;
+      }
+      // P0-01: In group mode, if readiness is lost mid-lock, cancel lock back to CANCELLED
+      if (state.mode === 'group' && state.groupReadyCount < state.groupTotalCount) {
+        return {
+          ...state,
+          status: 'CANCELLED',
+          statusMessage: `Group not ready (${state.groupReadyCount}/${state.groupTotalCount} faces ready) — hold steady`,
+        };
+      }
       const holdTime = getEffectiveHoldTime(state.isLowLight, state.baseHoldTime);
       const nextProgress = Math.min(1, Math.max(0, state.progress + action.dt / holdTime));
       if (nextProgress >= 1) {
+        // P0-01: Centralized canCapture check before transitioning to CAPTURED
+        if (!canCapture(state)) {
+          return state;
+        }
         return {
           ...state,
           status: 'CAPTURED',
@@ -314,9 +347,14 @@ export function cameraReducer(state: CameraState, action: CameraAction): CameraS
 
     case 'SET_GROUP_READY': {
       const clamped = Math.max(0, Math.min(state.groupTotalCount, action.count));
+      const lostReadiness = state.mode === 'group' && state.status === 'LOCKING' && clamped < state.groupTotalCount;
       return {
         ...state,
         groupReadyCount: clamped,
+        status: lostReadiness ? 'CANCELLED' : state.status,
+        statusMessage: lostReadiness
+          ? `Group not ready (${clamped}/${state.groupTotalCount} faces ready) — hold steady`
+          : state.statusMessage,
       };
     }
 
@@ -326,8 +364,8 @@ export function cameraReducer(state: CameraState, action: CameraAction): CameraS
         mode: state.mode,
         isLowLight: state.isLowLight,
         baseHoldTime: state.baseHoldTime,
-        groupReadyCount: state.groupReadyCount,
-        groupTotalCount: state.groupTotalCount,
+        groupReadyCount: initialCameraState.groupReadyCount,
+        groupTotalCount: initialCameraState.groupTotalCount,
       };
     }
 

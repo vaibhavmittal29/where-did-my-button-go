@@ -268,4 +268,106 @@ console.log('--- RUNNING CAMERA STATE MACHINE SANITY TESTS ---\n');
   console.log('✔ Test 9 Passed: Tap subject exclusively focuses and never triggers capture.\n');
 }
 
-console.log('ALL 9 STATE MACHINE TESTS PASSED SUCCESSFULLY! 🎉');
+// SCENARIO 10: Group Mode Steady Hold Guard (P0-01)
+{
+  console.log('Test 10: Group Mode Steady Hold & Dynamic Lock Guard');
+  let state: typeof initialCameraState = {
+    ...initialCameraState,
+    mode: 'group',
+    groupReadyCount: 3,
+    groupTotalCount: 4,
+  };
+
+  state = cameraReducer(state, { type: 'TAP_SUBJECT', x: 50, y: 50 });
+  assert.strictEqual(state.status, 'FOCUSED');
+
+  // STEADY_OK while group is at 3/4 must be rejected
+  state = cameraReducer(state, { type: 'STEADY_OK' });
+  assert.strictEqual(state.status, 'FOCUSED');
+  assert.ok(state.statusMessage?.includes('Group not ready'));
+
+  // If somehow in LOCKING, STEADY_TICK while group is at 3/4 transitions to CANCELLED
+  const lockingState: typeof initialCameraState = {
+    ...state,
+    status: 'LOCKING',
+    progress: 0.5,
+  };
+  const cancelledOnTick = cameraReducer(lockingState, { type: 'STEADY_TICK', dt: 100 });
+  assert.strictEqual(cancelledOnTick.status, 'CANCELLED');
+
+  // Losing group readiness mid-lock transitions to CANCELLED
+  const lockingReady: typeof initialCameraState = {
+    ...state,
+    status: 'LOCKING',
+    groupReadyCount: 4,
+    progress: 0.5,
+  };
+  const cancelledOnUnready = cameraReducer(lockingReady, { type: 'SET_GROUP_READY', count: 3 });
+  assert.strictEqual(cancelledOnUnready.status, 'CANCELLED');
+
+  // With all 4 ready, STEADY_OK enters LOCKING and STEADY_TICK completes to CAPTURED
+  let fullReadyState: typeof initialCameraState = {
+    ...initialCameraState,
+    mode: 'group',
+    groupReadyCount: 4,
+    groupTotalCount: 4,
+  };
+  fullReadyState = cameraReducer(fullReadyState, { type: 'TAP_SUBJECT', x: 50, y: 50 });
+  fullReadyState = cameraReducer(fullReadyState, { type: 'STEADY_OK' });
+  assert.strictEqual(fullReadyState.status, 'LOCKING');
+
+  // Advance ticks until capture (baseHoldTime = 800ms)
+  fullReadyState = cameraReducer(fullReadyState, { type: 'STEADY_TICK', dt: 900 });
+  assert.strictEqual(fullReadyState.status, 'CAPTURED');
+  assert.strictEqual(fullReadyState.progress, 1);
+
+  console.log('✔ Test 10 Passed: Group mode steady hold and lock guards verified.\n');
+}
+
+// SCENARIO 11: Delta Time Validation in STEADY_TICK (P2-02)
+{
+  console.log('Test 11: STEADY_TICK Delta Time Validation');
+  let state = initialCameraState;
+  state = cameraReducer(state, { type: 'TAP_SUBJECT', x: 50, y: 50 });
+  state = cameraReducer(state, { type: 'STEADY_OK' });
+  assert.strictEqual(state.status, 'LOCKING');
+  assert.strictEqual(state.progress, 0);
+
+  // Negative dt must be ignored
+  state = cameraReducer(state, { type: 'STEADY_TICK', dt: -100 });
+  assert.strictEqual(state.progress, 0);
+
+  // Zero dt must be ignored
+  state = cameraReducer(state, { type: 'STEADY_TICK', dt: 0 });
+  assert.strictEqual(state.progress, 0);
+
+  // NaN dt must be ignored
+  state = cameraReducer(state, { type: 'STEADY_TICK', dt: NaN });
+  assert.strictEqual(state.progress, 0);
+
+  // Infinity dt must be ignored
+  state = cameraReducer(state, { type: 'STEADY_TICK', dt: Infinity });
+  assert.strictEqual(state.progress, 0);
+
+  // Valid positive dt advances progress
+  state = cameraReducer(state, { type: 'STEADY_TICK', dt: 400 });
+  assert.strictEqual(state.progress, 0.5);
+
+  console.log('✔ Test 11 Passed: STEADY_TICK non-positive/non-finite dt rejected.\n');
+}
+
+// SCENARIO 12: Comprehensive State Verification
+{
+  console.log('Test 12: Comprehensive State Machine Invariants');
+  let state = initialCameraState;
+  assert.strictEqual(state.status, 'IDLE');
+  assert.strictEqual(state.progress, 0);
+
+  // Unhandled action returns identical state reference
+  const unchanged = cameraReducer(state, { type: 'UNKNOWN_ACTION' as any });
+  assert.strictEqual(unchanged, state);
+
+  console.log('✔ Test 12 Passed: Invariants and reference stability verified.\n');
+}
+
+console.log('ALL 12 STATE MACHINE TESTS PASSED SUCCESSFULLY! 🎉');

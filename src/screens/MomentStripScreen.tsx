@@ -19,7 +19,7 @@ export const MomentStripScreen: React.FC<MomentStripScreenProps> = ({ pureDevice
   const isAnnotated = urlParams.get('annotate') === '1';
 
   const [selectedIndex, setSelectedIndex] = useState(initialIndex);
-  const [toastMessage, setToastMessage] = useState<string | null>(showSavedToast ? 'Saved to gallery' : null);
+  const [toastMessage, setToastMessage] = useState<string | null>(showSavedToast ? 'Saved (simulated)' : null);
 
   return (
     <PhoneFrame pureDevice={pureDevice}>
@@ -82,7 +82,7 @@ export const MomentStripScreen: React.FC<MomentStripScreenProps> = ({ pureDevice
 
             <div style={{ position: 'relative' }}>
               <GlassChip icon={<Sparkles size={14} />} variant="accent">
-                {selectedIndex === 3 ? 'Best Moment (Sharpest)' : `Frame ${selectedIndex + 1} of 7`}
+                {selectedIndex === 3 ? 'Suggested (illustrative)' : `Frame ${selectedIndex + 1} of 7`}
               </GlassChip>
 
               {isAnnotated && (
@@ -193,7 +193,7 @@ export const MomentStripScreen: React.FC<MomentStripScreenProps> = ({ pureDevice
               }}
             >
               <Check size={16} strokeWidth={2.5} />
-              <span>Save Selection</span>
+              <span>Save Selection (prototype)</span>
             </button>
           </div>
         </div>

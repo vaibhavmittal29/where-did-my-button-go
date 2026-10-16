@@ -13,7 +13,16 @@ import {
   initialCameraState,
   getEffectiveHoldTime,
 } from '../state/cameraMachine';
-import { UNSTEADY_GRACE_MS, TIMEOUT_FOCUS_MS, COOLDOWN_MS } from '../state/constants';
+import {
+  UNSTEADY_GRACE_MS,
+  TIMEOUT_FOCUS_MS,
+  COOLDOWN_MS,
+  STEADY_THRESHOLD,
+  GROUP_STEADY_HOLD_MS,
+  AUTOSAVE_MS,
+  UNDO_WINDOW_MS,
+  VOICE_SUPPORTED_PHRASES,
+} from '../state/constants';
 import { useSteadiness } from '../hooks/useSteadiness';
 import { useHaptics } from '../hooks/useHaptics';
 import { getAssetPath, getScreenUrl } from '../utils/assetPath';
@@ -38,6 +47,7 @@ export const InteractiveCameraScreen: React.FC = () => {
     isHoldingSpace,
     isRealSensorEnabled,
     toggleRealSensor,
+    sensorStatusText,
     sensorError,
   } = useSteadiness();
   const { triggerHaptic, isMuted, toggleMute } = useHaptics();
@@ -55,18 +65,46 @@ export const InteractiveCameraScreen: React.FC = () => {
   // Group mode readiness count (3 of 4 or 4 of 4)
   const [groupReadyCount, setGroupReadyCount] = useState<number>(3);
 
-  // Dwell timer: if user holds phone steady in IDLE for 1.5s, prompt "Tap what matters"
-  const [dwellHintActive, setDwellHintActive] = useState<boolean>(false);
+  // P1-01: Track continuous steadiness duration
+  const steadySinceRef = useRef<number | null>(null);
   useEffect(() => {
-    if (state.status === 'IDLE' && steadiness >= 0.7) {
-      const timer = window.setTimeout(() => {
-        setDwellHintActive(true);
-      }, 1500);
-      return () => clearTimeout(timer);
+    if (steadiness >= STEADY_THRESHOLD) {
+      if (steadySinceRef.current === null) {
+        steadySinceRef.current = performance.now();
+      }
     } else {
+      steadySinceRef.current = null;
+    }
+  }, [steadiness]);
+
+  // Dwell timer: if user holds phone steady in IDLE for 1.5s, prompt "Tap what matters"
+  // P2-01: Stable boolean check so fluctuating continuous sensor updates do not restart the countdown
+  const isSteadyForDwell = state.status === 'IDLE' && steadiness >= STEADY_THRESHOLD;
+  const dwellTimerRef = useRef<number | null>(null);
+  const [dwellHintActive, setDwellHintActive] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (isSteadyForDwell) {
+      if (!dwellTimerRef.current && !dwellHintActive) {
+        dwellTimerRef.current = window.setTimeout(() => {
+          setDwellHintActive(true);
+          dwellTimerRef.current = null;
+        }, 1500);
+      }
+    } else {
+      if (dwellTimerRef.current) {
+        clearTimeout(dwellTimerRef.current);
+        dwellTimerRef.current = null;
+      }
       setDwellHintActive(false);
     }
-  }, [state.status, steadiness]);
+    return () => {
+      if (dwellTimerRef.current) {
+        clearTimeout(dwellTimerRef.current);
+        dwellTimerRef.current = null;
+      }
+    };
+  }, [isSteadyForDwell, dwellHintActive]);
 
   // Track 33% and 66% ring progress ticks (PLAN.md Section 6.4)
   const lastProgressRef = useRef<number>(0);
@@ -173,7 +211,7 @@ export const InteractiveCameraScreen: React.FC = () => {
 
       // P0-03: Read steadiness from ref so RAF loop is not torn down on every sensor update
       const currentSteadiness = steadinessRef.current;
-      if (currentSteadiness >= 0.7) {
+      if (currentSteadiness >= STEADY_THRESHOLD) {
         unsteadySinceRef.current = null;
         dispatch({ type: 'STEADY_TICK', dt });
       } else {
@@ -198,6 +236,7 @@ export const InteractiveCameraScreen: React.FC = () => {
   // 4. Capture flash and transition from CAPTURED to REVIEW
   useEffect(() => {
     if (state.status === 'CAPTURED') {
+      lastCooldownTimeRef.current = performance.now();
       triggerHaptic('capture');
       setFlashActive(true);
 
@@ -229,7 +268,7 @@ export const InteractiveCameraScreen: React.FC = () => {
     }
   }, [state.status]);
 
-  // 5. REVIEW Autosave 4-second Countdown (Max 1 reset on frame scrub)
+  // 5. REVIEW Autosave Countdown (P2-02: AUTOSAVE_MS, Max 1 reset on frame scrub)
   useEffect(() => {
     if (state.status !== 'REVIEW') {
       setAutosaveProgress(0);
@@ -241,7 +280,7 @@ export const InteractiveCameraScreen: React.FC = () => {
     previewFrameIndexRef.current = 3;
     setPreviewFrameIndex(3);
     autosaveStartRef.current = performance.now();
-    const duration = 4000;
+    const duration = AUTOSAVE_MS;
 
     const updateAutosave = (now: number) => {
       const elapsed = now - (autosaveStartRef.current || now);
@@ -285,7 +324,7 @@ export const InteractiveCameraScreen: React.FC = () => {
       undoTimeoutRef.current = window.setTimeout(() => {
         setToastMessage(null);
         dispatch({ type: 'RESET' });
-      }, 5000);
+      }, UNDO_WINDOW_MS);
 
       return () => {
         if (undoTimeoutRef.current) clearTimeout(undoTimeoutRef.current);
@@ -303,7 +342,7 @@ export const InteractiveCameraScreen: React.FC = () => {
       return;
     }
 
-    const isSteady = steadiness >= 0.7;
+    const isSteady = steadiness >= STEADY_THRESHOLD;
     const isGroupReady = groupReadyCount >= 4;
 
     if (isGroupReady && isSteady) {
@@ -311,7 +350,7 @@ export const InteractiveCameraScreen: React.FC = () => {
         groupHoldTimerRef.current = window.setTimeout(() => {
           dispatch({ type: 'PROGRESS_COMPLETE' });
           groupHoldTimerRef.current = null;
-        }, 600);
+        }, GROUP_STEADY_HOLD_MS);
       }
     } else {
       if (groupHoldTimerRef.current) {
@@ -319,7 +358,7 @@ export const InteractiveCameraScreen: React.FC = () => {
         groupHoldTimerRef.current = null;
       }
     }
-  }, [state.mode, state.status, groupReadyCount, steadiness >= 0.7]);
+  }, [state.mode, state.status, groupReadyCount, steadiness >= STEADY_THRESHOLD]);
 
   // Clean up group timer on unmount
   useEffect(() => {
@@ -331,8 +370,12 @@ export const InteractiveCameraScreen: React.FC = () => {
     };
   }, []);
 
-  // Guarded triggers for Volume Key & Voice (P1-04: haptic fired only on accepted transitions)
+  // Guarded triggers for Volume Key & Voice (P1-01 & P1-04: requires stability interval, cooldown, no capture haptic on reject)
   const handleVolumeKeyTrigger = useCallback(() => {
+    if (performance.now() - lastCooldownTimeRef.current < COOLDOWN_MS) {
+      triggerHaptic('error');
+      return;
+    }
     if (!['IDLE', 'FOCUSED', 'LOCKING'].includes(state.status)) {
       triggerHaptic('error');
       return;
@@ -342,7 +385,12 @@ export const InteractiveCameraScreen: React.FC = () => {
       triggerHaptic('error');
       return;
     }
-    const isSteady = steadinessRef.current >= 0.7;
+    // Require phone to have been held steady continuously for at least 800ms
+    const isSteady =
+      steadinessRef.current >= STEADY_THRESHOLD &&
+      steadySinceRef.current !== null &&
+      performance.now() - steadySinceRef.current >= 800;
+
     dispatch({ type: 'VOLUME_KEY', isSteady });
     if (isSteady) {
       lastCooldownTimeRef.current = performance.now();
@@ -353,6 +401,10 @@ export const InteractiveCameraScreen: React.FC = () => {
   }, [state.status, state.mode, groupReadyCount, triggerHaptic]);
 
   const handleVoiceTrigger = useCallback((phrase: string) => {
+    if (performance.now() - lastCooldownTimeRef.current < COOLDOWN_MS) {
+      triggerHaptic('error');
+      return;
+    }
     if (!['IDLE', 'FOCUSED', 'LOCKING'].includes(state.status)) {
       triggerHaptic('error');
       return;
@@ -362,7 +414,20 @@ export const InteractiveCameraScreen: React.FC = () => {
       triggerHaptic('error');
       return;
     }
-    const isSteady = steadinessRef.current >= 0.7;
+    const phraseLower = (phrase || '').trim().toLowerCase();
+    const isSupported = (VOICE_SUPPORTED_PHRASES as readonly string[]).includes(phraseLower);
+    if (!isSupported) {
+      dispatch({ type: 'VOICE_TRIGGER', phrase, isSteady: true });
+      triggerHaptic('error');
+      return;
+    }
+
+    // Require phone to have been held steady continuously for at least 800ms
+    const isSteady =
+      steadinessRef.current >= STEADY_THRESHOLD &&
+      steadySinceRef.current !== null &&
+      performance.now() - steadySinceRef.current >= 800;
+
     dispatch({ type: 'VOICE_TRIGGER', phrase, isSteady });
     if (isSteady) {
       lastCooldownTimeRef.current = performance.now();
@@ -409,6 +474,8 @@ export const InteractiveCameraScreen: React.FC = () => {
     if (undoTimeoutRef.current) clearTimeout(undoTimeoutRef.current);
     if (undoSecondaryTimerRef.current) clearTimeout(undoSecondaryTimerRef.current);
     setToastMessage(null);
+    setGroupReadyCount(3);
+    dispatch({ type: 'SET_GROUP_READY', count: 3 });
     dispatch({ type: 'RESET' });
   }, [triggerHaptic]);
 
@@ -570,7 +637,7 @@ export const InteractiveCameraScreen: React.FC = () => {
                 icon={<Users size={14} />}
                 variant={groupReadyCount >= 4 ? 'success' : 'accent'}
               >
-                {groupReadyCount >= 4 ? 'All 4 Ready · Auto-Capturing' : `${groupReadyCount} of 4 ready`}
+                {groupReadyCount >= 4 ? 'All 4 Ready (simulated) · Hold still to capture' : `${groupReadyCount} of 4 ready (simulated)`}
               </GlassChip>
             ) : state.isLowLight ? (
               <GlassChip icon={<Moon size={14} />} variant="accent">
@@ -578,7 +645,7 @@ export const InteractiveCameraScreen: React.FC = () => {
               </GlassChip>
             ) : (
               <GlassChip icon={<Sparkles size={14} />} variant="default">
-                Best Moment Active
+                Rewind Buffer Active (simulated)
               </GlassChip>
             )}
 
@@ -942,8 +1009,12 @@ export const InteractiveCameraScreen: React.FC = () => {
                 {/* Flip Camera */}
                 <IconButton
                   icon={<RotateCcw size={18} />}
-                  aria-label="Switch lens"
-                  onClick={() => triggerHaptic('tap')}
+                  aria-label="Switch lens (prototype simulation)"
+                  onClick={() => {
+                    triggerHaptic('tap');
+                    setToastMessage('Switch lens (prototype simulation)');
+                    setTimeout(() => setToastMessage(null), 1800);
+                  }}
                 />
               </div>
             </footer>
@@ -961,6 +1032,7 @@ export const InteractiveCameraScreen: React.FC = () => {
         groupReadyCount={groupReadyCount}
         isMuted={isMuted}
         isRealSensorEnabled={isRealSensorEnabled}
+        sensorStatusText={sensorStatusText}
         sensorError={sensorError}
         onToggleMute={toggleMute}
         onToggleRealSensor={toggleRealSensor}

@@ -4,15 +4,19 @@ export interface UseSteadinessOptions {
   initialValue?: number;
 }
 
+export type SensorStatus = 'off' | 'waiting' | 'active' | 'no-data' | 'error';
+
 export function useSteadiness(options: UseSteadinessOptions = {}) {
   const [steadiness, setSteadinessState] = useState<number>(options.initialValue ?? 0.88);
   const [isHoldingSpace, setIsHoldingSpace] = useState<boolean>(false);
   const [isRealSensorEnabled, setIsRealSensorEnabled] = useState<boolean>(false);
   const [sensorActive, setSensorActive] = useState<boolean>(false);
+  const [sensorStatus, setSensorStatus] = useState<SensorStatus>('off');
   const [sensorError, setSensorError] = useState<string | null>(null);
 
   const baseValueRef = useRef<number>(options.initialValue ?? 0.88);
   const shakeTimeoutRef = useRef<number | null>(null);
+  const noDataTimeoutRef = useRef<number | null>(null);
 
   // Manual setter (e.g. from DemoPanel slider)
   const setSteadiness = useCallback((val: number) => {
@@ -60,15 +64,18 @@ export function useSteadiness(options: UseSteadinessOptions = {}) {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
       if (shakeTimeoutRef.current) clearTimeout(shakeTimeoutRef.current);
+      if (noDataTimeoutRef.current) clearTimeout(noDataTimeoutRef.current);
     };
   }, []);
 
-  // 2. Explicit User Toggle for Real Hardware Motion Sensing
+  // 2. Explicit User Toggle for Real Hardware Motion Sensing (P1-06)
   const toggleRealSensor = useCallback(async () => {
     if (isRealSensorEnabled) {
       setIsRealSensorEnabled(false);
       setSensorActive(false);
+      setSensorStatus('off');
       setSensorError(null);
+      if (noDataTimeoutRef.current) clearTimeout(noDataTimeoutRef.current);
       setSteadinessState(baseValueRef.current);
       return;
     }
@@ -78,6 +85,7 @@ export function useSteadiness(options: UseSteadinessOptions = {}) {
     // Feature detection
     if (!('DeviceMotionEvent' in window)) {
       setSensorError('DeviceMotionEvent is not supported on this browser or hardware.');
+      setSensorStatus('error');
       return;
     }
 
@@ -88,16 +96,25 @@ export function useSteadiness(options: UseSteadinessOptions = {}) {
         const response = await DME.requestPermission();
         if (response !== 'granted') {
           setSensorError('Motion sensor permission was denied by user.');
+          setSensorStatus('error');
           return;
         }
       } catch (err) {
         setSensorError(`Motion sensor permission request failed: ${err instanceof Error ? err.message : String(err)}`);
+        setSensorStatus('error');
         return;
       }
     }
 
     setSensorError(null);
     setIsRealSensorEnabled(true);
+    setSensorStatus('waiting');
+
+    // If no events arrive within 2500ms, mark as no-data fallback
+    if (noDataTimeoutRef.current) clearTimeout(noDataTimeoutRef.current);
+    noDataTimeoutRef.current = window.setTimeout(() => {
+      setSensorStatus((curr) => (curr === 'waiting' ? 'no-data' : curr));
+    }, 2500);
   }, [isRealSensorEnabled]);
 
   // 3. Real Motion Listener (P1-06: with accelerationIncludingGravity delta fallback)
@@ -119,6 +136,7 @@ export function useSteadiness(options: UseSteadinessOptions = {}) {
 
       if (acc && acc.x !== null && acc.y !== null && acc.z !== null) {
         setSensorActive(true);
+        setSensorStatus('active');
         magnitude = Math.sqrt(
           (acc.x || 0) ** 2 +
           (acc.y || 0) ** 2 +
@@ -130,6 +148,7 @@ export function useSteadiness(options: UseSteadinessOptions = {}) {
         const accG = event.accelerationIncludingGravity;
         if (accG.x !== null && accG.y !== null && accG.z !== null) {
           setSensorActive(true);
+          setSensorStatus('active');
           if (lastAccG) {
             const dx = (accG.x || 0) - lastAccG.x;
             const dy = (accG.y || 0) - lastAccG.y;
@@ -156,8 +175,18 @@ export function useSteadiness(options: UseSteadinessOptions = {}) {
     return () => {
       window.removeEventListener('devicemotion', handleMotion);
       setSensorActive(false);
+      setSensorStatus('off');
+      if (noDataTimeoutRef.current) clearTimeout(noDataTimeoutRef.current);
     };
   }, [isRealSensorEnabled]);
+
+  const sensorStatusText = (() => {
+    if (sensorError) return sensorError;
+    if (sensorStatus === 'active') return 'Receiving motion sensor readings (accelerometer heuristic)';
+    if (sensorStatus === 'waiting') return 'Motion sensor requested — waiting for readings...';
+    if (sensorStatus === 'no-data') return 'No motion events received (using simulation fallback)';
+    return 'Simulation active (desktop slider & Spacebar hold)';
+  })();
 
   return {
     steadiness,
@@ -165,6 +194,8 @@ export function useSteadiness(options: UseSteadinessOptions = {}) {
     triggerShake,
     isHoldingSpace,
     sensorActive,
+    sensorStatus,
+    sensorStatusText,
     isRealSensorEnabled,
     toggleRealSensor,
     sensorError,
