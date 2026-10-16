@@ -127,19 +127,33 @@ Test 3: Undo Reversal Flow
 Test 4: Low-Light Multiplier
 ✔ Test 4 Passed: Low light accurately extends hold time by 1.5x.
 
-ALL 4 STATE MACHINE SANITY TESTS PASSED SUCCESSFULLY! 🎉
+Test 5: Voice Trigger Validation
+✔ Test 5 Passed: Voice trigger enforces supported phrase and stillness.
+
+Test 6: Volume Key Accessibility Fallback
+✔ Test 6 Passed: Volume key accessibility fallback verified with guards.
+
+Test 7: Group Mode Readiness Guards
+✔ Test 7 Passed: Group mode requires all faces ready before capture.
+
+Test 8: Tunable Hold Time Setting
+✔ Test 8 Passed: Tunable hold time clamps and persists correctly.
+
+Test 9: Tap Isolation
+✔ Test 9 Passed: Tap subject exclusively focuses and never triggers capture.
+
+ALL 9 STATE MACHINE TESTS PASSED SUCCESSFULLY! 🎉
 Testing Phase 5 Interactive Camera Scenarios...
 ✓ Scenario 0 Passed: Interactive screen loaded with Viewfinder & DemoPanel
 State after tap: State:LOCKING
 ✓ Scenario 1 Passed: Tap -> Steady Hold -> Auto-Capture -> Moment Strip Review
 ✓ Scenario 2 Passed: Moment Strip allows frame swapping
-Waiting for autosave countdown (approx 3.5s)...
+Waiting for autosave countdown (approx 4s)...
 ✓ Scenario 3a Passed: Autosave completed and showed Saved · Undo toast
 ✓ Scenario 3b Passed: Undo successfully discarded photo
-Shake state feedback: State updated
-✓ Scenario 4 Passed: Sudden movement cancels lock and drains ring
+✓ Scenario 4 Passed: Sudden movement cancels lock and drains ring with "Too much movement" feedback
 ✓ Scenario 5a Passed: Group Mode active with 3 of 4 ready and Tara blinking
-✓ Scenario 5b Passed: Voice trigger ("Cheese") immediately captures
+✓ Scenario 5b Passed: Voice trigger properly guarded by group readiness, then captures when all 4 ready
 
 🎉 ALL PHASE 5 INTERACTION SCENARIOS PASSED WITH FLYING COLORS!
 Testing Phase 6 Prefers-Reduced-Motion Compliance...

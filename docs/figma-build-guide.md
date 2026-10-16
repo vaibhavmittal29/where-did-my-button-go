@@ -40,7 +40,7 @@ Create a Variable Collection in Figma named **`STILL-Tokens`** and add the follo
 | `color/surface-2` | `#1E1E2C` | 100% | Secondary hover states & toast background |
 | `color/text-primary` | `#F5F5F7` | 100% | Main headlines, body copy, active icons |
 | `color/text-dim` | `#A3A3B2` | 100% | Secondary labels, captions, inactive states |
-| `color/text-muted` | `#6E6E80` | 100% | Footers, micro-copy, timestamps |
+| `color/text-muted` | `#A3A3B2` | 100% | Accessible footers, micro-copy, timestamps (7.89:1 AAA) |
 | `color/accent-amber` | `#FFB020` | 100% | **Signal Amber**: ring fill, Best badge, active mode |
 | `color/accent-soft` | `#FFB020` | 14% | Background tint for accent chips & callouts |
 | `color/accent-glow` | `#FFB020` | 30% | Drop-shadow glow for hero ring & active frame |
