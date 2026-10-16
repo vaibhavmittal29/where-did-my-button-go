@@ -5,7 +5,7 @@ A mobile camera prototype that replaces the physical shutter button with continu
 [![Vite](https://img.shields.io/badge/Vite-6.4-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![WCAG](https://img.shields.io/badge/WCAG-2.2_AA%2FAAA-3DDC97)](docs/QA-report.md)
+[![Contrast](https://img.shields.io/badge/Contrast_Ratio-18:1_(Exceeds_AAA)-3DDC97)](docs/QA-report.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-FFB020.svg)](LICENSE)
 
 > **VinnovateIT UI/UX Round 1 Challenge Submission**  
@@ -28,7 +28,7 @@ Instead of tapping to take a photo, STILL introduces a calm, 3-step capture gest
 
 1. **Tap subject to anchor focus:** Tap anywhere across the edge-to-edge viewfinder. An amber focus pin anchors on the subject.
 2. **Hold steady for 0.8 seconds:** A 104px physical ring fills linearly as the phone steadies. Capture occurs automatically after the tap's jolt has settled.
-3. **Rewind to choose afterwards:** A simulated 3-second buffer presents a 7-frame **Moment Strip**. The sharpest frame is preselected, auto-saves after 4 seconds, and includes a 5-second reversible Undo.
+3. **Rewind to choose afterwards:** A simulated 3-second buffer presents a 7-frame **Moment Strip**. A suggested frame (selected via prototype variance heuristic) is preselected, auto-saves after 4 seconds, and includes a 5-second reversible Undo.
 
 ![STILL Hero](export/hero-composite.png)
 
@@ -43,7 +43,7 @@ All screens are designed for mobile viewports (390 × 844 px) and exported at **
 | **01** | **Progressive Onboarding** | 3-step progressive coach card introducing the zero-button gesture. | [screen-01-onboarding.png](export/screens/screen-01-onboarding.png) | [`/?screen=onboarding`](http://localhost:5173/?screen=onboarding) |
 | **02** | **Viewfinder (Idle)** | Calm, uncluttered optical canvas with ghost ring and dwell prompt. | [screen-02-idle.png](export/screens/screen-02-idle.png) | [`/?screen=idle`](http://localhost:5173/?screen=idle) |
 | **03** | **Locking (Mid-Action)** | **Hero Screen:** 104px LockRing at 60%, 0.3s chip & steadiness meter. | [screen-03-locking.png](export/screens/screen-03-locking.png) · [Annotated](export/screens/screen-03-locking-annotated.png) | [`/?screen=locking&progress=0.6`](http://localhost:5173/?screen=locking&progress=0.6) |
-| **04** | **Moment Strip** | 7-frame buffer review, preselected Best frame, 4s autosave & 5s undo. | [screen-04-moments.png](export/screens/screen-04-moments.png) | [`/?screen=moments&selected=3`](http://localhost:5173/?screen=moments&selected=3) |
+| **04** | **Moment Strip** | 7-frame buffer review, preselected Suggested frame, 4s autosave & 5s undo. | [screen-04-moments.png](export/screens/screen-04-moments.png) | [`/?screen=moments&selected=3`](http://localhost:5173/?screen=moments&selected=3) |
 | **05** | **Group Mode** | Multi-face tracking (4 faces); fires only when everyone is ready. | [screen-05-group.png](export/screens/screen-05-group.png) | [`/?screen=group&ready=3`](http://localhost:5173/?screen=group&ready=3) |
 
 ---
@@ -59,7 +59,7 @@ All screens are designed for mobile viewports (390 × 844 px) and exported at **
 | **Case Study Presentation PDF** | Multi-page A4 portfolio case study document | [`export/case-study.pdf`](export/case-study.pdf) · [`CaseStudyScreen.tsx`](src/screens/CaseStudyScreen.tsx) |
 | **Hero Composite Banner** | Panoramic presentation elevation (2400 × 1350 px) | [`export/hero-composite.png`](export/hero-composite.png) |
 | **Pitch & Jury Defense Guide** | 60-second spoken pitch, 3-min presentation & 7-question defense | [`docs/pitch-60s.md`](docs/pitch-60s.md) |
-| **QA & Accessibility Report** | Contrast audit, touch-target verification & test execution logs | [`docs/QA-report.md`](docs/QA-report.md) · [`AUDIT-REPORT.md`](AUDIT-REPORT.md) |
+| **QA & Accessibility Report** | Contrast audit, touch-target verification & test execution logs | [`docs/QA-report.md`](docs/QA-report.md) · [`docs/history/`](docs/history/) |
 | **Design System & Tokens** | Color palette, spatial scale, typography & token definitions | [`docs/design-system.md`](docs/design-system.md) · [`tokens.css`](src/styles/tokens.css) |
 | **Asset Attribution** | Unsplash photo licenses and typography credits | [`docs/CREDITS.md`](docs/CREDITS.md) |
 
@@ -73,9 +73,9 @@ STILL operates on a deterministic 6-state finite state machine with automatic re
 - **`FOCUSED`:** User taps subject at `(x, y)`; focus anchor placed; 3s dwell timeout begins.
 - **`LOCKING`:** Device steadiness detected; amber LockRing sweeps linearly for 0.8 s.
 - **`CANCELLED`:** Hand shakes beyond 250 ms grace window; ring drains at 2× speed; focus pin retained for immediate re-lock.
-- **`CAPTURED`:** Lock completes 100%; shutter sound and synthetic haptics confirm capture.
-- **`REVIEW`:** Moment Strip slides up with preselected Best frame; 4s autosave countdown active.
-- **`SAVED`:** Frame committed to gallery; 5s persistent toast offers single-tap Undo.
+- **`CAPTURED`:** Lock progress reaches 100%; shutter sound and synthetic haptics confirm capture.
+- **`REVIEW`:** Moment Strip slides up with preselected Suggested frame; 4s autosave countdown active.
+- **`SAVED`:** Frame committed to simulated in-memory store; 5s persistent toast offers single-tap Undo.
 
 *See the full architecture diagram in [`docs/D2-user-flow.mmd`](docs/D2-user-flow.mmd) and [`export/user-flow.svg`](export/user-flow.svg).*
 
@@ -85,11 +85,11 @@ STILL operates on a deterministic 6-state finite state machine with automatic re
 
 - **Touch Target Sizing:** Every interactive control enforces a minimum bounding box of **44 × 44 CSS pixels**, complying with Apple Human Interface Guidelines and satisfying WCAG 2.2 Success Criteria 2.5.8 (Level AA minimum target).
 - **Color Contrast:** Mathematically verified against dark backgrounds (`#0B0B0F`):
-  - Primary text (`#F5F5F7`): **18.0 : 1** (exceeds WCAG AA 4.5:1 standard)
-  - Signal Amber (`#FFB020`): **10.7 : 1** (exceeds WCAG AA 4.5:1 standard)
-  - Success Green (`#3DDC97`): **11.1 : 1** (exceeds WCAG AA 4.5:1 standard)
-  - Movement Warning (`#FF6B5E`): **7.0 : 1** (exceeds WCAG AA 4.5:1 standard)
-  - Secondary text (`#A3A3B2`): **7.9 : 1** (exceeds WCAG AA 4.5:1 standard)
+  - Primary text (`#F5F5F7`): **18.0 : 1** (exceeds 4.5:1 / 7:1 benchmarks)
+  - Signal Amber (`#FFB020`): **10.7 : 1** (exceeds 4.5:1 / 7:1 benchmarks)
+  - Success Green (`#3DDC97`): **11.1 : 1** (exceeds 4.5:1 / 7:1 benchmarks)
+  - Movement Warning (`#FF6B5E`): **7.0 : 1** (exceeds 4.5:1 benchmark)
+  - Secondary text (`#A3A3B2`): **7.9 : 1** (exceeds 4.5:1 / 7:1 benchmarks)
 - **Screen Reader Announcements:** Dynamic live region (`aria-live="polite"`) announces camera state changes, countdown seconds, and save confirmations in real time.
 - **Vestibular Motion Safety:** Honors `prefers-reduced-motion` by replacing continuous sweeps with discrete stepped percentage ticks (33% → 66% → 100%).
 - **Inclusive Fallbacks:** Adjustable hold time in settings (400–1500 ms), voice trigger (*"Capture"* / *"Cheese"*), and physical key trigger ('C' key). *Note: Voice trigger and volume key capture are simulated in this browser prototype; native iOS/Android builds would connect directly to platform volume buttons and speech APIs.*
@@ -131,7 +131,7 @@ Open **`http://localhost:5173/`** in your browser.
 ```bash
 npm test
 ```
-Runs state machine unit tests (`test:machine`), Playwright browser interactive tests (`test:e2e`), and motion safety tests (`test:motion`).
+Runs 12 state machine unit tests (`test:machine`), 6 Playwright browser interactive scenarios (`test:e2e`), and motion safety tests (`test:motion`).
 
 ### 6. Re-Export Deliverables
 ```bash

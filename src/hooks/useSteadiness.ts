@@ -30,7 +30,7 @@ export function useSteadiness(options: UseSteadinessOptions = {}) {
     if (shakeTimeoutRef.current) clearTimeout(shakeTimeoutRef.current);
     shakeTimeoutRef.current = window.setTimeout(() => {
       setSteadinessState(baseValueRef.current);
-    }, 450);
+    }, 800);
   }, []);
 
   // 1. Spacebar Hold Simulation for Laptop / Desktop Demo (P1-01)

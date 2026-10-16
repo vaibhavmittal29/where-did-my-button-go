@@ -26,7 +26,7 @@ STILL does not relocate the button; it redesigns the interaction model from firs
 | Shutter's Job | How STILL Replaces It | Design Rationale |
 |---|---|---|
 | **Intent** | **Tap-to-Focus + Steadiness** | Users already tap a subject to establish focus. STILL repurposes this universal mental model: tapping places a focus ring, and holding the phone still signals active consent. |
-| **Timing** | **Moment Strip (Rolling 3s Buffer)** | Instead of predicting the precise millisecond, STILL records a continuous 3-second ring buffer. Users choose the sharpest moment *after* the event. |
+| **Timing** | **Moment Strip (Rolling 3s Buffer)** | Instead of predicting the precise millisecond, STILL records a continuous 3-second buffer. Users choose their preferred moment *after* the event. |
 | **Feedback** | **Dynamic Ring Fill + Haptic Pulse + Screen Bloom** | A physical, linear fill gauge on the focus point communicates progress. A crisp haptic confirmation and gentle perimeter bloom confirm capture without jarring flashes. |
 | **Reachability** | **Entire Viewfinder is Active** | Anywhere you tap becomes the capture anchor. No bottom-corner reach is required, making one-handed, selfie, and awkward angle captures effortless. |
 | **Camera Shake** | **Capture at Peak Stillness** | By requiring a steady threshold (0.8s hold), the photo is taken at the moment of minimal accelerometer delta. The old flaw is converted into the trigger mechanism. |
@@ -60,7 +60,7 @@ STILL does not relocate the button; it redesigns the interaction model from firs
 |---|---|---|---|
 | **Discoverability** | High | First-time users wonder *"Where is the button?"* and feel lost. | 1. Interactive 3-step onboarding sheet on first launch.<br/>2. Ambient pulsing **ghost ring** on viewfinder with coach text: *"Tap what you want to keep"*. |
 | **Accidental Captures** | Medium | Phone takes photos automatically in pocket or while walking. | Tapping alone **never** captures; sustained device steadiness (accelerometer variance < threshold for 800ms) is strictly enforced. |
-| **Loss of Precision** | Medium | User feels they lost control over the exact split-second. | Post-capture **Moment Strip** presents 7 candidate frames with the sharpest frame pre-selected (precomputed in prototype). |
+| **Loss of Precision** | Medium | User feels they lost control over the exact split-second. | Post-capture **Moment Strip** presents 7 candidate frames with a suggested frame pre-selected (precomputed in prototype). |
 | **Motor Impairments & Tremors** | High | Users with essential tremors or parkinsonism cannot keep phone still. | 1. Configurable hold time in Settings (400–1500 ms).<br/>2. Voice command trigger (*"Capture"* / *"Cheese"*, simulated in prototype).<br/>3. Physical key fallback ('C' key in prototype; volume keys in native apps). |
 | **Unwanted Captures** | Low | A capture completed that the user did not want stored. | Prominent 5-second **"Saved · Undo"** toast allows single-tap immediate deletion. |
 
@@ -74,7 +74,7 @@ STILL does not relocate the button; it redesigns the interaction model from firs
 - `LOCKING`: Device steadiness exceeds threshold; progress accumulator running ($progress = \Delta t / \text{holdTime}$).
 - `CANCELLED`: Device motion exceeded threshold during lock; ring drains at 2× speed with soft warning feedback.
 - `CAPTURED`: Lock progress reached 100%; exposure frozen; rolling buffer committed; haptic confirmation.
-- `REVIEW`: Moment Strip sliding up; sharpest frame highlighted with "Best" badge; 4s autosave countdown active.
+- `REVIEW`: Moment Strip sliding up; suggested frame highlighted with "Suggested" badge; 4s autosave countdown active.
 - `SAVED`: Selected frame written to storage; undo window (5s) available.
 
 ### 5.2 Transition Table

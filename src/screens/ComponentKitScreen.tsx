@@ -171,7 +171,7 @@ export const ComponentKitScreen: React.FC = () => {
             4. Live Toast Feedback
           </h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
-            <Toast message="Saved to gallery" actionLabel="Undo" onAction={() => alert('Undo triggered')} />
+            <Toast message="Saved (simulated)" actionLabel="Undo" onAction={() => alert('Undo triggered')} />
             <Toast message="Too much movement — hold still" type="warn" />
           </div>
         </div>

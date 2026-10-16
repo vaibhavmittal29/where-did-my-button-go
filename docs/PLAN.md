@@ -88,7 +88,7 @@ Replace *"press to capture"* with *"steadiness = consent"* and *"choose the mome
 
 **Three layers of interaction:**
 1. **Tap → Hold Steady → Capture (primary).** Tap the subject (this already means "focus here" in every camera app, so zero new learning). A ring appears on that spot. Hold the phone steady ~0.8 s; the ring fills; the photo is taken automatically when the phone is steady. If the user moves, the ring drains and nothing is captured. *This fixes the camera-shake flaw because the shot is taken at the steadiest moment.*
-2. **Rewind (the safety net).** The camera silently keeps a ~3 s rolling buffer. After capture, a **Moment Strip** shows ~7 nearby frames with the sharpest pre-selected ("Best"). Tap another to swap. If the user does nothing, the best one is saved after 4 s. *This removes "timing anxiety" — the old job #2.*
+2. **Rewind (the safety net).** The camera silently keeps a ~3 s rolling buffer. After capture, a **Moment Strip** shows ~7 nearby frames with a suggested frame pre-selected ("Suggested"). Tap another to swap. If the user does nothing, the selection is saved after 4 s. *This removes "timing anxiety" — the old job #2.*
 3. **Context modes (smart intent).**
    - **Group:** capture auto-triggers when everyone's face is in frame, eyes open, and phone is steady ("4 of 4 ready").
    - **Hands-free:** say "Capture" / "Cheese", or use volume keys as an accessibility fallback.

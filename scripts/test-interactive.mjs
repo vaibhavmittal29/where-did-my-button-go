@@ -132,13 +132,9 @@ async function testInteractive() {
 
   // Trigger sudden shake
   await page.locator('button:has-text("Simulate Sudden Shake")').click();
-  // UNSTEADY_GRACE_MS is 250ms; wait 350ms for UNSTEADY transition
-  await page.waitForTimeout(350);
+  // UNSTEADY_GRACE_MS is 250ms; wait reactively for UNSTEADY cancellation transition
+  await page.waitForFunction(() => document.body.innerText.includes('Too much movement'), { timeout: 3000 });
 
-  const shakeBody = await page.textContent('body');
-  if (!shakeBody.includes('Too much movement')) {
-    throw new Error(`Scenario 4 Failed: Expected "Too much movement" cancellation feedback in UI, but got: ${shakeBody.slice(0, 300)}`);
-  }
   await saveScreen(page, 'phase5-06-shake.png');
   console.log('✓ Scenario 4 Passed: Sudden movement cancels lock and drains ring with "Too much movement" feedback');
 

@@ -247,7 +247,7 @@ export const CaseStudyScreen: React.FC = () => {
                 <td><strong>2. Timing</strong></td>
                 <td>Single discrete shutter click freezes millisecond.</td>
                 <td>Human reaction time lags behind action, causing missed smiles or blinks.</td>
-                <td><strong style={{ color: '#3DDC97' }}>Moment Strip (3s Buffer)</strong>: 7 candidate frames recorded pre- and post-lock. Pick the exact sharpest frame post-hoc.</td>
+                <td><strong style={{ color: '#3DDC97' }}>Moment Strip (3s Buffer)</strong>: 7 candidate frames recorded pre- and post-lock. Pick your preferred frame post-hoc.</td>
               </tr>
               <tr>
                 <td><strong>3. Feedback</strong></td>
@@ -688,7 +688,7 @@ export const CaseStudyScreen: React.FC = () => {
             <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
               <span style={{ color: '#FFB020', fontWeight: 700, fontSize: '15px' }}>4.</span>
               <p style={{ margin: 0, fontSize: '15px', color: '#D1D1DB', lineHeight: 1.6 }}>
-                <strong style={{ color: '#F5F5F7' }}>Choose the moment afterwards.</strong> A rewind strip (a simulated 3-second buffer in this prototype) removes the pressure of perfect timing. The sharpest frame is preselected, saves after 4 seconds, and Undo lasts 5 seconds.
+                <strong style={{ color: '#F5F5F7' }}>Choose the moment afterwards.</strong> A rewind strip (a simulated 3-second buffer in this prototype) removes the pressure of perfect timing. A suggested frame is preselected, saves after 4 seconds, and Undo lasts 5 seconds.
               </p>
             </div>
 

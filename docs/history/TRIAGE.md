@@ -1,3 +1,6 @@
+> ⚠️ **HISTORICAL AUDIT ARTIFACT — SUPERSEDED**
+> This document is preserved for historical traceability. Its findings and hypotheses have been superseded by verified CI runs and repository implementation.
+
 # TRIAGE REPORT — STILL REPOSITORY AUDIT (HEAD: 5da83ff)
 
 **Repository:** https://github.com/vaibhavmittal29/where-did-my-button-go  

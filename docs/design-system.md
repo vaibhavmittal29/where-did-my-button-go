@@ -4,18 +4,18 @@
 
 ---
 
-## 1. Color System & WCAG AA Contrast Audit
+## 1. Color System & Contrast Ratio Audit
 
-| Token | Hex / Value | Role | Tested Against | Contrast Ratio | WCAG Compliance |
+| Token | Hex / Value | Role | Tested Against | Contrast Ratio | Evaluation |
 |---|---|---|---|---|---|
-| `--text` | `#F5F5F7` | Primary text & headlines | `--bg` (`#0B0B0F`) | **18.0 : 1** | **AAA** (Exceeds 7:1) |
-| `--text` | `#F5F5F7` | Card text | `--surface-1` (`#15151C`) | **15.7 : 1** | **AAA** (Exceeds 7:1) |
-| `--text-dim` | `#A3A3B2` | Secondary labels & microcopy | `--bg` (`#0B0B0F`) | **7.9 : 1** | **AAA** (Exceeds 7:1) |
-| `--text-dim` | `#A3A3B2` | Surface secondary | `--surface-1` (`#15151C`) | **6.9 : 1** | **AA** (Exceeds 4.5:1) |
-| `--accent` | `#FFB020` | Signal Amber (Ring arc, badges) | `--bg` (`#0B0B0F`) | **10.7 : 1** | **AAA** (Exceeds 7:1) |
-| `--accent` | `#FFB020` | Interactive chip label | `--surface-1` (`#15151C`) | **9.3 : 1** | **AAA** (Exceeds 7:1) |
-| `--success` | `#3DDC97` | Status Ready / Saved | `--bg` (`#0B0B0F`) | **11.1 : 1** | **AAA** (Exceeds 7:1) |
-| `--danger` | `#FF6B5E` | Movement warning / cancel | `--bg` (`#0B0B0F`) | **7.0 : 1** | **AA / AAA** (Exceeds 4.5:1 / 7:1 large) |
+| `--text` | `#F5F5F7` | Primary text & headlines | `--bg` (`#0B0B0F`) | **18.0 : 1** | Exceeds 7:1 (Enhanced) |
+| `--text` | `#F5F5F7` | Card text | `--surface-1` (`#15151C`) | **15.7 : 1** | Exceeds 7:1 (Enhanced) |
+| `--text-dim` | `#A3A3B2` | Secondary labels & microcopy | `--bg` (`#0B0B0F`) | **7.9 : 1** | Exceeds 7:1 (Enhanced) |
+| `--text-dim` | `#A3A3B2` | Surface secondary | `--surface-1` (`#15151C`) | **6.9 : 1** | Exceeds 4.5:1 (Minimum) |
+| `--accent` | `#FFB020` | Signal Amber (Ring arc, badges) | `--bg` (`#0B0B0F`) | **10.7 : 1** | Exceeds 7:1 (Enhanced) |
+| `--accent` | `#FFB020` | Interactive chip label | `--surface-1` (`#15151C`) | **9.3 : 1** | Exceeds 7:1 (Enhanced) |
+| `--success` | `#3DDC97` | Status Ready / Saved | `--bg` (`#0B0B0F`) | **11.1 : 1** | Exceeds 7:1 (Enhanced) |
+| `--danger` | `#FF6B5E` | Movement warning / cancel | `--bg` (`#0B0B0F`) | **7.0 : 1** | Exceeds 4.5:1 / 7:1 (Large) |
 | `--glass` | `rgba(20,20,28,0.55)` | Overlays & controls | Varied photo viewfinders | Verified with `backdrop-filter: blur(16px)` + 1px border scrim | Pass |
 
 ---

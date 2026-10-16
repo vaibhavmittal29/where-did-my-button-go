@@ -19,7 +19,7 @@
 >
 > Tap your subject anywhere on the viewfinder. Keep your hand steady for about 0.8 seconds. As the physical amber ring completes, STILL captures automatically after the tap's jolt has settled.
 >
-> And timing anxiety? A simulated 3-second buffer presents a 7-frame **Moment Strip** pre-selecting the sharpest frame, backed by a 4-second autosave and a 5-second reversible undo.
+> And timing anxiety? A simulated 3-second buffer presents a 7-frame **Moment Strip** pre-selecting a suggested frame, backed by a 4-second autosave and a 5-second reversible undo.
 >
 > **STILL: No button. No shake. The camera that waits for you.**"
 
@@ -36,7 +36,7 @@
   - **Step 1 (Intent & Reachability):** The entire viewfinder is active. Tap anywhere to place a focus pin.
   - **Step 2 (The Trigger):** A 104px physical amber ring sweeps as your hand steadies. In the prototype, device steadiness straightens the waveform. At 0.8 seconds of continuous stillness, a tactile click confirms capture.
   - **Step 3 (The Safety Net):** If the phone moves beyond the 250 ms grace period, the ring gracefully drains with a soft warning buzz—no accidental photos."
-- **1:30 – 2:00:** "Now, what about timing? Human reaction time naturally lags behind sudden action. STILL incorporates a 3-second rewind buffer (simulated in this prototype). Immediately after capture, the **Moment Strip** presents 7 candidate frames, pre-selecting the sharpest moment with a 'Best' badge. A 4-second countdown auto-saves the photo, and a 5-second Toast provides an immediate Undo action."
+- **1:30 – 2:00:** "Now, what about timing? Human reaction time naturally lags behind sudden action. STILL incorporates a 3-second rewind buffer (simulated in this prototype). Immediately after capture, the **Moment Strip** presents 7 candidate frames, pre-selecting a suggested moment with a 'Suggested' badge. A 4-second countdown auto-saves the photo, and a 5-second Toast provides an immediate Undo action."
 
 ### Minute 3: Group Intelligence, Accessibility & Technical Rigor
 - **2:00 – 2:30:** "The model scales seamlessly:

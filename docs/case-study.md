@@ -71,8 +71,8 @@ STILL operates on a deterministic, guarded finite state machine (`src/state/came
 - **`LOCKING`:** Phone steadiness meets or exceeds the threshold (`>= 0.7`). An SVG progress ring smoothly fills around the subject. Progress ticks provide tactile feedback at 33% and 66%.
 - **`CANCELLED`:** Micro-shakes or quick movements exceed the grace window (`250ms`). The lock ring drains smoothly to zero, preventing blurred photos. Focus coordinates remain anchored so the user can immediately hold still to retry without re-tapping.
 - **`CAPTURED`:** Lock ring reaches 100%. A perimeter bloom pulse illuminates the viewport edge, and a soft shutter tick confirms capture.
-- **`REVIEW`:** The Moment Strip slides up from the bottom, presenting 7 candidate burst frames from the 3-second rolling buffer. The best candidate (sharpest frame, open eyes) is pre-selected. An autosave progress bar begins a 4-second countdown.
-- **`SAVED`:** Photo is confirmed and committed to the gallery. A non-intrusive toast notification provides a 5-second `Undo` window.
+- **`REVIEW`:** The Moment Strip slides up from the bottom, presenting 7 candidate burst frames from the 3-second rolling buffer. The suggested candidate frame is pre-selected. An autosave progress bar begins a 4-second countdown.
+- **`SAVED`:** Photo is confirmed and committed in session. A non-intrusive toast notification provides a 5-second `Undo` window.
 
 ---
 
@@ -89,7 +89,7 @@ STILL operates on a deterministic, guarded finite state machine (`src/state/came
 - **Purpose:** Full-bleed, uncluttered composition window free of distracting dials or prominent button clusters.
 - **Key Elements:**
   - Ambient ghost ring with subtle scale animation.
-  - Context chip: *"Best Moment Active"*.
+  - Context chip: *"Rewind Buffer Active (simulated)"*.
   - Clean bottom bar: Gallery thumbnail preview, camera mode switcher, and lens toggle.
 
 ### Screen 3: Locking & Capture (`/?screen=locking&progress=0.6`)
@@ -98,20 +98,20 @@ STILL operates on a deterministic, guarded finite state machine (`src/state/came
   - Radial SVG lock ring filling clockwise (demonstrated at 60% progress).
   - Subject framing corner brackets indicating tracked focus.
   - Real-time countdown chip: *"Hold steady · 0.3s"*.
-  - Bottom steadiness waveform monitor indicating gyro stability.
+  - Bottom steadiness waveform monitor indicating device stability.
 
 ### Screen 4: Moment Strip Review (`/?screen=moments&selected=3`)
 - **Purpose:** Zero-stress frame selection and rolling buffer curation.
 - **Key Elements:**
   - High-resolution viewfinder preview of the active moment.
   - Horizontal filmstrip displaying 7 chronological frames (-1.5s to +1.5s).
-  - Amber badge highlighting the sharpest frame (*"Best Moment"*).
+  - Amber badge highlighting the suggested frame (*"Suggested"*).
   - Autosave countdown bar with pause/scrub capability.
 
 ### Screen 5: Hands-Free Group Mode (`/?screen=group&ready=3`)
 - **Purpose:** Effortless group photography without running timers or awkward selfie sticks.
 - **Key Elements:**
-  - Autonomous face readiness detection for up to 4 subjects.
+  - Simulated face readiness detection for up to 4 subjects.
   - Real-time status chips over faces (e.g., green *"Ready"* vs amber *"Tara · Blinking"*).
   - 3px perimeter glow frame around the viewfinder that turns emerald green when all subjects are ready.
   - Voice trigger alternative: saying *"Cheese"* or *"Capture"* immediately triggers capture.
@@ -224,9 +224,9 @@ The design system is constructed from high-performance CSS custom properties:
 
 ## 10. Prototype Implementation & Tooling
 
-The prototype is engineered as a zero-dependency, production-ready web application:
-- **Framework:** React 18 with TypeScript in strict mode.
-- **Build System:** Vite 5 with near-instant HMR.
+The interactive prototype is implemented with standard web technologies:
+- **Framework:** React 19 with TypeScript in strict mode.
+- **Build System:** Vite 6 with instant HMR.
 - **State Management:** Custom finite state machine reducer with zero external state library bloat.
 - **Burst Frame Synthesis:** Custom node script (`scripts/generate-moments.mjs`) employing HTML5 Canvas algorithms to generate 7 distinct, coherent burst frames with dynamic micro-perspective transformations.
 - **Automated Verification Suite:** Playwright test scripts for end-to-end user journeys (`scripts/test-interactive.mjs`) and accessibility reduced-motion verification (`scripts/test-reduced-motion.mjs`).

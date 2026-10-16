@@ -4,7 +4,7 @@
 **Specification:** Round 1 UI/UX Subdomain — *Where did my button go? Rethink the Interaction*  
 **Date:** October 2026  
 **Auditor:** Automated Test Suite + Design System Spec Inspection  
-**Standard:** WCAG 2.2 Level AA / AAA Compliance, Touch Target Sizing (WCAG 2.5.5 / 2.5.8), Apple HIG
+**Standard:** Contrast Ratios evaluated against WCAG 2.2 Benchmarks (4.5:1 / 7:1), Touch Target Sizing (Apple HIG 44×44px)
 
 ---
 
@@ -34,7 +34,7 @@ Every interactive element in STILL enforces a minimum bounding box of **44 × 44
 
 All colors are strictly governed by CSS variables defined in `src/styles/tokens.css`. Contrast ratios are mathematically computed against dark backdrops (`--bg: #0b0b0f`, `--surface-1: #15151c`):
 
-| Token Pair | Foreground | Background | Contrast Ratio | WCAG AA (4.5:1) | WCAG AAA (7:1) |
+| Token Pair | Foreground | Background | Contrast Ratio | Minimum Benchmark (4.5:1) | Enhanced Benchmark (7:1) |
 |---|---|---|---|---|---|
 | `--text` on `--bg` | `#F5F5F7` | `#0B0B0F` | **18.0 : 1** | PASS | PASS |
 | `--text` on `--surface-1` | `#F5F5F7` | `#15151C` | **15.7 : 1** | PASS | PASS |
@@ -66,9 +66,9 @@ To support screen reader users (VoiceOver, TalkBack, NVDA), a live status elemen
 - `IDLE`: *"Camera ready. Tap viewfinder to focus and hold steady to capture."*
 - `FOCUSED`: *"Subject focused. Hold phone steady to lock."*
 - `LOCKING`: *"Locking capture. X percent."*
-- `CAPTURED`: *"Photo captured. Reviewing best moment in Moment Strip."*
+- `CAPTURED`: *"Photo captured. Reviewing suggested moment in Moment Strip."*
 - `REVIEW`: *"Reviewing frame X of 7. Autosaving."*
-- `SAVED`: *"Photo saved to gallery. Undo available."*
+- `SAVED`: *"Photo saved (simulated). Undo available."*
 - `CANCELLED`: *"Too much movement — hold still."*
 
 ### 4.3 Lock Ring Semantics
@@ -142,9 +142,21 @@ Test 8: Tunable Hold Time Setting
 Test 9: Tap Isolation
 ✔ Test 9 Passed: Tap subject exclusively focuses and never triggers capture.
 
-ALL 9 STATE MACHINE TESTS PASSED SUCCESSFULLY! 🎉
+Test 10: Group Mode Steady Hold & Dynamic Lock Guard
+✔ Test 10 Passed: Group mode steady hold and lock guards verified.
+
+Test 11: STEADY_TICK Delta Time Validation
+✔ Test 11 Passed: STEADY_TICK non-positive/non-finite dt rejected.
+
+Test 12: Comprehensive State Machine Invariants
+✔ Test 12 Passed: Invariants and reference stability verified.
+
+ALL 12 STATE MACHINE TESTS PASSED SUCCESSFULLY! 🎉
 Testing Phase 5 Interactive Camera Scenarios...
+Starting Vite local server on port 5173...
+✓ Vite local server ready on port 5173
 ✓ Scenario 0 Passed: Interactive screen loaded with Viewfinder & DemoPanel
+✓ Touch Target Size Verification: All 9 DemoPanel buttons meet >= 44x44px target standard
 State after tap: State:LOCKING
 ✓ Scenario 1 Passed: Tap -> Steady Hold -> Auto-Capture -> Moment Strip Review
 ✓ Scenario 2 Passed: Moment Strip allows frame swapping
@@ -154,11 +166,15 @@ Waiting for autosave countdown (approx 4s)...
 ✓ Scenario 4 Passed: Sudden movement cancels lock and drains ring with "Too much movement" feedback
 ✓ Scenario 5a Passed: Group Mode active with 3 of 4 ready and Tara blinking
 ✓ Scenario 5b Passed: Voice trigger properly guarded by group readiness, then captures when all 4 ready
+✓ Scenario 5c Passed (P0-01): Group Mode with 3 of 4 ready strictly blocks steady hold capture
 
 🎉 ALL PHASE 5 INTERACTION SCENARIOS PASSED WITH FLYING COLORS!
 Testing Phase 6 Prefers-Reduced-Motion Compliance...
+Starting Vite local server on port 5173...
+✓ Vite local server ready on port 5173
 LockRing data-reduced-motion: true
-✓ Reduced motion test passed!
+LockRing aria-valuenow under reduced motion: 33%
+✓ Reduced motion test passed (stepped ring + capture -> review)!
 ```
 
 ---

@@ -4,7 +4,7 @@
 > **Challenge:** VinnovateIT (VIT Vellore) UI/UX Subdomain Round 1 Recruitment Challenge  
 > **Brief:** *"Where did my button go? Rethink the Interaction"*  
 > **Audit Timestamp:** 2026-10-15T15:38:00+05:30  
-> **Status:** **100% READY FOR SUBMISSION**  
+> **Status:** **COMPLETE AND SUBMITTABLE**
 
 ---
 
@@ -12,13 +12,13 @@
 
 | # | Deliverable Required by Brief | Status | File Location / Path | Metrics & Audit Notes |
 |---|---|---|---|---|
-| **D1** | **The Removed Interaction & Problem Definition** | **PASSED** | [`docs/D1-problem.md`](file:///c:/Programming/Projects%20of%20antigravity/project_7_uiux_vinnovateit_switchthebutton/docs/D1-problem.md) | **148 words** (Strict requirement: $\le 150$ words). Articulates the 5 shutter jobs, tap shake flaw, and clarifies tap objection. |
+| **D1** | **The Removed Interaction & Problem Definition** | **PASSED** | [`docs/D1-problem.md`](file:///c:/Programming/Projects%20of%20antigravity/project_7_uiux_vinnovateit_switchthebutton/docs/D1-problem.md) | **147 words** (Strict requirement: $\le 150$ words). Articulates the 5 shutter jobs, tap shake flaw, and clarifies tap objection. |
 | **D2** | **Interaction Model & User Flow Diagram** | **PASSED** | [`docs/D2-user-flow.mmd`](file:///c:/Programming/Projects%20of%20antigravity/project_7_uiux_vinnovateit_switchthebutton/docs/D2-user-flow.mmd)<br/>[`export/user-flow.svg`](file:///c:/Programming/Projects%20of%20antigravity/project_7_uiux_vinnovateit_switchthebutton/export/user-flow.svg)<br/>[`export/user-flow.png`](file:///c:/Programming/Projects%20of%20antigravity/project_7_uiux_vinnovateit_switchthebutton/export/user-flow.png) | Vector diagram + TypeScript FSM implementation in [`cameraMachine.ts`](file:///c:/Programming/Projects%20of%20antigravity/project_7_uiux_vinnovateit_switchthebutton/src/state/cameraMachine.ts). |
 | **D3** | **5 High-Fidelity UI Screens** | **PASSED** | [`export/screens/`](file:///c:/Programming/Projects%20of%20antigravity/project_7_uiux_vinnovateit_switchthebutton/export/screens/) | All 5 screens exported at **1170 × 2532 px** (Retina 3× Super Retina XDR). Zero placeholder boxes. |
-| **D4** | **Key Design Decisions & Trade-Offs** | **PASSED** | [`docs/D4-design-decisions.md`](file:///c:/Programming/Projects%20of%20antigravity/project_7_uiux_vinnovateit_switchthebutton/docs/D4-design-decisions.md) | **190 words** (Strict requirement: $\le 200$ words). Approved concise 7-point design rationale. |
+| **D4** | **Key Design Decisions & Trade-Offs** | **PASSED** | [`docs/D4-design-decisions.md`](file:///c:/Programming/Projects%20of%20antigravity/project_7_uiux_vinnovateit_switchthebutton/docs/D4-design-decisions.md) | **173 words** (Strict requirement: $\le 200$ words). Approved concise 7-point design rationale. |
 | **Extra** | **Case Study Presentation PDF** | **PASSED** | [`export/case-study.pdf`](file:///c:/Programming/Projects%20of%20antigravity/project_7_uiux_vinnovateit_switchthebutton/export/case-study.pdf) | A4 formatted multi-page design portfolio document rendered from `/?screen=case-study`. |
 | **Extra** | **Hero Composite Presentation** | **PASSED** | [`export/hero-composite.png`](file:///c:/Programming/Projects%20of%20antigravity/project_7_uiux_vinnovateit_switchthebutton/export/hero-composite.png) | **2400 × 1350 px**, panoramic presentation layout displaying all 5 devices in elevation. |
-| **Extra** | **Figma Replication Blueprint** | **PASSED** | [`docs/figma-build-guide.md`](file:///c:/Programming/Projects%20of%20antigravity/project_7_uiux_vinnovateit_switchthebutton/docs/figma-build-guide.md) | Complete token mapping, auto-layout layer recipes, and Smart Animate prototyping wiring. |
+| **Extra** | **Figma Replication Blueprint** | **PASSED** | [`docs/figma-build-guide.md`](file:///c:/Programming/Projects%20of antigravity/project_7_uiux_vinnovateit_switchthebutton/docs/figma-build-guide.md) | Complete token mapping, auto-layout layer recipes, and Smart Animate prototyping wiring. |
 | **Extra** | **Pitch & Interview Defense Guide** | **PASSED** | [`docs/pitch-60s.md`](file:///c:/Programming/Projects%20of%20antigravity/project_7_uiux_vinnovateit_switchthebutton/docs/pitch-60s.md) | 60-second elevator pitch (~50s), 3-minute stage presentation, and 7-question jury defense. |
 
 ---
@@ -31,21 +31,21 @@
 | `screen-02-idle.png` | iPhone 14/15 | 1170 × 2532 px | 1,695 KB | Full-bleed calm viewfinder, subtle ghost ring, dwell coachmark, zero shutter button. |
 | `screen-03-locking.png` | iPhone 14/15 | 1170 × 2532 px | 2,216 KB | Hero mid-action screen, 104px LockRing at 60%, 0.3s chip, steadiness meter. |
 | `screen-03-locking-annotated.png` | iPhone 14/15 | 1170 × 2532 px | 2,216 KB | Annotated hero screen featuring numbered callout pins ①②③. |
-| `screen-04-moments.png` | iPhone 14/15 | 1170 × 2532 px | 1,298 KB | 7-frame Moment Strip carousel, preselected Best frame badge, 4s countdown. |
+| `screen-04-moments.png` | iPhone 14/15 | 1170 × 2532 px | 1,298 KB | 7-frame Moment Strip carousel, preselected Suggested frame badge, 4s countdown. |
 | `screen-05-group.png` | iPhone 14/15 | 1170 × 2532 px | 2,072 KB | 4-student campus photo with bounding boxes: Tara (Blinking), Aarav, Pooja, Neha. |
 
 ---
 
 ## 3. Accessibility & Inclusivity Compliance Audit
 
-- [x] **Touch Target Size:** Enforced $\ge 44 \times 44\text{ px}$ on all interactive controls (`IconButton`, `GlassChip` touch wrappers, `Toast` undo button, `ModeCarousel` items, `MomentStrip` thumbnails) conforming to Apple HIG and WCAG 2.2.
-- [x] **Color Contrast Ratio:**
-  - Primary Text (`#F5F5F7`) on Background (`#0B0B0F`): **18.0 : 1** (exceeds WCAG AA 4.5:1 standard).
-  - Signal Amber (`#FFB020`) on Background (`#0B0B0F`): **10.7 : 1** (exceeds WCAG AA 4.5:1 standard).
-  - Success Green (`#3DDC97`) on Background (`#0B0B0F`): **11.1 : 1** (exceeds WCAG AA 4.5:1 standard).
-  - Movement Warning (`#FF6B5E`) on Background (`#0B0B0F`): **7.0 : 1** (exceeds WCAG AA 4.5:1 standard).
-- [x] **Screen Reader Accessibility:** Live region element with `aria-live="polite"` and `aria-atomic="true"` continuously announces state changes (*"Locking focus. Hold steady for 0.8 seconds."*, *"Photo captured."*, *"Auto-saved to gallery."*).
-- [x] **Reduced Motion Compliance:** Full `prefers-reduced-motion: reduce` support replacing continuous ring sweep with discrete 33% $\rightarrow$ 66% $\rightarrow$ 100% steps and haptic-only confirmations (verified via `scripts/test-reduced-motion.mjs`).
+- [x] **Touch Target Size:** Enforced $\ge 44 \times 44\text{ px}$ on all interactive controls (`IconButton`, `GlassChip` touch wrappers, `Toast` undo button, `ModeCarousel` items, `MomentStrip` thumbnails) conforming to Apple HIG guidelines.
+- [x] **Color Contrast Ratio:** High-contrast darkroom palette designed to exceed standard contrast ratios:
+  - Primary Text (`#F5F5F7`) on Background (`#0B0B0F`): **18.0 : 1** (high contrast).
+  - Signal Amber (`#FFB020`) on Background (`#0B0B0F`): **10.7 : 1** (high contrast).
+  - Success Green (`#3DDC97`) on Background (`#0B0B0F`): **11.1 : 1** (high contrast).
+  - Movement Warning (`#FF6B5E`) on Background (`#0B0B0F`): **7.0 : 1** (high contrast).
+- [x] **Screen Reader Accessibility:** Live region element with `aria-live="polite"` and `aria-atomic="true"` continuously announces state changes (*"Locking focus. Hold steady for 0.8 seconds."*, *"Photo captured."*, *"Auto-saved."*).
+- [x] **Reduced Motion Support:** Full `prefers-reduced-motion: reduce` support replacing continuous ring sweep with discrete 33% $\rightarrow$ 66% $\rightarrow$ 100% steps and haptic-only confirmations (verified via `scripts/test-reduced-motion.mjs`).
 - [x] **Hardware Fallback:** Physical Volume Key (`'C'` / Volume Up/Down) capture trigger provided for users with tremors or physical mittens.
 
 ---
@@ -54,9 +54,9 @@
 
 | Test Script | Target | Results | Status |
 |---|---|---|---|
-| `scripts/test-machine.ts` | Finite State Machine Transitions | 8/8 Tests Passed (Focus, Lock, Unsteady Shake, Timeout, Buffer Autosave, Undo) | **PASSED** |
-| `scripts/test-interactive.mjs` | Browser E2E Interaction Scenarios | 5/5 Scenarios Passed (Spacebar hold, shake rejection, Moment Strip pick, Group ready) | **PASSED** |
-| `scripts/test-reduced-motion.mjs` | Motion & Vestibular Safety | 3/3 Checks Passed (Stepped percentages verified) | **PASSED** |
+| `scripts/test-machine.ts` | Finite State Machine Transitions | 12/12 Tests Passed (Focus, Lock, Unsteady Shake, Timeout, Buffer Autosave, Undo, Group Guards, Hold Time Clamps) | **PASSED** |
+| `scripts/test-interactive.mjs` | Browser E2E Interaction Scenarios | 6/6 Scenarios Passed (Touch target audit, Spacebar hold, shake rejection, Moment Strip pick, Group ready, Group hold guard) | **PASSED** |
+| `scripts/test-reduced-motion.mjs` | Motion & Vestibular Safety | Checks Passed (Stepped percentages and full review flow verified) | **PASSED** |
 | `scripts/export-screens.mjs` | High-Resolution Asset Generation | 6 Screens (1170×2532) + Hero Banner (2400×1350) + PDF (14.3 MB) generated | **PASSED** |
 
 ---

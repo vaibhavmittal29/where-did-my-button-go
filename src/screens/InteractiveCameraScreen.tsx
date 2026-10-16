@@ -133,6 +133,7 @@ export const InteractiveCameraScreen: React.FC = () => {
 
   const viewfinderRef = useRef<HTMLDivElement>(null);
   const steadinessRef = useRef<number>(steadiness);
+  steadinessRef.current = steadiness;
   useEffect(() => {
     steadinessRef.current = steadiness;
   }, [steadiness]);

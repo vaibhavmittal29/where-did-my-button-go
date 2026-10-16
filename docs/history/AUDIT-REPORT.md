@@ -1,3 +1,6 @@
+> ⚠️ **HISTORICAL AUDIT ARTIFACT — SUPERSEDED**
+> This document is preserved for historical traceability. Its findings and hypotheses have been superseded by verified CI runs and repository implementation.
+
 # AUDIT REPORT — STILL Camera Submission
 
 > **Project:** STILL — The Camera That Waits For You  

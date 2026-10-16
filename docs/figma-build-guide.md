@@ -3,7 +3,7 @@
 > **Project:** STILL — The Camera That Waits For You  
 > **Challenge:** VinnovateIT Round 1 Challenge · UI/UX Subdomain (*"Where did my button go? Rethink the Interaction"*)  
 > **Target Canvas:** iPhone 14 / 15 / 13 Pro (`390 × 844 px`)  
-> **Source Code Match:** 100% 1:1 match with React + TypeScript codebase  
+> **Source Code Match:** Direct 1:1 match with React + TypeScript codebase  
 
 ---
 
@@ -147,7 +147,7 @@ Create a Variable Collection in Figma named **`STILL-Tokens`** and add the follo
 - **Fill:** `#1E1E2C` (Surface 2).
 - **Stroke:** 1px Inside `rgba(255, 255, 255, 0.12)`.
 - **Drop Shadow:** `0 12px 32px rgba(0, 0, 0, 0.6)`.
-- **Left Group:** Auto Layout (Horizontal, Gap `10 px`), Checkmark icon (`16 px`, `#3DDC97`) + Text "Saved to gallery" (`14 px`, `#F5F5F7`).
+- **Left Group:** Auto Layout (Horizontal, Gap `10 px`), Checkmark icon (`16 px`, `#3DDC97`) + Text "Saved (simulated)" (`14 px`, `#F5F5F7`).
 - **Right Button:** Text "Undo" (`14 px`, Inter SemiBold, `#FFB020`, minimum 44px tap zone).
 
 ---
@@ -217,14 +217,14 @@ Create a Variable Collection in Figma named **`STILL-Tokens`** and add the follo
 ### Screen 4: Moment Strip (`screen-04-moments`)
 1. **Top 62% Image Canvas:**
    - Display full-resolution chosen frame: `public/scenes/moment-3.jpg` (or selected index).
-   - Top Bar: Left `IconButton` (`X` close), Center `GlassChip` (Sparkles icon + **"Best Moment"**), Right `IconButton` (`Share2` share).
+   - Top Bar: Left `IconButton` (`X` close), Center `GlassChip` (Sparkles icon + **"Suggested (illustrative)"**), Right `IconButton` (`Share2` share).
 2. **Bottom 38% Moment Strip Sheet:**
    - Bottom sheet container docked from `Y: 520 px` to `844 px`.
    - Mount `MomentStrip` component.
-   - 7 Frame Thumbnails visible: Frame 4 highlighted with `2.5 px` amber border, scale `1.08`, and "BEST" badge.
-   - Autosave progress line running at 70% fill ("Saving best moment... 1.2s").
-   - Primary CTA Button: **"Save Selection"** (`#FFB020`).
-3. **Toast Variant:** If demonstrating save confirmation, float `Toast` component at `X: 16 px, Y: 460 px` with "Saved to gallery · Undo".
+   - 7 Frame Thumbnails visible: Frame 4 highlighted with `2.5 px` amber border, scale `1.08`, and "SUGGESTED" badge.
+   - Autosave progress line running at 70% fill ("Saving suggested moment... 1.2s").
+   - Primary CTA Button: **"Save Selection (prototype)"** (`#FFB020`).
+3. **Toast Variant:** If demonstrating save confirmation, float `Toast` component at `X: 16 px, Y: 460 px` with "Saved (simulated) · Undo".
 
 ---
 
