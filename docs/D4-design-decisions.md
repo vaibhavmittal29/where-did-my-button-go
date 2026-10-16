@@ -9,3 +9,19 @@
 7. **Calm dark UI.** The photo is the hero; amber is reserved for action and suggested moment.
 
 Note: the timings (0.8 s, 4 s, 5 s) are starting values to tune through usability testing.
+
+### Moment Strip: Simulated Stand-ins vs. Production Circular Buffer
+In this browser prototype, the 7 candidate frames presented in the Moment Strip are visual stand-ins derived via CSS and canvas geometric/color transformations from a single high-resolution portrait photograph. They exist to demonstrate the rewind, card-scrubbing, and pre-selection UI pattern in a lightweight browser environment. In a production native mobile implementation (iOS AVFoundation or Android CameraX), the camera hardware would maintain a continuous circular ring buffer (e.g., 90 frames at 30 fps over 3.0 seconds). Upon stillness-triggered capture, the native pipeline would read directly from this hardware buffer, compute variance/edge gradients across candidate frames to identify peak sharpness, and surface genuine high-resolution photographic exposures.
+
+---
+
+## Prototype Limitations (Simulated vs Real)
+
+This project is a browser-based UI/UX prototype created for the VinnovateIT design challenge. To maintain technical integrity, the following hardware/native capabilities are simulated in the browser:
+
+- **Camera stream:** Browser simulation using an optimized high-resolution portrait image with dynamic CSS filters (not raw hardware sensor frames).
+- **Steadiness sensor:** Web `DeviceMotionEvent` acceleration heuristic (filtered magnitude) or on-screen slider/keyboard simulator, not true multi-axis gyroscope angular velocity.
+- **Moment Strip:** 7 transformed visual variations derived from a single portrait to demonstrate the rewind UI/UX pattern, not 7 distinct frames from a hardware rolling ring buffer.
+- **Group detection:** Simulated multi-face tracking bounding boxes and readiness state machine, not on-device computer vision or face-mesh ML models.
+- **Speech recognition:** Simulated button triggers and keyword hooks, not the native Web Speech API.
+- **Persistence:** In-memory reactive state and transient toast dismissal, not persistent disk or IndexedDB gallery photo storage.

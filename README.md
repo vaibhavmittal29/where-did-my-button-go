@@ -131,13 +131,26 @@ Open **`http://localhost:5173/`** in your browser.
 ```bash
 npm test
 ```
-Runs 12 state machine unit tests (`test:machine`), 6 Playwright browser interactive scenarios (`test:e2e`), and motion safety tests (`test:motion`).
+Runs 13 state machine unit tests (`test:machine`), 8 Playwright browser interactive scenarios (`test:e2e`), motion safety tests (`test:motion`), and Figma plugin static checks (`test:figma`).
 
 ### 6. Re-Export Deliverables
 ```bash
 npm run export
 ```
 Re-generates all 6 retina screens (1170 × 2532 px), the panoramic composite (2400 × 1350 px), and the case study PDF.
+
+---
+
+## ⚠️ Prototype Limitations (Simulated vs Real)
+
+This project is a browser-based UI/UX prototype created for the VinnovateIT design challenge. To maintain technical integrity, the following hardware/native capabilities are simulated in the browser:
+
+- **Camera stream:** Browser simulation using an optimized high-resolution portrait image with dynamic CSS filters (not raw hardware sensor frames).
+- **Steadiness sensor:** Web `DeviceMotionEvent` acceleration heuristic (filtered magnitude) or on-screen slider/keyboard simulator, not true multi-axis gyroscope angular velocity.
+- **Moment Strip:** 7 transformed visual variations derived from a single portrait to demonstrate the rewind UI/UX pattern, not 7 distinct frames from a hardware circular ring buffer.
+- **Group detection:** Simulated multi-face tracking bounding boxes and readiness state machine, not on-device computer vision or face-mesh ML models.
+- **Speech recognition:** Simulated button triggers and keyword hooks, not the native Web Speech API.
+- **Persistence:** In-memory reactive state and transient toast dismissal, not persistent disk or IndexedDB gallery photo storage.
 
 ---
 

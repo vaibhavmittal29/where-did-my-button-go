@@ -110,7 +110,7 @@ All failure modes were verified via unit state tests (`scripts/test-machine.ts`)
 
 ## 6. Real Automated Test Suite Execution Output
 
-The automated test suite runs via `npm test` (`tsx scripts/test-machine.ts && node scripts/test-interactive.mjs && node scripts/test-reduced-motion.mjs`):
+The automated test suite runs via `npm test` (`tsx scripts/test-machine.ts && node scripts/test-interactive.mjs && node scripts/test-reduced-motion.mjs && node scripts/test-figma.mjs`):
 
 ```text
 --- RUNNING CAMERA STATE MACHINE SANITY TESTS ---
@@ -146,12 +146,15 @@ Test 10: Group Mode Steady Hold & Dynamic Lock Guard
 ✔ Test 10 Passed: Group mode steady hold and lock guards verified.
 
 Test 11: STEADY_TICK Delta Time Validation
-✔ Test 11 Passed: STEADY_TICK non-positive/non-finite dt rejected.
+✔ Test 11 Passed: STEADY_TICK invalid dt rejected and massive dt clamped to 100ms.
 
 Test 12: Comprehensive State Machine Invariants
 ✔ Test 12 Passed: Invariants and reference stability verified.
 
-ALL 12 STATE MACHINE TESTS PASSED SUCCESSFULLY! 🎉
+Test 13: Group Auto-Capture Epoch & Undo Disarm
+✔ Test 13 Passed: Group auto-capture epoch disarmed on capture and through Undo.
+
+ALL 13 STATE MACHINE TESTS PASSED SUCCESSFULLY! 🎉
 Testing Phase 5 Interactive Camera Scenarios...
 Starting Vite local server on port 5173...
 ✓ Vite local server ready on port 5173
@@ -167,6 +170,8 @@ Waiting for autosave countdown (approx 4s)...
 ✓ Scenario 5a Passed: Group Mode active with 3 of 4 ready and Tara blinking
 ✓ Scenario 5b Passed: Voice trigger properly guarded by group readiness, then captures when all 4 ready
 ✓ Scenario 5c Passed (P0-01): Group Mode with 3 of 4 ready strictly blocks steady hold capture
+✓ Scenario 5d Passed (1.1): Group Mode auto-capture disarmed through Undo; no re-capture while steady
+✓ Scenario 5e Passed (1.2): Group readiness is single-sourced in reducer without desync
 
 🎉 ALL PHASE 5 INTERACTION SCENARIOS PASSED WITH FLYING COLORS!
 Testing Phase 6 Prefers-Reduced-Motion Compliance...
@@ -175,6 +180,14 @@ Starting Vite local server on port 5173...
 LockRing data-reduced-motion: true
 LockRing aria-valuenow under reduced motion: 33%
 ✓ Reduced motion test passed (stepped ring + capture -> review)!
+🧪 Running Figma Plugin Static Verification Suite...
+  ✓ Files exist
+  ✓ code.js passed Node.js JavaScript syntax check
+  ✓ manifest.json is valid
+  ✓ code.js uses correct millisecond timeout (timeout: 800)
+  ✓ ui.html contains complete message protocol handlers
+  ✓ code.js contains MomentStrip, font fallback hierarchy, and idempotent tagging
+🎉 Figma plugin static verification PASSED!
 ```
 
 ---
@@ -182,3 +195,16 @@ LockRing aria-valuenow under reduced motion: 33%
 ## 7. Conclusion & Deliverable Sign-Off
 
 The STILL Camera application satisfies all functional and non-functional requirements. The prototype is accessible, responsive, contrast-verified, and resilient to real-world edge cases.
+
+---
+
+## 8. Prototype Limitations (Simulated vs Real)
+
+This project is a browser-based UI/UX prototype created for the VinnovateIT design challenge. To maintain technical integrity, the following hardware/native capabilities are simulated in the browser:
+
+- **Camera stream:** Browser simulation using an optimized high-resolution portrait image with dynamic CSS filters (not raw hardware sensor frames).
+- **Steadiness sensor:** Web `DeviceMotionEvent` acceleration heuristic (filtered magnitude) or on-screen slider/keyboard simulator, not true multi-axis gyroscope angular velocity.
+- **Moment Strip:** 7 transformed visual variations derived from a single portrait to demonstrate the rewind UI/UX pattern, not 7 distinct frames from a hardware circular ring buffer.
+- **Group detection:** Simulated multi-face tracking bounding boxes and readiness state machine, not on-device computer vision or face-mesh ML models.
+- **Speech recognition:** Simulated button triggers and keyword hooks, not the native Web Speech API.
+- **Persistence:** In-memory reactive state and transient toast dismissal, not persistent disk or IndexedDB gallery photo storage.

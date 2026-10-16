@@ -94,3 +94,16 @@
 ### Q7: "You still tap the screen. How is that different from a shutter button?"
 > **My Answer:**  
 > "With a traditional shutter button, the tap *is* the capture trigger: the shutter fires at the exact moment of finger impact, transferring mechanical torque and jitter directly into the camera lens. In STILL, tapping only sets the focus point. The photo is taken only after the phone has settled for about 0.8 seconds. The jolt from the tap has completely dissipated before exposure occurs."
+
+---
+
+## 4. Prototype Limitations (Simulated vs Real)
+
+This project is a browser-based UI/UX prototype created for the VinnovateIT design challenge. To maintain technical integrity, the following hardware/native capabilities are simulated in the browser:
+
+- **Camera stream:** Browser simulation using an optimized high-resolution portrait image with dynamic CSS filters (not raw hardware sensor frames).
+- **Steadiness sensor:** Web `DeviceMotionEvent` acceleration heuristic (filtered magnitude) or on-screen slider/keyboard simulator, not true multi-axis gyroscope angular velocity.
+- **Moment Strip:** 7 transformed visual variations derived from a single portrait to demonstrate the rewind UI/UX pattern, not 7 distinct frames from a hardware circular ring buffer.
+- **Group detection:** Simulated multi-face tracking bounding boxes and readiness state machine, not on-device computer vision or face-mesh ML models.
+- **Speech recognition:** Simulated button triggers and keyword hooks, not the native Web Speech API.
+- **Persistence:** In-memory reactive state and transient toast dismissal, not persistent disk or IndexedDB gallery photo storage.

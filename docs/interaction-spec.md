@@ -61,7 +61,7 @@ STILL does not relocate the button; it redesigns the interaction model from firs
 | **Discoverability** | High | First-time users wonder *"Where is the button?"* and feel lost. | 1. Interactive 3-step onboarding sheet on first launch.<br/>2. Ambient pulsing **ghost ring** on viewfinder with coach text: *"Tap what you want to keep"*. |
 | **Accidental Captures** | Medium | Phone takes photos automatically in pocket or while walking. | Tapping alone **never** captures; sustained device steadiness (accelerometer variance < threshold for 800ms) is strictly enforced. |
 | **Loss of Precision** | Medium | User feels they lost control over the exact split-second. | Post-capture **Moment Strip** presents 7 candidate frames with a suggested frame pre-selected (precomputed in prototype). |
-| **Motor Impairments & Tremors** | High | Users with essential tremors or parkinsonism cannot keep phone still. | 1. Configurable hold time in Settings (400–1500 ms).<br/>2. Voice command trigger (*"Capture"* / *"Cheese"*, simulated in prototype).<br/>3. Physical key fallback ('C' key in prototype; volume keys in native apps). |
+| **Tap Tremor & Alternate Triggers** | Medium | Users looking to avoid screen tap impact or wanting hands-free triggering. | 1. Configurable hold time in Settings (400–1500 ms).<br/>2. Voice trigger (*"Capture"* / *"Cheese"*, simulated in prototype).<br/>3. Physical key fallback ('C' key in prototype; volume keys in native apps). All alternate triggers still require phone stillness before capture. |
 | **Unwanted Captures** | Low | A capture completed that the user did not want stored. | Prominent 5-second **"Saved · Undo"** toast allows single-tap immediate deletion. |
 
 ---
@@ -87,7 +87,7 @@ STILL does not relocate the button; it redesigns the interaction model from firs
 | `LOCKING` | `UNSTEADY(>250ms)` | `CANCELLED` | Drain ring gauge at 2× speed; soft error haptic (30ms); toast: *"Too much movement"*. |
 | `CANCELLED` | `ANIM_DONE` | `FOCUSED` | Retain focus pin at `(x,y)` to enable immediate re-lock without re-tapping. |
 | `LOCKING` | `PROGRESS >= 1.0` | `CAPTURED` | Multi-pulse haptic `[18ms, 30ms, 18ms]`; perimeter viewport bloom; snapshot buffer. |
-| `CAPTURED` | `ANIM_DONE` | `REVIEW` | Animate Moment Strip from bottom; pre-select frame with highest sharpness index. |
+| `CAPTURED` | `ANIM_DONE` | `REVIEW` | Animate Moment Strip from bottom; pre-select suggested frame (simulated in prototype). |
 | `REVIEW` | `PICK_FRAME(i)` | `REVIEW` | Swap primary preview; reset autosave countdown timer. |
 | `REVIEW` | `TIMEOUT(4s)` | `SAVED` | Commit chosen frame; dismiss strip; surface toast: *"Saved · Undo"*. |
 | `SAVED` | `UNDO(<=5s)` | `IDLE` | Purge saved frame from storage; toast: *"Photo removed"*. |
@@ -101,7 +101,7 @@ export const HOLD_TIME_MS = 800;          // Base required stillness (configurab
 export const UNSTEADY_GRACE_MS = 250;     // Permitted micro-jitter window before cancel
 export const STEADY_THRESHOLD = 0.7;      // Accelerometer variance threshold (0.0 = chaotic, 1.0 = rock solid)
 export const LOW_LIGHT_MULTIPLIER = 1.5;  // Extended exposure hold in low-lux conditions (1200ms)
-export const BUFFER_SECONDS = 3.0;        // Rolling rolling buffer window
+export const BUFFER_SECONDS = 3.0;        // Rolling buffer window
 export const CANDIDATE_FRAMES = 7;        // Frames displayed in Moment Strip
 export const AUTOSAVE_MS = 4000;          // Auto-commit timer if user does not touch strip
 export const UNDO_WINDOW_MS = 5000;       // Post-save undo grace period
@@ -119,3 +119,29 @@ export const COOLDOWN_MS = 600;           // Guard against accidental double-cap
 | **Capture Completed** | `[18ms, 30ms, 18ms]` | Short 40ms camera shutter click | Viewport perimeter bloom (no white flash) |
 | **Motion Cancelled** | 30ms dull pulse | None | Amber ring drains rapidly to red track |
 | **Auto-Saved** | 12ms soft confirmation | None | Toast message with interactive Undo CTA |
+
+---
+
+## 8. Moment Strip Buffer Architecture: Prototype vs. Production
+
+### 8.1 Browser Prototype Stand-ins
+In this browser prototype, the 7 frames in the Moment Strip are visual stand-ins derived from a single high-resolution portrait photograph. Dynamic CSS zoom, pan, brightness, and warmth transforms simulate candidate frames along a temporal sequence. This allows the prototype to demonstrate the card-scrubbing ergonomics, automatic "Suggested" moment indicator, and autosave lifecycle with zero external video pipeline dependencies.
+
+### 8.2 Production Circular Ring Buffer Specification
+In a production native mobile implementation (iOS AVFoundation / Android CameraX):
+1. **Ring Buffer Allocation:** The camera pipeline allocates an in-memory circular ring buffer of YUV/RAW frames running at 30 fps over 3.0 seconds (a FIFO cache of 90 full-resolution frames).
+2. **Foreground Gating:** The buffer records frames only when the viewfinder view is visible and the app is active in the foreground, immediately freeing resources when backgrounded.
+3. **Capture & Sharpness Ranking:** When the 0.8s stillness condition is met, the circular buffer freezes. A background worker samples candidate frames at 250ms intervals across the preceding 1.5 seconds, computes Laplacian variance / high-frequency gradient metrics to identify the frame with minimal motion blur, and pre-selects it as the Suggested candidate.
+
+---
+
+## 9. Prototype Limitations (Simulated vs Real)
+
+This project is a browser-based UI/UX prototype created for the VinnovateIT design challenge. To maintain technical integrity, the following hardware/native capabilities are simulated in the browser:
+
+- **Camera stream:** Browser simulation using an optimized high-resolution portrait image with dynamic CSS filters (not raw hardware sensor frames).
+- **Steadiness sensor:** Web `DeviceMotionEvent` acceleration heuristic (filtered magnitude) or on-screen slider/keyboard simulator, not true multi-axis gyroscope angular velocity.
+- **Moment Strip:** 7 transformed visual variations derived from a single portrait to demonstrate the rewind UI/UX pattern, not 7 distinct frames from a hardware circular ring buffer.
+- **Group detection:** Simulated multi-face tracking bounding boxes and readiness state machine, not on-device computer vision or face-mesh ML models.
+- **Speech recognition:** Simulated button triggers and keyword hooks, not the native Web Speech API.
+- **Persistence:** In-memory reactive state and transient toast dismissal, not persistent disk or IndexedDB gallery photo storage.
