@@ -5,6 +5,7 @@ import { GlassChip } from '../components/GlassChip';
 import { IconButton } from '../components/IconButton';
 import { Toast } from '../components/Toast';
 import { Sparkles, Check, X, Share2 } from 'lucide-react';
+import { getAssetPath, getScreenUrl } from '../utils/assetPath';
 
 interface MomentStripScreenProps {
   pureDevice?: boolean;
@@ -41,7 +42,7 @@ export const MomentStripScreen: React.FC<MomentStripScreenProps> = ({ pureDevice
           backgroundColor: 'var(--surface-1)',
         }}>
           <img
-            src={`/scenes/moment-${selectedIndex}.jpg`}
+            src={getAssetPath(`scenes/moment-${selectedIndex}.jpg`)}
             alt={`Selected moment frame ${selectedIndex + 1}`}
             style={{
               width: '100%',
@@ -73,7 +74,11 @@ export const MomentStripScreen: React.FC<MomentStripScreenProps> = ({ pureDevice
             alignItems: 'center',
             zIndex: 10,
           }}>
-            <IconButton icon={<X size={18} />} aria-label="Discard selection and return to camera" />
+            <IconButton
+              icon={<X size={18} />}
+              aria-label="Discard selection and return to camera"
+              onClick={() => { window.location.href = getScreenUrl('screen=live'); }}
+            />
 
             <div style={{ position: 'relative' }}>
               <GlassChip icon={<Sparkles size={14} />} variant="accent">
@@ -99,7 +104,14 @@ export const MomentStripScreen: React.FC<MomentStripScreenProps> = ({ pureDevice
               )}
             </div>
 
-            <IconButton icon={<Share2 size={18} />} aria-label="Share photo" />
+            <IconButton
+              icon={<Share2 size={18} />}
+              aria-label="Share photo"
+              onClick={() => {
+                setToastMessage('Share sheet opened (simulated)');
+                setTimeout(() => setToastMessage(null), 2000);
+              }}
+            />
           </div>
 
           {/* Toast Variant (if saved or active) */}
@@ -163,7 +175,7 @@ export const MomentStripScreen: React.FC<MomentStripScreenProps> = ({ pureDevice
           }}>
             <button
               type="button"
-              onClick={() => { window.location.href = '/?screen=moments&selected=3&saved=1'; }}
+              onClick={() => { window.location.href = getScreenUrl(`screen=moments&selected=${selectedIndex}&saved=1`); }}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',

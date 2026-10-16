@@ -3,6 +3,7 @@ import { PhoneFrame } from '../components/PhoneFrame';
 import { LockRing } from '../components/LockRing';
 import { GlassChip } from '../components/GlassChip';
 import { Hand, Sparkles, Sliders } from 'lucide-react';
+import { getAssetPath, getScreenUrl } from '../utils/assetPath';
 
 interface OnboardingScreenProps {
   pureDevice?: boolean;
@@ -42,7 +43,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ pureDevice =
         }}>
           {/* Background Scene */}
           <img
-            src="/scenes/portrait-subject.jpg"
+            src={getAssetPath('scenes/portrait-subject.jpg')}
             alt="Viewfinder preview subject"
             style={{
               position: 'absolute',
@@ -190,7 +191,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ pureDevice =
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)', alignItems: 'center' }}>
             <button
               type="button"
-              onClick={() => { window.location.href = '/?screen=idle'; }}
+              onClick={() => { window.location.href = getScreenUrl('screen=idle'); }}
               style={{
                 width: '100%',
                 padding: 'var(--space-3) var(--space-4)',
@@ -210,7 +211,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ pureDevice =
             </button>
 
             <a
-              href="/?screen=idle"
+              href={getScreenUrl('screen=idle')}
               style={{
                 color: 'var(--text-dim)',
                 fontSize: 'var(--text-caption)',

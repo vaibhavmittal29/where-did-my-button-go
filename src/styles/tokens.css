@@ -14,11 +14,15 @@
   --danger: #FF6B5E;
   --danger-soft: rgba(255, 107, 94, 0.15);
   --ring-track: rgba(255, 255, 255, 0.28);
-  --focus-ring: rgba(255, 176, 32, 0.6);
+  /* Aliases for backwards and component compatibility (P1-11) */
+  --border: rgba(255, 255, 255, 0.08);
+  --text-muted: #A3A3B2;
 
   /* 5.2 Typography Scale */
   --font-family-display: 'Space Grotesk', system-ui, -apple-system, sans-serif;
   --font-family-body: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-display: var(--font-family-display);
+  --font-body: var(--font-family-body);
 
   --text-caption: 12px;
   --text-small: 14px;
@@ -36,6 +40,7 @@
   --space-2: 8px;
   --space-3: 12px;
   --space-4: 16px;
+  --space-5: 20px;
   --space-6: 24px;
   --space-8: 32px;
   --space-12: 48px;

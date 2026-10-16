@@ -5,6 +5,7 @@ import { ModeCarousel } from '../components/ModeCarousel';
 import { IconButton } from '../components/IconButton';
 import { GlassChip } from '../components/GlassChip';
 import { Settings2, RotateCcw, Zap, Mic, Users } from 'lucide-react';
+import { getAssetPath, getScreenUrl } from '../utils/assetPath';
 
 interface GroupModeScreenProps {
   pureDevice?: boolean;
@@ -41,7 +42,7 @@ export const GroupModeScreen: React.FC<GroupModeScreenProps> = ({ pureDevice = f
       }}>
         {/* Full-Bleed Viewfinder Photo (4 University Friends Facing Camera) */}
         <img
-          src="/scenes/group-campus.jpg"
+          src={getAssetPath('scenes/group-campus.jpg')}
           alt="University campus group of 4 friends smiling at camera"
           style={{
             position: 'absolute',
@@ -149,27 +150,37 @@ export const GroupModeScreen: React.FC<GroupModeScreenProps> = ({ pureDevice = f
             alignItems: 'center',
             justifyContent: 'space-between',
           }}>
-            {/* Gallery Thumbnail */}
-            <div style={{
-              width: '44px',
-              height: '44px',
-              borderRadius: 'var(--radius-card)',
-              overflow: 'hidden',
-              border: '1.5px solid rgba(255, 255, 255, 0.25)',
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)',
-            }}>
+            {/* Gallery Thumbnail (Semantic button for accessibility) */}
+            <button
+              type="button"
+              onClick={() => { window.location.href = getScreenUrl('screen=moments'); }}
+              aria-label="View last capture in Moment Strip"
+              style={{
+                width: '44px',
+                height: '44px',
+                minWidth: '44px',
+                minHeight: '44px',
+                padding: 0,
+                borderRadius: 'var(--radius-card)',
+                overflow: 'hidden',
+                border: '1.5px solid rgba(255, 255, 255, 0.25)',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)',
+                background: 'transparent',
+                cursor: 'pointer',
+              }}
+            >
               <img
-                src="/scenes/portrait-subject.jpg"
+                src={getAssetPath('scenes/portrait-subject.jpg')}
                 alt="Gallery thumbnail"
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
               />
-            </div>
+            </button>
 
             {/* Mode Carousel (Group Mode Highlighted) */}
             <ModeCarousel
               activeMode="group"
               onModeChange={(m) => {
-                if (m === 'still') window.location.href = '/?screen=idle';
+                if (m === 'still') window.location.href = getScreenUrl('screen=idle');
               }}
             />
 

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Sparkles } from 'lucide-react';
 import styles from './MomentStrip.module.css';
+import { getAssetPath } from '../../utils/assetPath';
 
 export interface MomentStripProps {
   frames?: string[];
@@ -12,7 +13,7 @@ export interface MomentStripProps {
 }
 
 export const MomentStrip: React.FC<MomentStripProps> = ({
-  frames = Array.from({ length: 7 }, (_, i) => `/scenes/moment-${i}.jpg`),
+  frames = Array.from({ length: 7 }, (_, i) => getAssetPath(`scenes/moment-${i}.jpg`)),
   selectedIndex,
   bestIndex = 3,
   onSelectFrame,

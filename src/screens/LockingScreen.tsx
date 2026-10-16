@@ -5,6 +5,7 @@ import { ModeCarousel } from '../components/ModeCarousel';
 import { IconButton } from '../components/IconButton';
 import { GlassChip } from '../components/GlassChip';
 import { Settings2, RotateCcw, Zap, Sun, Hand, Activity } from 'lucide-react';
+import { getAssetPath, getScreenUrl } from '../utils/assetPath';
 
 interface LockingScreenProps {
   pureDevice?: boolean;
@@ -30,7 +31,7 @@ export const LockingScreen: React.FC<LockingScreenProps> = ({ pureDevice = false
       }}>
         {/* Full-Bleed Viewfinder Photo (dimmed 8% to highlight focus ring) */}
         <img
-          src="/scenes/portrait-subject.jpg"
+          src={getAssetPath('scenes/portrait-subject.jpg')}
           alt="Subject being locked and tracked"
           style={{
             position: 'absolute',
@@ -227,21 +228,31 @@ export const LockingScreen: React.FC<LockingScreenProps> = ({ pureDevice = false
             alignItems: 'center',
             justifyContent: 'space-between',
           }}>
-            {/* Gallery Thumbnail */}
-            <div style={{
-              width: '44px',
-              height: '44px',
-              borderRadius: 'var(--radius-card)',
-              overflow: 'hidden',
-              border: '1.5px solid rgba(255, 255, 255, 0.25)',
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)',
-            }}>
+            {/* Gallery Thumbnail (Semantic button for accessibility) */}
+            <button
+              type="button"
+              onClick={() => { window.location.href = getScreenUrl('screen=moments'); }}
+              aria-label="View last capture in Moment Strip"
+              style={{
+                width: '44px',
+                height: '44px',
+                minWidth: '44px',
+                minHeight: '44px',
+                padding: 0,
+                borderRadius: 'var(--radius-card)',
+                overflow: 'hidden',
+                border: '1.5px solid rgba(255, 255, 255, 0.25)',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)',
+                background: 'transparent',
+                cursor: 'pointer',
+              }}
+            >
               <img
-                src="/scenes/moment-3.jpg"
+                src={getAssetPath('scenes/moment-3.jpg')}
                 alt="Gallery thumbnail"
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
               />
-            </div>
+            </button>
 
             {/* Mode Carousel */}
             <ModeCarousel activeMode="still" />

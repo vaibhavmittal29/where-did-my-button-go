@@ -29,24 +29,28 @@ export function useSteadiness(options: UseSteadinessOptions = {}) {
     }, 450);
   }, []);
 
-  // 1. Spacebar Hold Simulation for Laptop / Desktop Demo
+  // 1. Spacebar Hold Simulation for Laptop / Desktop Demo (P1-01)
+  // Matching PLAN.md: "Hold Spacebar = steady (0.95), Release Spacebar = unsteady (0.35)"
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Ignore if user is interacting with an input or form control
-      if (['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON'].includes((e.target as HTMLElement)?.tagName)) return;
+      // Ignore if user is interacting with an input, button, select, or custom control
+      if (['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON'].includes((e.target as HTMLElement)?.tagName) ||
+          (e.target as HTMLElement)?.closest('[role="button"], [role="tab"], [contenteditable]')) return;
       if (e.code === 'Space' && !e.repeat) {
         e.preventDefault();
         setIsHoldingSpace(true);
-        setSteadinessState(0.96);
+        setSteadinessState(0.95);
       }
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {
-      if (['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON'].includes((e.target as HTMLElement)?.tagName) ||
+          (e.target as HTMLElement)?.closest('[role="button"], [role="tab"], [contenteditable]')) return;
       if (e.code === 'Space') {
         e.preventDefault();
         setIsHoldingSpace(false);
-        setSteadinessState(baseValueRef.current);
+        // Release spacebar drops steadiness to unsteady 0.35
+        setSteadinessState(0.35);
       }
     };
 
@@ -96,32 +100,49 @@ export function useSteadiness(options: UseSteadinessOptions = {}) {
     setIsRealSensorEnabled(true);
   }, [isRealSensorEnabled]);
 
-  // 3. Real Motion Listener (only active when explicitly enabled)
+  // 3. Real Motion Listener (P1-06: with accelerationIncludingGravity delta fallback)
   useEffect(() => {
     if (!isRealSensorEnabled || typeof window === 'undefined') return;
 
     let lastTime = Date.now();
     let smoothedJitter = 0;
+    let lastAccG: { x: number; y: number; z: number } | null = null;
 
     const handleMotion = (event: DeviceMotionEvent) => {
       const now = Date.now();
       if (now - lastTime < 50) return; // 20Hz sample rate
       lastTime = now;
 
-      // Prefer acceleration excluding gravity; fallback to accelerationIncludingGravity with high-pass delta
+      // Prefer linear acceleration (excluding gravity)
       const acc = event.acceleration;
-      if (!acc || (acc.x === null && acc.y === null && acc.z === null)) {
-        // Fallback: use event.accelerationIncludingGravity magnitude delta
+      let magnitude = 0;
+
+      if (acc && acc.x !== null && acc.y !== null && acc.z !== null) {
+        setSensorActive(true);
+        magnitude = Math.sqrt(
+          (acc.x || 0) ** 2 +
+          (acc.y || 0) ** 2 +
+          (acc.z || 0) ** 2
+        );
+      } else if (event.accelerationIncludingGravity) {
+        // Fallback for Android Chrome / devices where linear acceleration is null:
+        // Use high-pass delta of accelerationIncludingGravity between successive samples
+        const accG = event.accelerationIncludingGravity;
+        if (accG.x !== null && accG.y !== null && accG.z !== null) {
+          setSensorActive(true);
+          if (lastAccG) {
+            const dx = (accG.x || 0) - lastAccG.x;
+            const dy = (accG.y || 0) - lastAccG.y;
+            const dz = (accG.z || 0) - lastAccG.z;
+            magnitude = Math.sqrt(dx ** 2 + dy ** 2 + dz ** 2);
+          }
+          lastAccG = { x: accG.x || 0, y: accG.y || 0, z: accG.z || 0 };
+        } else {
+          return;
+        }
+      } else {
         return;
       }
-
-      setSensorActive(true);
-
-      const magnitude = Math.sqrt(
-        (acc.x || 0) ** 2 +
-        (acc.y || 0) ** 2 +
-        (acc.z || 0) ** 2
-      );
 
       // Conservative prototype heuristic: smoothed exponential moving average of acceleration magnitude
       smoothedJitter = smoothedJitter * 0.7 + magnitude * 0.3;

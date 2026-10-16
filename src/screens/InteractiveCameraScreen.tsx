@@ -13,9 +13,10 @@ import {
   initialCameraState,
   getEffectiveHoldTime,
 } from '../state/cameraMachine';
-import { UNSTEADY_GRACE_MS } from '../state/constants';
+import { UNSTEADY_GRACE_MS, TIMEOUT_FOCUS_MS, COOLDOWN_MS } from '../state/constants';
 import { useSteadiness } from '../hooks/useSteadiness';
 import { useHaptics } from '../hooks/useHaptics';
+import { getAssetPath, getScreenUrl } from '../utils/assetPath';
 import {
   Settings2,
   RotateCcw,
@@ -45,7 +46,7 @@ export const InteractiveCameraScreen: React.FC = () => {
   const [previewFrameIndex, setPreviewFrameIndex] = useState<number>(3);
   const previewFrameIndexRef = useRef<number>(3);
   const hasResetAutosaveRef = useRef<boolean>(false);
-  const [savedThumbnail, setSavedThumbnail] = useState<string>('/scenes/portrait-subject.jpg');
+  const [savedThumbnail, setSavedThumbnail] = useState<string>(getAssetPath('scenes/portrait-subject.jpg'));
   const [flashActive, setFlashActive] = useState<boolean>(false);
   const [flashMode, setFlashMode] = useState<'off' | 'auto' | 'on'>('auto');
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
@@ -88,7 +89,9 @@ export const InteractiveCameraScreen: React.FC = () => {
   const autosaveStartRef = useRef<number | null>(null);
   const [autosaveProgress, setAutosaveProgress] = useState<number>(0);
   const undoTimeoutRef = useRef<number | null>(null);
+  const undoSecondaryTimerRef = useRef<number | null>(null);
   const groupHoldTimerRef = useRef<number | null>(null);
+  const lastCooldownTimeRef = useRef<number>(0);
 
   const viewfinderRef = useRef<HTMLDivElement>(null);
   const steadinessRef = useRef<number>(steadiness);
@@ -99,21 +102,24 @@ export const InteractiveCameraScreen: React.FC = () => {
   // Determine current scene background based on mode and state
   const getSceneSrc = () => {
     if (state.status === 'REVIEW') {
-      return `/scenes/moment-${previewFrameIndex}.jpg`;
+      return getAssetPath(`scenes/moment-${previewFrameIndex}.jpg`);
     }
     if (state.mode === 'group') {
-      return '/scenes/group-campus.jpg';
+      return getAssetPath('scenes/group-campus.jpg');
     }
     if (state.mode === 'doc') {
-      return '/scenes/whiteboard-notes.jpg';
+      return getAssetPath('scenes/whiteboard-notes.jpg');
     }
-    return '/scenes/portrait-subject.jpg';
+    return getAssetPath('scenes/portrait-subject.jpg');
   };
 
   // 1. Subject Tap Handler (focus pin placement)
   const handleViewfinderTap = (e: React.MouseEvent<HTMLDivElement>) => {
     // Only allow tapping when idle, focused, or locking
     if (state.status === 'REVIEW' || state.status === 'SAVED') return;
+
+    // P1-03: Enforce capture/reset cooldown (600ms) to prevent accidental double-taps
+    if (performance.now() - lastCooldownTimeRef.current < COOLDOWN_MS) return;
 
     // P0-01: Tap to focus MUST only fire when clicking the viewfinder background,
     // not header, footer, controls, chips, buttons, carousel, demo panel, or dialogs.
@@ -139,6 +145,19 @@ export const InteractiveCameraScreen: React.FC = () => {
       }
     }
   }, [state.status, steadiness]);
+
+  // 2b. State Machine: FOCUSED -> IDLE timeout (3000ms) if no steady hold begins (P1-02)
+  useEffect(() => {
+    if (state.status === 'FOCUSED') {
+      const focusTimer = window.setTimeout(() => {
+        dispatch({ type: 'TIMEOUT_FOCUS' });
+      }, TIMEOUT_FOCUS_MS);
+
+      return () => {
+        clearTimeout(focusTimer);
+      };
+    }
+  }, [state.status]);
 
   // 3. State Machine: LOCKING loop (progress accumulation & unsteady detection)
   useEffect(() => {
@@ -231,7 +250,7 @@ export const InteractiveCameraScreen: React.FC = () => {
 
       if (progress >= 1) {
         triggerHaptic('save');
-        setSavedThumbnail(`/scenes/moment-${previewFrameIndexRef.current}.jpg`);
+        setSavedThumbnail(getAssetPath(`scenes/moment-${previewFrameIndexRef.current}.jpg`));
         dispatch({ type: 'TIMEOUT_REVIEW' });
       } else {
         autosaveTimerRef.current = requestAnimationFrame(updateAutosave);
@@ -312,31 +331,54 @@ export const InteractiveCameraScreen: React.FC = () => {
     };
   }, []);
 
-  // Guarded triggers for Volume Key & Voice
+  // Guarded triggers for Volume Key & Voice (P1-04: haptic fired only on accepted transitions)
   const handleVolumeKeyTrigger = useCallback(() => {
-    const isSteady = steadiness >= 0.7;
+    if (!['IDLE', 'FOCUSED', 'LOCKING'].includes(state.status)) {
+      triggerHaptic('error');
+      return;
+    }
+    if (state.mode === 'group' && groupReadyCount < 4) {
+      dispatch({ type: 'VOLUME_KEY', isSteady: true });
+      triggerHaptic('error');
+      return;
+    }
+    const isSteady = steadinessRef.current >= 0.7;
     dispatch({ type: 'VOLUME_KEY', isSteady });
     if (isSteady) {
+      lastCooldownTimeRef.current = performance.now();
       triggerHaptic('capture');
     } else {
       triggerHaptic('error');
     }
-  }, [steadiness, triggerHaptic]);
+  }, [state.status, state.mode, groupReadyCount, triggerHaptic]);
 
   const handleVoiceTrigger = useCallback((phrase: string) => {
-    const isSteady = steadiness >= 0.7;
+    if (!['IDLE', 'FOCUSED', 'LOCKING'].includes(state.status)) {
+      triggerHaptic('error');
+      return;
+    }
+    if (state.mode === 'group' && groupReadyCount < 4) {
+      dispatch({ type: 'VOICE_TRIGGER', phrase, isSteady: true });
+      triggerHaptic('error');
+      return;
+    }
+    const isSteady = steadinessRef.current >= 0.7;
     dispatch({ type: 'VOICE_TRIGGER', phrase, isSteady });
     if (isSteady) {
+      lastCooldownTimeRef.current = performance.now();
       triggerHaptic('capture');
     } else {
       triggerHaptic('error');
     }
-  }, [steadiness, triggerHaptic]);
+  }, [state.status, state.mode, groupReadyCount, triggerHaptic]);
 
-  // 8. Accessibility Fallback Trigger: Volume Key / 'C' key
+  // 8. Accessibility Fallback Trigger: Volume Key / 'C' key (P1-05: ignores interactive custom controls)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON'].includes((e.target as HTMLElement)?.tagName) ||
+          (e.target as HTMLElement)?.closest('button, [role="button"], [role="tab"], [contenteditable]')) {
+        return;
+      }
       if (e.key === 'c' || e.key === 'C') {
         e.preventDefault();
         handleVolumeKeyTrigger();
@@ -346,23 +388,39 @@ export const InteractiveCameraScreen: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleVolumeKeyTrigger]);
 
-  // Handlers for Undo and Reset
+  // Handlers for Undo and Reset (P1-17: track and clean up secondary timeout)
   const handleUndo = useCallback(() => {
     triggerHaptic('tap');
+    lastCooldownTimeRef.current = performance.now();
     if (undoTimeoutRef.current) clearTimeout(undoTimeoutRef.current);
+    if (undoSecondaryTimerRef.current) clearTimeout(undoSecondaryTimerRef.current);
     dispatch({ type: 'UNDO' });
     setToastMessage('Photo removed');
-    setTimeout(() => {
+    undoSecondaryTimerRef.current = window.setTimeout(() => {
       setToastMessage(null);
       dispatch({ type: 'RESET' });
+      undoSecondaryTimerRef.current = null;
     }, 1800);
   }, [triggerHaptic]);
 
   const handleReset = useCallback(() => {
     triggerHaptic('tap');
+    lastCooldownTimeRef.current = 0;
+    if (undoTimeoutRef.current) clearTimeout(undoTimeoutRef.current);
+    if (undoSecondaryTimerRef.current) clearTimeout(undoSecondaryTimerRef.current);
     setToastMessage(null);
     dispatch({ type: 'RESET' });
   }, [triggerHaptic]);
+
+  // Cleanup undo secondary timer on unmount (P1-17)
+  useEffect(() => {
+    return () => {
+      if (undoSecondaryTimerRef.current) {
+        clearTimeout(undoSecondaryTimerRef.current);
+        undoSecondaryTimerRef.current = null;
+      }
+    };
+  }, []);
 
   // Group mode faces
   const groupFaces: FaceData[] = [
@@ -555,9 +613,9 @@ export const InteractiveCameraScreen: React.FC = () => {
               <div
                 style={{
                   backgroundColor: 'var(--surface-1)',
-                  borderTop: '1px solid var(--border)',
+                  borderTop: '1px solid var(--glass-border)',
                   borderRadius: '24px 24px 0 0',
-                  padding: 'var(--space-5) var(--space-4)',
+                  padding: 'var(--space-6) var(--space-4)',
                   display: 'flex',
                   flexDirection: 'column',
                   gap: 'var(--space-4)',
@@ -579,7 +637,7 @@ export const InteractiveCameraScreen: React.FC = () => {
                 {/* Tunable Hold Duration */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
-                    <span style={{ color: 'var(--text-muted)' }}>Stillness Hold Duration</span>
+                    <span style={{ color: 'var(--text-dim)' }}>Stillness Hold Duration</span>
                     <span style={{ color: 'var(--accent)', fontWeight: 600 }}>{state.baseHoldTime} ms</span>
                   </div>
                   <input
@@ -600,19 +658,19 @@ export const InteractiveCameraScreen: React.FC = () => {
                 </div>
 
                 {/* Audio Feedback Toggle */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderTop: '1px solid var(--border)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderTop: '1px solid var(--glass-border)' }}>
                   <div>
                     <div style={{ fontSize: '13px', fontWeight: 500, color: 'var(--text)' }}>Sound & Haptic Feedback</div>
-                    <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Progress clicks and capture confirmation</div>
+                    <div style={{ fontSize: '11px', color: 'var(--text-dim)' }}>Progress clicks and capture confirmation</div>
                   </div>
                   <button
                     onClick={toggleMute}
                     style={{
                       padding: '5px 12px',
                       borderRadius: 'var(--radius-pill)',
-                      border: '1px solid var(--border)',
+                      border: '1px solid var(--glass-border)',
                       backgroundColor: isMuted ? 'transparent' : 'var(--accent)',
-                      color: isMuted ? 'var(--text-muted)' : 'var(--bg)',
+                      color: isMuted ? 'var(--text-dim)' : 'var(--bg)',
                       fontWeight: 600,
                       fontSize: '12px',
                       cursor: 'pointer',
@@ -623,19 +681,19 @@ export const InteractiveCameraScreen: React.FC = () => {
                 </div>
 
                 {/* Hardware Sensors Toggle */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderTop: '1px solid var(--border)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderTop: '1px solid var(--glass-border)' }}>
                   <div>
                     <div style={{ fontSize: '13px', fontWeight: 500, color: 'var(--text)' }}>Hardware Gyroscope</div>
-                    <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{sensorError || 'Use real physical device motion if supported'}</div>
+                    <div style={{ fontSize: '11px', color: 'var(--text-dim)' }}>{sensorError || 'Use real physical device motion if supported'}</div>
                   </div>
                   <button
                     onClick={toggleRealSensor}
                     style={{
                       padding: '5px 12px',
                       borderRadius: 'var(--radius-pill)',
-                      border: '1px solid var(--border)',
+                      border: '1px solid var(--glass-border)',
                       backgroundColor: isRealSensorEnabled ? 'var(--accent)' : 'transparent',
-                      color: isRealSensorEnabled ? 'var(--bg)' : 'var(--text-muted)',
+                      color: isRealSensorEnabled ? 'var(--bg)' : 'var(--text-dim)',
                       fontWeight: 600,
                       fontSize: '12px',
                       cursor: 'pointer',
@@ -809,7 +867,7 @@ export const InteractiveCameraScreen: React.FC = () => {
                       transition: 'width 0.1s ease-out',
                     }} />
                   </div>
-                  <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                  <span style={{ fontSize: '11px', color: 'var(--text-dim)' }}>
                     {steadiness >= 0.7 ? 'Steady' : 'Hold still'}
                   </span>
                 </div>
@@ -842,29 +900,35 @@ export const InteractiveCameraScreen: React.FC = () => {
                 alignItems: 'center',
                 justifyContent: 'space-between',
               }}>
-                {/* Gallery Thumbnail */}
-                <div
+                {/* Gallery Thumbnail (P1-15: semantic button) */}
+                <button
+                  type="button"
                   style={{
                     width: '44px',
                     height: '44px',
+                    minWidth: '44px',
+                    minHeight: '44px',
+                    padding: 0,
                     borderRadius: 'var(--radius-card)',
                     overflow: 'hidden',
                     border: '1.5px solid rgba(255, 255, 255, 0.25)',
                     boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)',
                     cursor: 'pointer',
+                    background: 'transparent',
                   }}
                   onClick={() => {
                     triggerHaptic('tap');
-                    window.location.href = '/?screen=moments';
+                    window.location.href = getScreenUrl('screen=moments');
                   }}
+                  aria-label="View last capture in Moment Strip"
                   title="View last capture in Moment Strip"
                 >
                   <img
                     src={savedThumbnail}
                     alt="Gallery thumbnail"
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                   />
-                </div>
+                </button>
 
                 {/* Mode Carousel (No shutter button here — carousel takes bottom center) */}
                 <ModeCarousel

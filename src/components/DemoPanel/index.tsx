@@ -160,10 +160,10 @@ export const DemoPanel: React.FC<DemoPanelProps> = ({
           <button
             className={styles.actionBtn}
             onClick={() => onTriggerVoice('Cheese')}
-            title="Simulate hands-free voice command trigger"
+            title="Simulate hands-free voice command trigger (prototype simulation)"
           >
             <Mic size={14} color="var(--accent)" />
-            <span>Simulate Voice ("Cheese")</span>
+            <span>Voice: "Cheese" (Sim)</span>
           </button>
 
           <button
@@ -172,24 +172,26 @@ export const DemoPanel: React.FC<DemoPanelProps> = ({
               if (mode !== 'group') onModeChange('group');
               else onSetGroupReady(groupReadyCount === 4 ? 3 : 4);
             }}
+            title="Group mode auto-capture (simulated face tracking)"
           >
             <Users size={14} />
-            <span>{mode === 'group' ? (groupReadyCount === 4 ? 'All 4 Ready' : '3 of 4 Ready') : 'Group Mode'}</span>
+            <span>{mode === 'group' ? (groupReadyCount === 4 ? 'All 4 Ready' : '3 of 4 Ready') : 'Group Mode (Sim)'}</span>
           </button>
 
           <button
             className={`${styles.actionBtn} ${mode === 'doc' ? styles.actionBtnPrimary : ''}`}
             onClick={() => onModeChange(mode === 'doc' ? 'still' : 'doc')}
+            title="Document edge detection layout (prototype simulation)"
           >
             <Zap size={14} />
-            <span>{mode === 'doc' ? 'Doc Mode' : 'Doc Mode'}</span>
+            <span>{mode === 'doc' ? 'Doc Mode' : 'Doc Mode (Sim)'}</span>
           </button>
 
           {onTriggerVolumeKey && (
             <button
               className={styles.actionBtn}
               onClick={onTriggerVolumeKey}
-              title="Physical volume key accessibility fallback ('C' key)"
+              title="Physical volume key accessibility fallback ('C' key on desktop)"
               style={{ gridColumn: 'span 2' }}
             >
               <Volume2 size={14} color="var(--accent)" />
@@ -202,7 +204,7 @@ export const DemoPanel: React.FC<DemoPanelProps> = ({
       {/* Core Interaction Checklist */}
       <div className={styles.section}>
         <span className={styles.sectionTitle}>Interaction Guide</span>
-        <div style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        <div style={{ fontSize: '11px', color: 'var(--text-dim)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
           <div>① <strong>Tap subject</strong> on viewfinder to place focus pin.</div>
           <div>② <strong>Hold steady</strong> ~0.8s (or hold Spacebar) to fill lock ring.</div>
           <div>③ <strong>Movement drains ring</strong> to prevent blurred shots.</div>

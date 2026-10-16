@@ -6,6 +6,7 @@ import { ModeCarousel } from '../components/ModeCarousel';
 import { IconButton } from '../components/IconButton';
 import { GlassChip } from '../components/GlassChip';
 import { Settings2, RotateCcw, Zap, Sun } from 'lucide-react';
+import { getAssetPath, getScreenUrl } from '../utils/assetPath';
 
 interface ViewfinderIdleScreenProps {
   pureDevice?: boolean;
@@ -26,7 +27,7 @@ export const ViewfinderIdleScreen: React.FC<ViewfinderIdleScreenProps> = ({ pure
       }}>
         {/* Full-Bleed Viewfinder Background Photo */}
         <img
-          src="/scenes/portrait-subject.jpg"
+          src={getAssetPath('scenes/portrait-subject.jpg')}
           alt="Camera Viewfinder Subject"
           style={{
             position: 'absolute',
@@ -68,13 +69,21 @@ export const ViewfinderIdleScreen: React.FC<ViewfinderIdleScreenProps> = ({ pure
           alignItems: 'center',
           justifyContent: 'space-between',
         }}>
-          <IconButton icon={<Zap size={18} />} aria-label="Flash mode auto" />
+          <IconButton
+            icon={<Zap size={18} />}
+            aria-label="Flash mode auto (prototype simulation)"
+            onClick={() => { window.location.href = getScreenUrl('screen=live'); }}
+          />
           
           <GlassChip icon={<Sun size={14} />} variant="default">
             Good Light · 1×
           </GlassChip>
 
-          <IconButton icon={<Settings2 size={18} />} aria-label="Open Camera Settings" />
+          <IconButton
+            icon={<Settings2 size={18} />}
+            aria-label="Open Camera Settings (prototype simulation)"
+            onClick={() => { window.location.href = getScreenUrl('screen=live'); }}
+          />
         </header>
 
         {/* Center: Ghost Ring & Coach Mark */}
@@ -109,36 +118,45 @@ export const ViewfinderIdleScreen: React.FC<ViewfinderIdleScreenProps> = ({ pure
             justifyContent: 'space-between',
           }}>
             {/* Gallery Thumbnail (Last Photo) */}
-            <div
+            <button
+              type="button"
               style={{
                 width: '44px',
                 height: '44px',
+                minWidth: '44px',
+                minHeight: '44px',
+                padding: 0,
                 borderRadius: 'var(--radius-card)',
                 overflow: 'hidden',
                 border: '1.5px solid rgba(255, 255, 255, 0.25)',
                 boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)',
                 cursor: 'pointer',
+                background: 'transparent',
               }}
-              role="button"
-              aria-label="View last photo in gallery"
+              aria-label="View last photo in Moment Strip"
+              onClick={() => { window.location.href = getScreenUrl('screen=moments'); }}
             >
               <img
-                src="/scenes/moment-3.jpg"
+                src={getAssetPath('scenes/moment-3.jpg')}
                 alt="Last captured thumbnail"
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
               />
-            </div>
+            </button>
 
             {/* Mode Carousel (Still · Group · Doc) occupies the center */}
             <ModeCarousel
               activeMode="still"
               onModeChange={(m) => {
-                if (m === 'group') window.location.href = '/?screen=group&ready=3';
+                if (m === 'group') window.location.href = getScreenUrl('screen=group&ready=3');
               }}
             />
 
             {/* Lens Switcher */}
-            <IconButton icon={<RotateCcw size={18} />} aria-label="Switch to selfie front camera" />
+            <IconButton
+              icon={<RotateCcw size={18} />}
+              aria-label="Switch lens (prototype simulation)"
+              onClick={() => { window.location.href = getScreenUrl('screen=live'); }}
+            />
           </div>
         </footer>
       </div>

@@ -77,7 +77,7 @@
 
 .steppedText {
   position: absolute;
-  font-family: var(--font-display);
+  font-family: var(--font-family-display);
   font-size: 14px;
   font-weight: 700;
   color: var(--accent);
