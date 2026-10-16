@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>STILL Figma Builder</title>
+  <style>
+    :root {
+      --bg: #0B0B0F;
+      --surface-1: #14141E;
+      --surface-2: #1E1E2C;
+      --accent: #FFB020;
+      --text: #F5F5F7;
+      --text-dim: #A3A3B2;
+      --success: #3DDC97;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 16px;
+    }
+
+    .badge {
+      background-color: var(--accent);
+      color: var(--bg);
+      font-weight: 700;
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      letter-spacing: 0.05em;
+    }
+
+    h1 {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .subtitle {
+      font-size: 12px;
+      color: var(--text-dim);
+      line-height: 1.4;
+    }
+
+    .card {
+      background-color: var(--surface-1);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .feature-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .feature-list li {
+      font-size: 12px;
+      color: var(--text-dim);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .feature-list li span.dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background-color: var(--accent);
+    }
+
+    .btn-primary {
+      background-color: var(--accent);
+      color: var(--bg);
+      border: none;
+      border-radius: 999px;
+      padding: 12px 18px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: opacity 0.15s ease, transform 0.1s ease;
+    }
+
+    .btn-primary:hover {
+      opacity: 0.92;
+      transform: translateY(-1px);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .btn-secondary {
+      background-color: var(--surface-2);
+      color: var(--text);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      transition: background-color 0.15s ease;
+    }
+
+    .btn-secondary:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .status-box {
+      background-color: rgba(61, 220, 151, 0.1);
+      border: 1px solid rgba(61, 220, 151, 0.3);
+      color: var(--success);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 12px;
+      display: none;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <span class="badge">STILL</span>
+    <div>
+      <h1>Canvas Project Generator</h1>
+      <p class="subtitle">VinnovateIT UI/UX Round 1 Submission</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <span>⚡ 1-Click Complete Project Generator</span>
+    </div>
+    <ul class="feature-list">
+      <li><span class="dot"></span> 5 Structured Pages (Cover, Tokens, Components, Screens, Prototype)</li>
+      <li><span class="dot"></span> Local Variables: 12 Colors, 5 Radii, 6 Spacing tokens</li>
+      <li><span class="dot"></span> 6 Master Components (IconButton, GlassChip, LockRing, MomentStrip, Toast, Carousel)</li>
+      <li><span class="dot"></span> 5 iPhone 14/15 Frames (390 × 844 px, 48px corner radius)</li>
+      <li><span class="dot"></span> Interactive Smart Animate prototype wiring</li>
+    </ul>
+
+    <button id="btnBuildAll" class="btn-primary">
+      🚀 Build Entire STILL Project
+    </button>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <span>🛠️ Granular Page Generators</span>
+    </div>
+    <div class="btn-row">
+      <button id="btnBuildTokens" class="btn-secondary">
+        🎨 Design Tokens Only
+      </button>
+      <button id="btnBuildScreens" class="btn-secondary">
+        📱 5 Screens Only
+      </button>
+    </div>
+  </div>
+
+  <div id="statusBox" class="status-box">
+    ✓ Generation in progress... Check your Figma canvas!
+  </div>
+
+  <script>
+    const btnAll = document.getElementById('btnBuildAll');
+    const btnTokens = document.getElementById('btnBuildTokens');
+    const btnScreens = document.getElementById('btnBuildScreens');
+    const statusBox = document.getElementById('statusBox');
+
+    function showStatus(msg) {
+      statusBox.style.display = 'block';
+      statusBox.textContent = msg;
+    }
+
+    btnAll.addEventListener('click', () => {
+      showStatus('⏳ Generating all 5 pages, tokens, components, and prototype...');
+      parent.postMessage({ pluginMessage: { type: 'BUILD_ALL' } }, '*');
+    });
+
+    btnTokens.addEventListener('click', () => {
+      showStatus('🎨 Generating STILL-Tokens collection...');
+      parent.postMessage({ pluginMessage: { type: 'BUILD_TOKENS' } }, '*');
+    });
+
+    btnScreens.addEventListener('click', () => {
+      showStatus('📱 Generating 5 mobile screens on current page...');
+      parent.postMessage({ pluginMessage: { type: 'BUILD_SCREENS' } }, '*');
+    });
+  </script>
+</body>
+</html>
