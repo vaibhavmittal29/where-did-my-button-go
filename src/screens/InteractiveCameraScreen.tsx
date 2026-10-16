@@ -61,9 +61,7 @@ export const InteractiveCameraScreen: React.FC = () => {
   const [flashMode, setFlashMode] = useState<'off' | 'auto' | 'on'>('auto');
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-
-  // Group mode readiness count (3 of 4 or 4 of 4)
-  const [groupReadyCount, setGroupReadyCount] = useState<number>(3);
+  // Group mode readiness count is managed directly in cameraMachine reducer (state.groupReadyCount)
 
   // P1-01: Track continuous steadiness duration
   const steadySinceRef = useRef<number | null>(null);
@@ -333,9 +331,15 @@ export const InteractiveCameraScreen: React.FC = () => {
     }
   }, [state.status]);
 
-  // 7. Group Mode Hands-Free Auto-Capture (P0-04)
+  // 7. Group Mode Hands-Free Auto-Capture (P0-04, P1-01)
   useEffect(() => {
-    if (state.mode !== 'group' || state.status === 'REVIEW' || state.status === 'SAVED') {
+    if (
+      state.mode !== 'group' ||
+      !state.groupAutoCaptureArmed ||
+      state.status === 'REVIEW' ||
+      state.status === 'SAVED' ||
+      state.status === 'CAPTURED'
+    ) {
       if (groupHoldTimerRef.current) {
         clearTimeout(groupHoldTimerRef.current);
         groupHoldTimerRef.current = null;
@@ -344,9 +348,9 @@ export const InteractiveCameraScreen: React.FC = () => {
     }
 
     const isSteady = steadiness >= STEADY_THRESHOLD;
-    const isGroupReady = groupReadyCount >= 4;
+    const isGroupReady = state.groupReadyCount >= state.groupTotalCount;
 
-    if (isGroupReady && isSteady) {
+    if (isGroupReady && isSteady && state.groupAutoCaptureArmed) {
       if (!groupHoldTimerRef.current) {
         groupHoldTimerRef.current = window.setTimeout(() => {
           dispatch({ type: 'PROGRESS_COMPLETE' });
@@ -359,7 +363,14 @@ export const InteractiveCameraScreen: React.FC = () => {
         groupHoldTimerRef.current = null;
       }
     }
-  }, [state.mode, state.status, groupReadyCount, steadiness >= STEADY_THRESHOLD]);
+  }, [
+    state.mode,
+    state.status,
+    state.groupReadyCount,
+    state.groupTotalCount,
+    state.groupAutoCaptureArmed,
+    steadiness >= STEADY_THRESHOLD,
+  ]);
 
   // Clean up group timer on unmount
   useEffect(() => {
@@ -381,7 +392,7 @@ export const InteractiveCameraScreen: React.FC = () => {
       triggerHaptic('error');
       return;
     }
-    if (state.mode === 'group' && groupReadyCount < 4) {
+    if (state.mode === 'group' && state.groupReadyCount < state.groupTotalCount) {
       dispatch({ type: 'VOLUME_KEY', isSteady: true });
       triggerHaptic('error');
       return;
@@ -399,7 +410,7 @@ export const InteractiveCameraScreen: React.FC = () => {
     } else {
       triggerHaptic('error');
     }
-  }, [state.status, state.mode, groupReadyCount, triggerHaptic]);
+  }, [state.status, state.mode, state.groupReadyCount, state.groupTotalCount, triggerHaptic]);
 
   const handleVoiceTrigger = useCallback((phrase: string) => {
     if (performance.now() - lastCooldownTimeRef.current < COOLDOWN_MS) {
@@ -410,7 +421,7 @@ export const InteractiveCameraScreen: React.FC = () => {
       triggerHaptic('error');
       return;
     }
-    if (state.mode === 'group' && groupReadyCount < 4) {
+    if (state.mode === 'group' && state.groupReadyCount < state.groupTotalCount) {
       dispatch({ type: 'VOICE_TRIGGER', phrase, isSteady: true });
       triggerHaptic('error');
       return;
@@ -436,9 +447,9 @@ export const InteractiveCameraScreen: React.FC = () => {
     } else {
       triggerHaptic('error');
     }
-  }, [state.status, state.mode, groupReadyCount, triggerHaptic]);
+  }, [state.status, state.mode, state.groupReadyCount, state.groupTotalCount, triggerHaptic]);
 
-  // 8. Accessibility Fallback Trigger: Volume Key / 'C' key (P1-05: ignores interactive custom controls)
+  // 8. Alternate Input Trigger: Volume Key / 'C' key (requires continuous stillness, avoids screen tap shake)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON'].includes((e.target as HTMLElement)?.tagName) ||
@@ -460,6 +471,10 @@ export const InteractiveCameraScreen: React.FC = () => {
     lastCooldownTimeRef.current = performance.now();
     if (undoTimeoutRef.current) clearTimeout(undoTimeoutRef.current);
     if (undoSecondaryTimerRef.current) clearTimeout(undoSecondaryTimerRef.current);
+    if (groupHoldTimerRef.current) {
+      clearTimeout(groupHoldTimerRef.current);
+      groupHoldTimerRef.current = null;
+    }
     dispatch({ type: 'UNDO' });
     setToastMessage('Photo removed');
     undoSecondaryTimerRef.current = window.setTimeout(() => {
@@ -474,9 +489,11 @@ export const InteractiveCameraScreen: React.FC = () => {
     lastCooldownTimeRef.current = 0;
     if (undoTimeoutRef.current) clearTimeout(undoTimeoutRef.current);
     if (undoSecondaryTimerRef.current) clearTimeout(undoSecondaryTimerRef.current);
+    if (groupHoldTimerRef.current) {
+      clearTimeout(groupHoldTimerRef.current);
+      groupHoldTimerRef.current = null;
+    }
     setToastMessage(null);
-    setGroupReadyCount(3);
-    dispatch({ type: 'SET_GROUP_READY', count: 3 });
     dispatch({ type: 'RESET' });
   }, [triggerHaptic]);
 
@@ -492,7 +509,7 @@ export const InteractiveCameraScreen: React.FC = () => {
 
   // Group mode faces
   const groupFaces: FaceData[] = [
-    { id: '1', name: groupReadyCount >= 4 ? 'Tara' : 'Tara · Blinking', top: '46.5%', left: '11.5%', width: '14%', height: '8%', isReady: groupReadyCount >= 4 },
+    { id: '1', name: state.groupReadyCount >= 4 ? 'Tara' : 'Tara · Blinking', top: '46.5%', left: '11.5%', width: '14%', height: '8%', isReady: state.groupReadyCount >= 4 },
     { id: '2', name: 'Aarav', top: '47%', left: '31%', width: '12.5%', height: '8%', isReady: true },
     { id: '3', name: 'Pooja', top: '48%', left: '54.5%', width: '12%', height: '8%', isReady: true },
     { id: '4', name: 'Neha', top: '46%', left: '73%', width: '12.5%', height: '8%', isReady: true },
@@ -578,10 +595,10 @@ export const InteractiveCameraScreen: React.FC = () => {
               position: 'absolute',
               inset: '16px',
               borderRadius: '32px',
-              border: `3px solid ${groupReadyCount >= 4 ? 'var(--success)' : 'var(--accent)'}`,
+              border: `3px solid ${state.groupReadyCount >= 4 ? 'var(--success)' : 'var(--accent)'}`,
               opacity: 0.85,
               pointerEvents: 'none',
-              boxShadow: `0 0 24px ${groupReadyCount >= 4 ? 'rgba(61, 220, 151, 0.4)' : 'rgba(255, 176, 32, 0.3)'}`,
+              boxShadow: `0 0 24px ${state.groupReadyCount >= 4 ? 'rgba(61, 220, 151, 0.4)' : 'rgba(255, 176, 32, 0.3)'}`,
               transition: 'all var(--dur-base) var(--ease-out)',
               zIndex: 12,
             }} />
@@ -636,9 +653,9 @@ export const InteractiveCameraScreen: React.FC = () => {
             {state.mode === 'group' ? (
               <GlassChip
                 icon={<Users size={14} />}
-                variant={groupReadyCount >= 4 ? 'success' : 'accent'}
+                variant={state.groupReadyCount >= 4 ? 'success' : 'accent'}
               >
-                {groupReadyCount >= 4 ? 'All 4 Ready (simulated) · Hold still to capture' : `${groupReadyCount} of 4 ready (simulated)`}
+                {state.groupReadyCount >= 4 ? 'All 4 Ready (simulated) · Hold still to capture' : `${state.groupReadyCount} of 4 ready (simulated)`}
               </GlassChip>
             ) : state.isLowLight ? (
               <GlassChip icon={<Moon size={14} />} variant="accent">
@@ -1030,7 +1047,7 @@ export const InteractiveCameraScreen: React.FC = () => {
         steadiness={steadiness}
         isHoldingSpace={isHoldingSpace}
         isLowLight={state.isLowLight}
-        groupReadyCount={groupReadyCount}
+        groupReadyCount={state.groupReadyCount}
         isMuted={isMuted}
         isRealSensorEnabled={isRealSensorEnabled}
         sensorStatusText={sensorStatusText}
@@ -1041,7 +1058,6 @@ export const InteractiveCameraScreen: React.FC = () => {
         onTriggerShake={triggerShake}
         onToggleLowLight={() => dispatch({ type: 'SET_LOW_LIGHT', isLowLight: !state.isLowLight })}
         onSetGroupReady={(count) => {
-          setGroupReadyCount(count);
           dispatch({ type: 'SET_GROUP_READY', count });
         }}
         onTriggerVoice={handleVoiceTrigger}

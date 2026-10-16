@@ -102,7 +102,7 @@ All failure modes were verified via unit state tests (`scripts/test-machine.ts`)
 | **4. Accidental Tap** | Single tap on screen | Places focus pin; never captures without stillness | (Focus pin appears empty) | Verified in state machine |
 | **5. High-Speed Movement** | Subject dashes across frame | 3s rolling buffer captures 7 frames; best frame preselected | *"Pick your favourite moment"* | Verified in Moment Strip |
 | **6. Group Member Not Ready** | Someone blinks or looks away | Face chips show missing member; capture holds until ready | *"3 of 4 ready"* (Tara blinking) | Verified in Screen 5 & Interactive mode |
-| **7. Motor Impairment / Tremor** | User cannot hold steady | Physical key ('C' key in prototype) or voice trigger provides capture | *"Accessibility capture (Volume key)"* | Verified via key listener & A11y trigger |
+| **7. Alternate Triggers (Tap Tremor Fallback)** | User wants to trigger capture without touching screen | Physical key ('C' key in prototype) or voice trigger triggers capture after steady hold | *"Accessibility capture (Simulated volume key)"* | Verified via key listener & A11y trigger |
 | **8. Unwanted Capture** | Photo auto-saved accidentally | 5s countdown toast provides 1-tap Undo deletion | *"Saved · Undo"* → *"Photo removed"* | Verified in Undo loop test |
 | **9. Buttonless Discoverability** | First-time user opens camera | 3-card onboarding demo + pulsing ghost ring in idle | *"No shutter. Just stillness."* | Verified on `/` & `/?screen=onboarding` |
 

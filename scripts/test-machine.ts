@@ -370,4 +370,53 @@ console.log('--- RUNNING CAMERA STATE MACHINE SANITY TESTS ---\n');
   console.log('✔ Test 12 Passed: Invariants and reference stability verified.\n');
 }
 
-console.log('ALL 12 STATE MACHINE TESTS PASSED SUCCESSFULLY! 🎉');
+// SCENARIO 13: Group Auto-Capture Epoch & Undo Disarm (P1-01 / Phase 1.1)
+{
+  console.log('Test 13: Group Auto-Capture Epoch & Undo Disarm');
+  let state: typeof initialCameraState = {
+    ...initialCameraState,
+    mode: 'group',
+    groupReadyCount: 3,
+    groupTotalCount: 4,
+  };
+  assert.strictEqual(state.groupAutoCaptureArmed, false);
+
+  // Arming epoch: setting count to 4 arms auto-capture
+  state = cameraReducer(state, { type: 'SET_GROUP_READY', count: 4 });
+  assert.strictEqual(state.groupReadyCount, 4);
+  assert.strictEqual(state.groupAutoCaptureArmed, true);
+
+  // Capture completes -> disarms auto-capture
+  state = cameraReducer(state, { type: 'PROGRESS_COMPLETE' });
+  assert.strictEqual(state.status, 'CAPTURED');
+  assert.strictEqual(state.groupAutoCaptureArmed, false);
+
+  // Review -> Saved -> Undo
+  state = cameraReducer(state, { type: 'ANIM_DONE' });
+  assert.strictEqual(state.status, 'REVIEW');
+  state = cameraReducer(state, { type: 'TIMEOUT_REVIEW' });
+  assert.strictEqual(state.status, 'SAVED');
+
+  state = cameraReducer(state, { type: 'UNDO' });
+  assert.strictEqual(state.status, 'IDLE');
+  assert.strictEqual(state.groupAutoCaptureArmed, false);
+
+  // Attempting auto-capture immediately after Undo must be blocked!
+  const reCaptureBlocked = cameraReducer(state, { type: 'PROGRESS_COMPLETE' });
+  assert.strictEqual(reCaptureBlocked.status, 'IDLE'); // Must remain IDLE, not re-capture!
+  assert.strictEqual(reCaptureBlocked.groupAutoCaptureArmed, false);
+
+  // Epoch reset: user changing readiness to 3 keeps it disarmed
+  state = cameraReducer(state, { type: 'SET_GROUP_READY', count: 3 });
+  assert.strictEqual(state.groupAutoCaptureArmed, false);
+
+  // New readiness epoch: user sets count to 4 re-arms auto-capture
+  state = cameraReducer(state, { type: 'SET_GROUP_READY', count: 4 });
+  assert.strictEqual(state.groupAutoCaptureArmed, true);
+  state = cameraReducer(state, { type: 'PROGRESS_COMPLETE' });
+  assert.strictEqual(state.status, 'CAPTURED');
+
+  console.log('✔ Test 13 Passed: Group auto-capture epoch disarmed on capture and through Undo.\n');
+}
+
+console.log('ALL 13 STATE MACHINE TESTS PASSED SUCCESSFULLY! 🎉');

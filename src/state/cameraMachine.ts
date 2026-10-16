@@ -32,6 +32,7 @@ export interface CameraState {
   canUndo: boolean;
   groupReadyCount: number;
   groupTotalCount: number;
+  groupAutoCaptureArmed: boolean;
 }
 
 export type CameraAction =
@@ -67,6 +68,7 @@ export const initialCameraState: CameraState = {
   canUndo: false,
   groupReadyCount: 3,
   groupTotalCount: 4,
+  groupAutoCaptureArmed: false,
 };
 
 export function getEffectiveHoldTime(isLowLight: boolean, baseHoldTime: number = HOLD_TIME_MS): number {
@@ -77,8 +79,13 @@ export function canCapture(state: CameraState): boolean {
   if (['CAPTURED', 'REVIEW', 'SAVED'].includes(state.status)) {
     return false;
   }
-  if (state.mode === 'group' && state.groupReadyCount < state.groupTotalCount) {
-    return false;
+  if (state.mode === 'group') {
+    if (state.groupReadyCount < state.groupTotalCount) {
+      return false;
+    }
+    if (!state.groupAutoCaptureArmed) {
+      return false;
+    }
   }
   return true;
 }
@@ -98,6 +105,7 @@ export function cameraReducer(state: CameraState, action: CameraAction): CameraS
         progress: 0,
         statusMessage: null,
         canUndo: false,
+        groupAutoCaptureArmed: state.mode === 'group' ? state.groupReadyCount >= state.groupTotalCount : false,
       };
     }
 
@@ -144,6 +152,7 @@ export function cameraReducer(state: CameraState, action: CameraAction): CameraS
           status: 'CAPTURED',
           progress: 1,
           statusMessage: 'Captured!',
+          groupAutoCaptureArmed: false,
         };
       }
       return {
@@ -174,10 +183,10 @@ export function cameraReducer(state: CameraState, action: CameraAction): CameraS
 
     case 'PROGRESS_COMPLETE': {
       // P0-06: In normal still/doc mode, capture can ONLY complete from 'LOCKING'
-      // In group mode, auto-capture can complete from IDLE or FOCUSED hands-free ONLY IF all faces are ready
+      // In group mode, auto-capture can complete from IDLE or FOCUSED hands-free ONLY IF all faces are ready and armed
       if (state.mode === 'group') {
         if (!['LOCKING', 'FOCUSED', 'IDLE'].includes(state.status)) return state;
-        if (state.groupReadyCount < state.groupTotalCount) {
+        if (state.groupReadyCount < state.groupTotalCount || !state.groupAutoCaptureArmed) {
           return state;
         }
       } else {
@@ -188,6 +197,7 @@ export function cameraReducer(state: CameraState, action: CameraAction): CameraS
         status: 'CAPTURED',
         progress: 1,
         statusMessage: 'Captured!',
+        groupAutoCaptureArmed: false,
       };
     }
 
@@ -241,6 +251,7 @@ export function cameraReducer(state: CameraState, action: CameraAction): CameraS
         savedPhoto: false,
         canUndo: false,
         statusMessage: 'Photo removed',
+        groupAutoCaptureArmed: false,
       };
     }
 
@@ -284,6 +295,7 @@ export function cameraReducer(state: CameraState, action: CameraAction): CameraS
         focusPoint: state.focusPoint || { x: 50, y: 50 },
         progress: 1,
         statusMessage: `Voice capture: "${phrase === 'capture' ? 'Capture' : 'Cheese'}"`,
+        groupAutoCaptureArmed: false,
       };
     }
 
@@ -316,6 +328,7 @@ export function cameraReducer(state: CameraState, action: CameraAction): CameraS
         focusPoint: state.focusPoint || { x: 50, y: 50 },
         progress: 1,
         statusMessage: 'Accessibility capture (Simulated volume key)',
+        groupAutoCaptureArmed: false,
       };
     }
 
@@ -327,6 +340,7 @@ export function cameraReducer(state: CameraState, action: CameraAction): CameraS
         focusPoint: null,
         progress: 0,
         statusMessage: null,
+        groupAutoCaptureArmed: false,
       };
     }
 
@@ -351,6 +365,7 @@ export function cameraReducer(state: CameraState, action: CameraAction): CameraS
       return {
         ...state,
         groupReadyCount: clamped,
+        groupAutoCaptureArmed: clamped >= state.groupTotalCount,
         status: lostReadiness ? 'CANCELLED' : state.status,
         statusMessage: lostReadiness
           ? `Group not ready (${clamped}/${state.groupTotalCount} faces ready) — hold steady`
@@ -366,6 +381,7 @@ export function cameraReducer(state: CameraState, action: CameraAction): CameraS
         baseHoldTime: state.baseHoldTime,
         groupReadyCount: initialCameraState.groupReadyCount,
         groupTotalCount: initialCameraState.groupTotalCount,
+        groupAutoCaptureArmed: false,
       };
     }
 

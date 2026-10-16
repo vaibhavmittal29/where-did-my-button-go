@@ -817,7 +817,7 @@ async function wirePrototype(screens) {
     // S3 After Delay (800ms) -> S4 Moments
     s3.reactions = [
       {
-        trigger: { type: 'AFTER_TIMEOUT', timeout: 0.8 },
+        trigger: { type: 'AFTER_TIMEOUT', timeout: 800 },
         actions: [
           {
             type: 'NODE',

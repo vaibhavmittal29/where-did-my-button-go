@@ -194,14 +194,53 @@ async function testInteractive() {
   }
   console.log('✓ Scenario 5c Passed (P0-01): Group Mode with 3 of 4 ready strictly blocks steady hold capture');
 
-    await browser.close();
-    console.log('\n🎉 ALL PHASE 5 INTERACTION SCENARIOS PASSED WITH FLYING COLORS!');
-  } finally {
-    if (serverProcess) {
-      serverProcess.kill();
-    }
+  // Scenario 5d (1.1): Group Mode one-shot auto-capture does not re-capture after Undo
+  await page.locator('button:has-text("Reset")').click();
+  await page.waitForTimeout(300);
+  const groupBtn5d = page.locator('button:has-text("Group Mode")');
+  if (await groupBtn5d.count() > 0) {
+    await groupBtn5d.click();
+    await page.waitForTimeout(300);
   }
-  process.exit(0);
+  // Toggle to All 4 Ready
+  const toggle4Ready = page.locator('button:has-text("3 of 4 Ready")');
+  if (await toggle4Ready.count() > 0) {
+    await toggle4Ready.click();
+    await page.waitForTimeout(300);
+  }
+  // Wait for auto-capture (800ms hold) and enter REVIEW
+  await page.waitForFunction(() => document.body.innerText.includes('Pick your favourite moment'), { timeout: 4000 });
+  // Wait for autosave countdown (~4.5s)
+  await page.waitForFunction(() => document.body.innerText.includes('Saved · Undo'), { timeout: 6000 });
+  // Click Undo
+  await page.locator('button:has-text("Undo")').click();
+  await page.waitForFunction(() => document.body.innerText.includes('Photo removed'), { timeout: 2000 });
+  // Stay steady for 2.2 seconds
+  await page.waitForTimeout(2200);
+  // Assert no new capture or review occurs!
+  const postUndoText = await page.textContent('body');
+  if (postUndoText.includes('Pick your favourite moment') || postUndoText.includes('Saved · Undo')) {
+    throw new Error('Group Mode re-captured after Undo! 1.1 violation.');
+  }
+  console.log('✓ Scenario 5d Passed (1.1): Group Mode auto-capture disarmed through Undo; no re-capture while steady');
+
+  // Scenario 5e (1.2): Group readiness single source of truth in reducer & DemoPanel reset
+  await page.locator('button:has-text("Reset")').click();
+  await page.waitForTimeout(300);
+  const chipText = await page.textContent('body');
+  if (!chipText.includes('3 of 4 ready')) {
+    throw new Error('UI group chip does not match reducer initial 3 of 4 ready state! 1.2 violation.');
+  }
+  console.log('✓ Scenario 5e Passed (1.2): Group readiness is single-sourced in reducer without desync');
+
+  await browser.close();
+  console.log('\n🎉 ALL PHASE 5 INTERACTION SCENARIOS PASSED WITH FLYING COLORS!');
+} finally {
+  if (serverProcess) {
+    serverProcess.kill();
+  }
+}
+process.exit(0);
 }
 
 testInteractive().catch((err) => {

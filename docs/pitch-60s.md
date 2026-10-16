@@ -41,20 +41,20 @@
 ### Minute 3: Group Intelligence, Accessibility & Technical Rigor
 - **2:00 – 2:30:** "The model scales seamlessly:
   - In **Group Mode**, STILL tracks multiple faces. In the campus test scene, it shows readiness per face. A global perimeter ring stays amber until subjects are steady, turning green and firing automatically.
-  - For universal accessibility, STILL enforces high contrast (18.0:1 primary text), 44×44px touch targets (Apple HIG), `aria-live="polite"` screen-reader regions, stepped rings for reduced motion, and redundant fallbacks: adjustable hold time (400–1500 ms), voice trigger, and a physical key fallback ('C' key in prototype; volume keys in native apps)."
+  - For universal accessibility, STILL enforces high contrast (18.0:1 primary text), 44×44px touch targets (Apple HIG), `aria-live="polite"` screen-reader regions, stepped rings for reduced motion, and alternate input fallbacks: adjustable hold time (400–1500 ms), voice trigger, and a physical key fallback ('C' key in prototype; volume keys in native apps) that bypass screen tap shake while requiring phone stillness."
 - **2:30 – 3:00:** "Finally, STILL isn't just a static mockup. I built and verified the entire interactive experience in React 19 and TypeScript, powered by a deterministic finite state machine, Web Audio haptics, and automated Playwright test suites. All four challenge deliverables are fully documented, with 1170×2532 px high-res assets and an A4 case study PDF. Thank you, and I welcome your questions."
 
 ---
 
 ## 3. The Jury Q&A Defense Guide
 
-### Q1: "What if someone has Parkinson's disease, motor tremors, or is wearing winter gloves? They can't hold still for 0.8 seconds."
+### Q1: "What if someone is wearing gloves, holding the phone with two hands, or wants to avoid touching the screen entirely?"
 > **My Answer:**  
-> "Accessibility must be universal, not conditional. I addressed this through a multimodal fallback architecture:
-> 1. **Adjustable Hold Time:** In settings, users can adjust hold time from 400 ms to 1500 ms.
-> 2. **Voice Trigger:** Users can say *'Capture'* or *'Cheese'* (simulated in the prototype), triggering immediate capture.
-> 3. **Physical Key Fallback:** A physical key trigger ('C' in prototype; hardware volume keys in native apps) provides direct tactile capture.
-> Importantly, these are explicit accessibility safeguards rather than the primary interface, ensuring nobody is excluded while preserving the clean zero-button paradigm."
+> "I addressed touch-free and alternate triggering through multimodal inputs:
+> 1. **Adjustable Hold Time:** In settings, users can adjust hold time from 400 ms to 1500 ms depending on handling comfort.
+> 2. **Voice Trigger:** Users can say *'Capture'* or *'Cheese'* (simulated in the prototype); once the phone is held steady, capture occurs without touching the glass.
+> 3. **Physical Key Alternate:** A keyboard key trigger ('C' in prototype; hardware volume keys in native apps) initiates capture once steady without tapping the touchscreen.
+> Importantly, both alternate triggers still require the phone to settle before capture to prevent tap-induced camera shake, while freeing the user from onscreen tap interactions."
 
 ---
 

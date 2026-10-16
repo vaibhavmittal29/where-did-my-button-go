@@ -92,7 +92,7 @@ STILL operates on a deterministic 6-state finite state machine with automatic re
   - Secondary text (`#A3A3B2`): **7.9 : 1** (exceeds 4.5:1 / 7:1 benchmarks)
 - **Screen Reader Announcements:** Dynamic live region (`aria-live="polite"`) announces camera state changes, countdown seconds, and save confirmations in real time.
 - **Vestibular Motion Safety:** Honors `prefers-reduced-motion` by replacing continuous sweeps with discrete stepped percentage ticks (33% → 66% → 100%).
-- **Inclusive Fallbacks:** Adjustable hold time in settings (400–1500 ms), voice trigger (*"Capture"* / *"Cheese"*), and physical key trigger ('C' key). *Note: Voice trigger and volume key capture are simulated in this browser prototype; native iOS/Android builds would connect directly to platform volume buttons and speech APIs.*
+- **Inclusive Fallbacks:** Adjustable hold time in settings (400–1500 ms), voice trigger (*"Capture"* / *"Cheese"*), and physical key trigger ('C' key). *Note: Voice trigger and volume key capture are simulated alternate input triggers in this browser prototype; they require the device to be held steady (settling tap shake) rather than tapping the touchscreen.*
 
 ---
 
@@ -124,7 +124,7 @@ Open **`http://localhost:5173/`** in your browser.
 ### 4. Interactive Keyboard Simulation
 - **Spacebar (Hold):** Simulates holding the device steady.
 - **Spacebar (Release):** Simulates hand movement / camera shake (triggers ring drain).
-- **'C' Key:** Simulates physical volume button accessibility fallback.
+- **'C' Key:** Simulates physical volume button alternate trigger (requires steady hold, avoids touchscreen tap shake).
 - **STILL Lab Panel (Desktop):** Real-time steadiness slider, manual shake trigger, mode switcher, and sound/haptic toggles.
 
 ### 5. Run Test Suite

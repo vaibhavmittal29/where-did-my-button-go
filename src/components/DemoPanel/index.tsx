@@ -193,7 +193,7 @@ export const DemoPanel: React.FC<DemoPanelProps> = ({
             <button
               className={styles.actionBtn}
               onClick={onTriggerVolumeKey}
-              title="Physical volume key accessibility fallback ('C' key on desktop)"
+              title="Simulated physical volume key trigger ('C' key; requires phone held steady, avoids tap shake)"
               style={{ gridColumn: 'span 2' }}
             >
               <Volume2 size={14} color="var(--accent)" />
