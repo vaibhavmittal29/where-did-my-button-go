@@ -1,0 +1,99 @@
+{
+  "generatedAt": "2026-10-17T05:59:43.745Z",
+  "assetCount": 11,
+  "assets": [
+    {
+      "path": "case-study-preview.png",
+      "sizeBytes": 4940378,
+      "sha256": "bd6c221ca4fad2b78fb7e0de291872eef39e2059d8e3f0dfc36f65c32b937927",
+      "dimensions": {
+        "width": 2560,
+        "height": 13610
+      }
+    },
+    {
+      "path": "case-study.pdf",
+      "sizeBytes": 14461281,
+      "sha256": "0ef50455c8c22c21c5519c337523bdfcb6367d3681bccba57d7a6d57582eebd7",
+      "dimensions": null
+    },
+    {
+      "path": "hero-composite.png",
+      "sizeBytes": 2229175,
+      "sha256": "40b46a267ea580e29be29fefb9f67b0fdfc6e58351413b8f31ac244219106904",
+      "dimensions": {
+        "width": 2400,
+        "height": 1350
+      }
+    },
+    {
+      "path": "screens/screen-01-onboarding.png",
+      "sizeBytes": 1038018,
+      "sha256": "dea5662c8c55b3a4cfc1ba164414ae85c19d9ddfaa28f5976d84abc008a60ea7",
+      "dimensions": {
+        "width": 1170,
+        "height": 2532
+      }
+    },
+    {
+      "path": "screens/screen-02-idle.png",
+      "sizeBytes": 1737394,
+      "sha256": "13635f127b1d5c63ab6f88d9f889d75289d4f10b1cc9a6cac664fb9b1998abec",
+      "dimensions": {
+        "width": 1170,
+        "height": 2532
+      }
+    },
+    {
+      "path": "screens/screen-03-locking-annotated.png",
+      "sizeBytes": 2270414,
+      "sha256": "50e99015f487f34f32864c8cf3709083f289274728a8378d13a858c51618591c",
+      "dimensions": {
+        "width": 1170,
+        "height": 2532
+      }
+    },
+    {
+      "path": "screens/screen-03-locking.png",
+      "sizeBytes": 2270138,
+      "sha256": "abaac7e02b4f314e98d67b81482d3b70603c0501d9bf91f9e6de0a10f1034df9",
+      "dimensions": {
+        "width": 1170,
+        "height": 2532
+      }
+    },
+    {
+      "path": "screens/screen-04-moments.png",
+      "sizeBytes": 1404855,
+      "sha256": "6c3663ea1f9f0d521c36d010691794766afa40943f14a518f70fc41b622bd3e2",
+      "dimensions": {
+        "width": 1170,
+        "height": 2532
+      }
+    },
+    {
+      "path": "screens/screen-05-group.png",
+      "sizeBytes": 2122481,
+      "sha256": "f284c9ef9c7908294bd9fa474cea05f760bb2caffea8f5dc862fa0460ae9cba0",
+      "dimensions": {
+        "width": 1170,
+        "height": 2532
+      }
+    },
+    {
+      "path": "user-flow.png",
+      "sizeBytes": 557652,
+      "sha256": "dd75bf4f8630f43e8696f5cc1ff79ffeba1dca34d9b9c204cef3195a3a1be1f7",
+      "dimensions": {
+        "width": 3840,
+        "height": 6400
+      }
+    },
+    {
+      "path": "user-flow.svg",
+      "sizeBytes": 42579,
+      "sha256": "f14b55cb82e09c9e04cb081a030afe0b1186323f85c4c7f25da87ee7bb6cdb92",
+      "dimensions": null
+    }
+  ]
+}

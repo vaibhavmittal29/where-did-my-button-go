@@ -1,6 +1,7 @@
 import { chromium } from 'playwright';
 import path from 'node:path';
 import fs from 'node:fs';
+import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { ensureServer } from './server-helper.mjs';
 
@@ -39,6 +40,11 @@ function getPngDimensions(filePath) {
   const width = buf.readUInt32BE(16);
   const height = buf.readUInt32BE(20);
   return { width, height };
+}
+
+function computeSha256(filePath) {
+  const buf = fs.readFileSync(filePath);
+  return crypto.createHash('sha256').update(buf).digest('hex');
 }
 
 async function runExport() {
@@ -194,6 +200,45 @@ async function runExport() {
 
     await pdfPage.close();
     await pdfContext.close();
+
+    // -------------------------------------------------------------
+    // STEP 4: Generate export/MANIFEST.json (F11)
+    // -------------------------------------------------------------
+    console.log('\n📋 [4/4] Generating export/MANIFEST.json...');
+    const manifestAssets = [];
+    const collectAssets = (dir, prefix = '') => {
+      if (!fs.existsSync(dir)) return;
+      const entries = fs.readdirSync(dir, { withFileTypes: true });
+      for (const ent of entries) {
+        if (ent.name === 'MANIFEST.json' || ent.name.startsWith('.')) continue;
+        const fullPath = path.join(dir, ent.name);
+        const relPath = prefix ? `${prefix}/${ent.name}` : ent.name;
+        if (ent.isDirectory()) {
+          collectAssets(fullPath, relPath);
+        } else if (ent.isFile()) {
+          const stats = fs.statSync(fullPath);
+          const ext = path.extname(ent.name).toLowerCase();
+          const dimensions = ext === '.png' ? getPngDimensions(fullPath) : null;
+          manifestAssets.push({
+            path: relPath,
+            sizeBytes: stats.size,
+            sha256: computeSha256(fullPath),
+            dimensions,
+          });
+        }
+      }
+    };
+    collectAssets(EXPORT_DIR);
+
+    const manifestData = {
+      generatedAt: new Date().toISOString(),
+      assetCount: manifestAssets.length,
+      assets: manifestAssets.sort((a, b) => a.path.localeCompare(b.path)),
+    };
+    const manifestFile = path.join(EXPORT_DIR, 'MANIFEST.json');
+    fs.writeFileSync(manifestFile, JSON.stringify(manifestData, null, 2), 'utf8');
+    if (BRAIN_DIR) safeCopyToBrain(manifestFile, path.join(BRAIN_DIR, 'MANIFEST.json'));
+    console.log(`     ✓ Generated export/MANIFEST.json with ${manifestAssets.length} verified assets`);
 
     console.log('\n✨ All Phase 8 Export Deliverables generated and verified successfully!\n');
   } finally {
