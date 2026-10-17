@@ -123,16 +123,16 @@ STILL operates on a deterministic, guarded finite state machine (`src/state/came
 In fast-paced moments—such as laughter, sports, or children moving—a single shutter click almost always occurs too early or too late.
 
 STILL solves this through an integrated circular buffer:
-1. **Continuous Capture:** The camera sensor maintains a simulated rolling buffer of the previous 3 seconds at 30 fps.
+1. **Continuous Capture:** The camera sensor maintains a simulated rolling buffer of the previous 3 seconds (concept buffer). In this prototype, the 7 frames are crops, zooms, and tone adjustments of a single portrait to illustrate the interaction.
 2. **Keyframe Extraction:** When capture triggers, the system extracts 7 discrete candidate frames spaced uniformly across the buffer window (`t - 1.5s` to `t + 1.5s`):
    - `moment-0.jpg`: -1.5s (Anticipation)
    - `moment-1.jpg`: -1.0s (Movement onset)
    - `moment-2.jpg`: -0.5s (Peak action approaching)
-   - `moment-3.jpg`: 0.0s (**Best Moment** — optimal sharpness and composition)
+   - `moment-3.jpg`: 0.0s (**Suggested Frame (illustrative)** — fixed preselected index 3)
    - `moment-4.jpg`: +0.5s (Immediate follow-through)
    - `moment-5.jpg`: +1.0s (Natural expression)
    - `moment-6.jpg`: +1.5s (Post-action)
-3. **Autosave Policy:** If the user does not interact with the Moment Strip within 4.0 seconds, Frame 3 (Best Moment) is automatically saved. If the user picks an alternate frame, the countdown resets **once** to give the user time to inspect their choice, then saves the selected frame without requiring manual confirmation.
+3. **Autosave Policy:** If the user does not interact with the Moment Strip within 4.0 seconds, Frame 3 (Suggested Frame) is automatically saved. If the user picks an alternate frame, the countdown resets **once** to give the user time to inspect their choice, then saves the selected frame without requiring manual confirmation.
 
 ---
 

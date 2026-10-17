@@ -28,7 +28,7 @@ Instead of tapping to take a photo, STILL introduces a calm, 3-step capture gest
 
 1. **Tap subject to anchor focus:** Tap anywhere across the edge-to-edge viewfinder. An amber focus pin anchors on the subject.
 2. **Hold steady for 0.8 seconds:** A 104px physical ring fills linearly as the phone steadies. Capture occurs automatically after the tap's jolt has settled.
-3. **Rewind to choose afterwards:** A simulated 3-second buffer presents a 7-frame **Moment Strip**. A suggested frame (selected via prototype variance heuristic) is preselected, auto-saves after 4 seconds, and includes a 5-second reversible Undo.
+3. **Rewind to choose afterwards:** A simulated 3-second buffer presents a 7-frame **Moment Strip**. A suggested frame (fixed illustrative frame index 3) is preselected, auto-saves after 4 seconds, and includes a 5-second reversible Undo.
 
 ![STILL Hero](export/hero-composite.png)
 

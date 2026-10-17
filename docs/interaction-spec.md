@@ -125,13 +125,13 @@ export const COOLDOWN_MS = 600;           // Guard against accidental double-cap
 ## 8. Moment Strip Buffer Architecture: Prototype vs. Production
 
 ### 8.1 Browser Prototype Stand-ins
-In this browser prototype, the 7 frames in the Moment Strip are visual stand-ins derived from a single high-resolution portrait photograph. Dynamic CSS zoom, pan, brightness, and warmth transforms simulate candidate frames along a temporal sequence. This allows the prototype to demonstrate the card-scrubbing ergonomics, automatic "Suggested" moment indicator, and autosave lifecycle with zero external video pipeline dependencies.
+In this browser prototype, the 7 frames in the Moment Strip are visual stand-ins derived from a single high-resolution portrait photograph. Dynamic CSS zoom, pan, brightness, and warmth transforms simulate candidate frames along a temporal sequence. Frame index 3 is preselected as a fixed illustrative Suggested frame (no real-time sharpness ranking or variance heuristic is computed in the browser prototype). This allows the prototype to demonstrate the card-scrubbing ergonomics, automatic "Suggested" moment indicator, and autosave lifecycle with zero external video pipeline dependencies.
 
 ### 8.2 Production Circular Ring Buffer Specification
 In a production native mobile implementation (iOS AVFoundation / Android CameraX):
 1. **Ring Buffer Allocation:** The camera pipeline allocates an in-memory circular ring buffer of YUV/RAW frames running at 30 fps over 3.0 seconds (a continuous FIFO cache of exposures).
 2. **Foreground Gating:** The buffer records frames only when the viewfinder view is visible and the app is active in the foreground, immediately freeing resources when backgrounded.
-3. **Capture & Sharpness Ranking:** When the 0.8s stillness condition is met, the circular buffer freezes. A background worker samples candidate frames at 250ms intervals across the preceding 1.5 seconds, computes Laplacian variance / high-frequency gradient metrics to identify the frame with minimal motion blur, and pre-selects it as the Suggested candidate.
+3. **Capture & Suggested Frame Selection:** In this prototype, frame index 3 is pre-selected as a fixed illustrative Suggested frame. In a future production native camera pipeline, a background worker would sample candidate frames from the circular buffer, evaluate high-frequency edge gradients across candidate frames, and pre-select the least blurred candidate.
 
 ---
 

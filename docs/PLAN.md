@@ -241,7 +241,7 @@ Side states: `CANCELLED` (moved too much), `LOW_LIGHT_WARN`, `LISTENING` (voice)
 | LOCKING | `UNSTEADY(>250ms)` | CANCELLED | Ring drains 2× speed; soft error haptic; message "Too much movement" |
 | LOCKING | `progress ≥ 1` | CAPTURED | Success haptic; screen pulse (not a flash-bang); freeze buffer |
 | CANCELLED | `ANIM_DONE` | FOCUSED | Pin remains so user can retry instantly |
-| CAPTURED | `ANIM_DONE` | REVIEW | Moment Strip slides up; Best frame preselected |
+| CAPTURED | `ANIM_DONE` | REVIEW | Moment Strip slides up; Suggested frame (fixed index 3) preselected |
 | REVIEW | `PICK_FRAME(i)` | REVIEW | Selected frame swaps; autosave timer resets (max 1 reset) |
 | REVIEW | `TIMEOUT(4s)` | SAVED | Save selected; toast "Saved · Undo" |
 | SAVED | `UNDO(≤5s)` | IDLE | Discard; toast "Photo removed" |
@@ -279,7 +279,7 @@ Provide a Settings toggle and always respect OS reduced-haptics where detectable
 | Low light | Hold time ×1.5, amber warning dot | "Low light — hold a bit longer" |
 | No subject tapped, user just holds | After 1.5 s of steadiness, soft prompt (not auto-capture) | "Tap what matters" |
 | Accidental taps | Tap alone never captures (stillness required) | — |
-| Kid/pet moving fast | Moment Strip rewinds 3 s; Best frame chosen by sharpness | "Pick your favourite moment" |
+| Kid/pet moving fast | Moment Strip rewinds 3 s; Suggested frame (fixed index 3) preselected | "Pick your favourite moment" |
 | Group not ready | Chips show who's missing | "3 of 4 ready" |
 | Motor impairment / can't hold still | Settings: longer hold, voice, dwell, switch control | "Adjust steadiness" |
 | Capture happened but unwanted | Undo for 5 s | "Saved · Undo" |
@@ -353,11 +353,11 @@ flowchart TD
     G --> M{All faces ready & steady?}
     M -- No --> G
     M -- Yes --> L
-    L --> N[Screen 4 · Moment Strip<br/>Best frame preselected]
+    L --> N[Screen 4 · Moment Strip<br/>Suggested frame preselected (fixed index 3)]
     N --> O{User action}
     O -- Tap another frame --> P[Swap selection]
     P --> N
-    O -- Do nothing 4s --> Q[Auto-save best frame]
+    O -- Do nothing 4s --> Q[Auto-save suggested frame]
     O -- Tap Save / swipe up --> Q
     Q --> R[Toast: Saved · Undo]
     R --> S{Undo within 5s?}
