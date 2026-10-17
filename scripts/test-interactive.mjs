@@ -286,7 +286,10 @@ async function testInteractive() {
   if (postUndoText.includes('Pick your favourite moment') || postUndoText.includes('Saved · Undo')) {
     throw new Error('Group Mode re-captured after Undo! 1.1 violation.');
   }
-  console.log('✓ Scenario 5d Passed (1.1): Group Mode auto-capture disarmed through Undo; no re-capture while steady');
+  if (!postUndoText.includes('All 4 Ready (Auto-capture complete)')) {
+    throw new Error('Group chip did not reflect disarmed state "All 4 Ready (Auto-capture complete)" after Undo! F6 violation.');
+  }
+  console.log('✓ Scenario 5d Passed (1.1 & F6): Group Mode auto-capture disarmed through Undo with distinct UI chip; no re-capture while steady');
 
   // Scenario 5e (1.2): Group readiness single source of truth in reducer & DemoPanel reset
   await page.locator('button:has-text("Reset")').click();

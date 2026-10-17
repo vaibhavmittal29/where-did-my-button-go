@@ -502,7 +502,6 @@ export const InteractiveCameraScreen: React.FC = () => {
     setToastMessage('Photo removed');
     undoSecondaryTimerRef.current = window.setTimeout(() => {
       setToastMessage(null);
-      dispatch({ type: 'RESET' });
       undoSecondaryTimerRef.current = null;
     }, 1800);
   }, [state.status, state.canUndo, triggerHaptic]);
@@ -680,9 +679,13 @@ export const InteractiveCameraScreen: React.FC = () => {
             {state.mode === 'group' ? (
               <GlassChip
                 icon={<Users size={14} />}
-                variant={state.groupReadyCount >= 4 ? 'success' : 'accent'}
+                variant={state.groupReadyCount >= 4 ? (state.groupAutoCaptureArmed ? 'success' : 'default') : 'accent'}
               >
-                {state.groupReadyCount >= 4 ? 'All 4 Ready (simulated) · Hold still to capture' : `${state.groupReadyCount} of 4 ready (simulated)`}
+                {state.groupReadyCount >= 4
+                  ? (state.groupAutoCaptureArmed
+                      ? 'All 4 Ready (simulated) · Hold still to capture'
+                      : 'All 4 Ready (Auto-capture complete)')
+                  : `${state.groupReadyCount} of 4 ready (simulated)`}
               </GlassChip>
             ) : state.isLowLight ? (
               <GlassChip icon={<Moon size={14} />} variant="accent">
