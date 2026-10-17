@@ -30,6 +30,12 @@ const FORBIDDEN_CLAIMS = [
   'real camera buffer',
   'sharpest frame algorithm',
   'highest sharpness index',
+  'zero camera blur',
+  'Zero Camera Blur',
+  'ZERO CAMERA BLUR',
+  'Tap Jitter Eliminated',
+  'Tap Jitter',
+  'tap jitter',
 ];
 
 const SCAN_DIRS = ['src', 'docs'];

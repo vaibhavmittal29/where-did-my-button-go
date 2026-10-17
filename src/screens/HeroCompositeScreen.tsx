@@ -131,8 +131,8 @@ export const HeroCompositeScreen: React.FC = () => {
           }}>
             <Eye size={20} color="#3DDC97" />
             <div>
-              <div style={{ fontSize: '11px', color: '#A3A3B2', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Rolling Buffer</div>
-              <div style={{ fontSize: '15px', fontWeight: 600, color: '#F5F5F7' }}>3.0s Moment Strip</div>
+              <div style={{ fontSize: '11px', color: '#A3A3B2', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Simulated Rewind</div>
+              <div style={{ fontSize: '15px', fontWeight: 600, color: '#F5F5F7' }}>3.0s Concept Buffer</div>
             </div>
           </div>
 
@@ -147,8 +147,8 @@ export const HeroCompositeScreen: React.FC = () => {
           }}>
             <ShieldCheck size={20} color="#60A5FA" />
             <div>
-              <div style={{ fontSize: '11px', color: '#A3A3B2', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Zero Camera Blur</div>
-              <div style={{ fontSize: '15px', fontWeight: 600, color: '#F5F5F7' }}>Tap Jitter Eliminated</div>
+              <div style={{ fontSize: '11px', color: '#A3A3B2', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Steadiness-Gated Capture</div>
+              <div style={{ fontSize: '15px', fontWeight: 600, color: '#F5F5F7' }}>Tap Shake Settled</div>
             </div>
           </div>
         </div>
