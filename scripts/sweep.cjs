@@ -13,11 +13,11 @@ const FORBIDDEN_CLAIMS = [
   'production-ready',
   'production-grade',
   'zero-dependency',
-  'Saved to gallery',
-  'WCAG Accessible',
-  'WCAG AA compliant',
-  'WCAG AAA compliant',
-  'WCAG certified',
+  'saved to gallery',
+  'wcag accessible',
+  'wcag aa compliant',
+  'wcag aaa compliant',
+  'wcag certified',
   '100% compliant',
   '100% coverage',
   '100% accessible',
@@ -31,32 +31,42 @@ const FORBIDDEN_CLAIMS = [
   'sharpest frame algorithm',
   'highest sharpness index',
   'zero camera blur',
-  'Zero Camera Blur',
-  'ZERO CAMERA BLUR',
-  'Tap Jitter Eliminated',
-  'Tap Jitter',
+  'tap jitter eliminated',
   'tap jitter',
 ];
 
-const SCAN_DIRS = ['src', 'docs'];
-const SCAN_FILES = ['README.md', 'index.html'];
+function escapeRegex(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
 
-function scanFile(filePath) {
-  // Exclude historical archive
-  if (filePath.includes('docs' + path.sep + 'history')) return [];
-  const content = fs.readFileSync(filePath, 'utf8');
+const FORBIDDEN_REGEXES = FORBIDDEN_CLAIMS.map((term) => ({
+  raw: term,
+  regex: new RegExp(escapeRegex(term), 'i'),
+}));
+
+function scanText(content, filePath) {
   const lines = content.split('\n');
   const hits = [];
 
   lines.forEach((line, idx) => {
-    for (const term of FORBIDDEN_CLAIMS) {
-      if (line.includes(term)) {
-        hits.push({ file: filePath, line: idx + 1, term, snippet: line.trim() });
+    if (line.includes('sweep-ignore')) return;
+    for (const claim of FORBIDDEN_REGEXES) {
+      if (claim.regex.test(line)) {
+        hits.push({ file: filePath, line: idx + 1, term: claim.raw, snippet: line.trim() });
       }
     }
   });
 
   return hits;
+}
+
+function scanFile(filePath) {
+  // Exclude historical archive
+  if (filePath.includes('docs' + path.sep + 'history') || filePath.includes('docs/history')) return [];
+  // Exclude sweep.cjs itself
+  if (path.basename(filePath) === 'sweep.cjs') return [];
+  const content = fs.readFileSync(filePath, 'utf8');
+  return scanText(content, filePath);
 }
 
 function walkDir(dir) {
@@ -66,26 +76,64 @@ function walkDir(dir) {
     const fullPath = path.join(dir, file);
     const stat = fs.statSync(fullPath);
     if (stat && stat.isDirectory()) {
-      if (file !== 'history' && file !== 'node_modules') {
+      if (file !== 'history' && file !== 'node_modules' && file !== 'dist' && file !== '.git' && file !== 'export') {
         results = results.concat(walkDir(fullPath));
       }
     } else {
-      if (fullPath.endsWith('.ts') || fullPath.endsWith('.tsx') || fullPath.endsWith('.md') || fullPath.endsWith('.html')) {
-        results.push(fullPath);
+      if (
+        fullPath.endsWith('.ts') ||
+        fullPath.endsWith('.tsx') ||
+        fullPath.endsWith('.md') ||
+        fullPath.endsWith('.html') ||
+        fullPath.endsWith('.cjs') ||
+        fullPath.endsWith('.mjs') ||
+        fullPath.endsWith('.json')
+      ) {
+        if (path.basename(fullPath) !== 'sweep.cjs') {
+          results.push(fullPath);
+        }
       }
     }
   });
   return results;
 }
 
-const filesToScan = [...SCAN_FILES.map(f => path.resolve(f))];
+// Built-in Unit Test Fixtures verifying case-insensitivity and true negatives
+function runFixtures() {
+  const testCases = [
+    { text: 'Uses ZERO CAMERA BLUR to capture', expectedHits: 1 },
+    { text: 'Produces the sharpest output', expectedHits: 1 },
+    { text: '100% compliant with standards', expectedHits: 1 },
+    { text: 'Tap Jitter Eliminated in test', expectedHits: 2 }, // matches tap jitter eliminated & tap jitter
+    { text: 'Steadiness-gated capture with suggested frame (illustrative)', expectedHits: 0 },
+    { text: 'Touch target size satisfies >= 44x44px standards', expectedHits: 0 },
+  ];
+
+  for (const tc of testCases) {
+    const hits = scanText(tc.text, 'fixture-virtual');
+    if (hits.length !== tc.expectedHits) {
+      throw new Error(`Fixture test failure on "${tc.text}": expected ${tc.expectedHits} hits, got ${hits.length}`);
+    }
+  }
+  return true;
+}
+
+runFixtures();
+
+const SCAN_DIRS = ['src', 'docs', 'scripts'];
+const SCAN_FILES = ['README.md', 'index.html', 'package.json'];
+
+const filesToScan = [...SCAN_FILES.map((f) => path.resolve(f))];
 for (const dir of SCAN_DIRS) {
   filesToScan.push(...walkDir(path.resolve(dir)));
 }
 
+// Deduplicate files
+const uniqueFiles = Array.from(new Set(filesToScan)).filter((f) => fs.existsSync(f));
+
 let totalHits = 0;
-console.log(`Scanning ${filesToScan.length} files for forbidden/unsupported claims...`);
-for (const file of filesToScan) {
+console.log(`Scanning ${uniqueFiles.length} files for forbidden/unsupported claims (case-insensitive with unit fixtures)...`);
+for (const file of uniqueFiles) {
   const hits = scanFile(file);
   if (hits.length > 0) {
     totalHits += hits.length;

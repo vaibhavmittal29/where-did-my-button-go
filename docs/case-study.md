@@ -165,11 +165,11 @@ Accessibility is not an afterthought in STILL; it is a fundamental design requir
 - **Minimum 48px Touch Targets:**
   - All interactive buttons (`IconButton`, `GlassChip`, mode carousel tabs) maintain minimum touch bounding boxes of 48x48 CSS pixels with 8px spatial separation, meeting WCAG 2.5.5 target size requirements.
 - **Physical Volume Key Fallback (`'C'` Key):**
-  - For users with essential tremors or motor impairments who find steady-hold difficult, pressing the hardware volume key (or desktop `'C'` key) triggers a guarded accessibility capture.
+  - For alternate input triggering, pressing the simulated volume key (or desktop `'C'` key) triggers a stillness-guarded capture without tapping the screen.
 - **Hands-Free Voice Trigger:**
-  - Users with upper-limb mobility limitations can capture photos hands-free by speaking *"Capture"* or *"Cheese"*.
+  - Provides a hands-free alternate input trigger by speaking *"Capture"* or *"Cheese"* (simulated via demo buttons and voice triggers in this browser prototype).
 - **Screen Reader Announcements (`aria-live="polite"`):**
-  - Dynamic status changes are announced cleanly to assistive technologies without verbosity (e.g., *"Subject focused. Hold phone steady to lock"*, *"Photo saved to gallery. Undo available"*).
+  - Dynamic status changes are announced cleanly to assistive technologies without verbosity (e.g., *"Subject focused. Hold phone steady to lock"*, *"Photo saved. Undo available"*).
 - **Respect for `prefers-reduced-motion`:**
   - All non-essential animations (radial spinning, pulse breathing, card entry transitions) automatically simplify to instantaneous crossfades when the user has enabled reduced motion preferences.
 
