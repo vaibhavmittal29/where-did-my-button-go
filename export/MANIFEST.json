@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-17T05:59:43.745Z",
+  "generatedAt": "2026-10-17T06:16:56.811Z",
   "assetCount": 11,
   "assets": [
     {
@@ -14,7 +14,7 @@
     {
       "path": "case-study.pdf",
       "sizeBytes": 14461281,
-      "sha256": "0ef50455c8c22c21c5519c337523bdfcb6367d3681bccba57d7a6d57582eebd7",
+      "sha256": "7d9e7e29253226e52bf3581cf53f7d78172c37b286ee20cd876af6b4ffa94b2f",
       "dimensions": null
     },
     {

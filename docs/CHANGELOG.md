@@ -67,3 +67,28 @@ This document records the step-by-step design, engineering, and verification his
   - **Stage 1 (Correctness & Honest UI):** Fixed Group Mode lock gating with centralized `canCapture(state)` guard in `cameraMachine.ts`; prevented 3/4 group ready from ever triggering capture; enforced 800ms continuous stillness duration requirement on voice & volume inputs via `steadySinceRef`; stabilized dwell timer; added non-positive `dt` validation; enforced 44×44px Apple HIG touch targets on DemoPanel buttons; compacted Moment Strip to 44px flex-basis with 6px gaps fitting 390px viewports without horizontal clipping; honest UI disclosures on suggested moments and simulated hardware controls (`44caf43`).
   - **Stage 2 (Scripts, Exports & CI Resilience):** Direct Node execution of Vite in `server-helper.mjs` with process tree cleanup via `serverProcess.unref()` and `process.exit(0)`, resolving CI pipeline timeouts (1m37s green run); expanded `test-reduced-motion.mjs` with discrete stepped ring assertions; pruned obsolete screenshot scripts; re-exported Retina 3× screens, panoramic composite, and A4 PDF (`c87833b`).
   - **Stage 3 (Documentation Integrity & Historical Archive):** Archived historical superseded reports to `docs/history/`; executed comprehensive truth pass removing unsourced claims (such as unvalidated sharpness superlatives, unverified gallery persistence claims, and fabricated sensor figures); verified D1 (148 words) and D4 (191 words) limits; synchronized test logs with real 12 unit tests and 6 browser interaction scenarios.
+
+- **Phase 13 — Comprehensive Multi-Phase Audit Resolution & Hardening (F1–F19)**
+  - **Phase 1 (P1 High-Priority Fixes: F1–F4):**
+    - **F1:** Mode carousel switching blocked during `CAPTURED` and `SAVED` states in both state machine and UI (`7bd66af`).
+    - **F2:** Enforced $\ge 44\times 44\text{px}$ touch targets across all routes (live, onboarding, idle, locking, moments, group, kit, settings dialog) and scoped accessibility claims honestly (`e16f8d6`).
+    - **F3:** Added dedicated "Prototype Limitations" section to Case Study PDF and presentation screens, resolving relative asset paths (`f3cb3ab`).
+    - **F4:** Eliminated overclaims on hero composite banner; expanded claim scan sweep (`9a2c54e`).
+  - **Phase 2 (P2 State & UI Logic Hardening: F5–F17):**
+    - **F5:** Derived `remainingHoldSec` and dynamic low-light chip directly from `getEffectiveHoldTime()` in `DemoPanel/index.tsx` and `InteractiveCameraScreen.tsx` (`91bfde9`).
+    - **F6:** Differentiated Group Mode status chip between armed and disarmed-complete states; corrected `handleUndo` reset logic (`c35f66b`).
+    - **F7:** Restored previous gallery thumbnail on `UNDO` and reset in `handleReset` (`ba0d87d`).
+    - **F8:** Clarified Suggested frame is fixed illustrative candidate index 3 in `README.md`, `docs/case-study.md`, and `docs/interaction-spec.md` (`ceb85fd`).
+    - **F9:** Tightened Figma plugin face node matching to exact `Face: Aarav` in `scripts/figma-plugin/code.js` (`b8fcfe7`).
+    - **F10:** Framed Figma plugin generator as layout scaffold/baseline in `docs/figma-bridge.md` with relative links (`73f9c3c`).
+    - **F11:** Generated `export/MANIFEST.json` with SHA-256 checksums, byte sizes, and dimensions for all export assets (`2dad6a7`).
+    - **F12:** Verified superseded headers in `docs/history/` and aligned documentation test counts (`2395e6c`).
+    - **F13:** Enforced D4 word limit ($\le 200$ words, exactly 180 words) and added automated verification via `scripts/count-d4.mjs` (`90377ae`).
+    - **F14:** Clarified Unsplash license details and visual derivative framing in `docs/CREDITS.md` (`349ee10`).
+    - **F15:** Expanded claim scanner `scripts/sweep.cjs` with case-insensitive search and test fixtures (`03a8abf`).
+    - **F16:** Audited static route interactive elements with `aria-disabled="true"` and added Playwright Scenario 6 static route click sweep with console error monitoring (`d3c96c2`).
+    - **F17:** Updated `docs/QA-report.md` with real execution logs across all test suites (`140f98f`).
+  - **Phase 3 (CI Infrastructure & Payload Validation: F18–F19):**
+    - **F18:** Upgraded and secured GitHub Actions workflows with least-privilege permissions and verified v4 action suite (`2a7cd04`).
+    - **F19:** Enforced strict payload validation and boundary clamping for `TAP_SUBJECT`, `SET_HOLD_TIME`, `SET_GROUP_READY`, `PICK_FRAME`, and `STEADY_TICK` in `cameraMachine.ts`; expanded state machine unit tests to 15 tests (`cf32009`).
+
