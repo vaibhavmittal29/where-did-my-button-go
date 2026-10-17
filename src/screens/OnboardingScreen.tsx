@@ -194,6 +194,10 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ pureDevice =
               onClick={() => { window.location.href = getScreenUrl('screen=idle'); }}
               style={{
                 width: '100%',
+                minHeight: '44px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
                 padding: 'var(--space-3) var(--space-4)',
                 backgroundColor: 'var(--accent)',
                 color: 'var(--bg)',
@@ -218,7 +222,10 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ pureDevice =
                 textDecoration: 'none',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '4px'
+                justifyContent: 'center',
+                minHeight: '44px',
+                padding: '0 var(--space-2)',
+                gap: '4px',
               }}
             >
               <Sliders size={12} />

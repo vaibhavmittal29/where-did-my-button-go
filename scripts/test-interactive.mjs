@@ -64,6 +64,69 @@ async function testInteractive() {
   }
   console.log(`✓ Touch Target Size Verification: All ${btnCount} DemoPanel buttons meet >= 44x44px target standard`);
 
+  // Comprehensive Touch Target Size Verification across routes and viewports (F2)
+  console.log('Auditing touch targets across routes (live, onboarding, idle, locking, moments, group, kit, settings dialog) at 390x844 and 1200x950...');
+  const auditRoutes = [
+    '/?screen=live',
+    '/?screen=onboarding',
+    '/?screen=idle',
+    '/?screen=locking&progress=0.6',
+    '/?screen=moments&selected=3',
+    '/?screen=group&ready=3',
+    '/?screen=kit',
+  ];
+  const auditViewports = [
+    { width: 390, height: 844, name: 'Mobile 390x844' },
+    { width: 1200, height: 950, name: 'Desktop 1200x950' },
+  ];
+
+  for (const vp of auditViewports) {
+    const auditContext = await browser.newContext({ viewport: { width: vp.width, height: vp.height } });
+    const auditPage = await auditContext.newPage();
+
+    for (const r of auditRoutes) {
+      await auditPage.goto(`http://127.0.0.1:5173${r}`, { waitUntil: 'networkidle' });
+      await auditPage.waitForTimeout(100);
+
+      const targets = auditPage.locator('button:visible, [role="tab"]:visible, [role="button"]:visible, a:visible');
+      const count = await targets.count();
+      for (let i = 0; i < count; i++) {
+        const el = targets.nth(i);
+        const box = await el.boundingBox();
+        if (box && (box.width > 0 || box.height > 0)) {
+          if (box.width < 43.5 || box.height < 43.5) {
+            const text = (await el.textContent() || '').trim().replace(/\s+/g, ' ');
+            const ariaLabel = await el.getAttribute('aria-label') || '';
+            throw new Error(`[${vp.name} on ${r}] Target size violation: element "${text || ariaLabel}" has size ${box.width.toFixed(1)}x${box.height.toFixed(1)}px (expected >= 44x44px)`);
+          }
+        }
+      }
+
+      if (r === '/?screen=live') {
+        const settingsBtn = auditPage.locator('button[aria-label="STILL Settings"]');
+        if (await settingsBtn.count() > 0) {
+          await settingsBtn.click();
+          await auditPage.waitForTimeout(200);
+          const modalBtns = auditPage.locator('div[role="dialog"] button:visible');
+          const mCount = await modalBtns.count();
+          for (let i = 0; i < mCount; i++) {
+            const el = modalBtns.nth(i);
+            const box = await el.boundingBox();
+            if (box && (box.width < 43.5 || box.height < 43.5)) {
+              const text = (await el.textContent() || '').trim();
+              const ariaLabel = await el.getAttribute('aria-label') || '';
+              throw new Error(`[${vp.name} on Settings Dialog] Target size violation: button "${text || ariaLabel}" has size ${box.width.toFixed(1)}x${box.height.toFixed(1)}px (expected >= 44x44px)`);
+            }
+          }
+          const closeBtn = auditPage.locator('button[aria-label="Close settings"]');
+          if (await closeBtn.count() > 0) await closeBtn.click();
+        }
+      }
+    }
+    await auditContext.close();
+  }
+  console.log('✓ Comprehensive Touch Target Size Audit Passed across all routes, dialogs, and viewports (>= 44x44px)');
+
   // Take screenshot of idle interactive state
   await saveScreen(page, 'phase5-01-idle.png');
 

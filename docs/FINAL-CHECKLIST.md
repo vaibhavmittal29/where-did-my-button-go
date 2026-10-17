@@ -46,7 +46,7 @@
   - Movement Warning (`#FF6B5E`) on Background (`#0B0B0F`): **7.0 : 1** (high contrast).
 - [x] **Screen Reader Accessibility:** Live region element with `aria-live="polite"` and `aria-atomic="true"` continuously announces state changes (*"Locking focus. Hold steady for 0.8 seconds."*, *"Photo captured."*, *"Auto-saved."*).
 - [x] **Reduced Motion Support:** Full `prefers-reduced-motion: reduce` support replacing continuous ring sweep with discrete 33% $\rightarrow$ 66% $\rightarrow$ 100% steps and haptic-only confirmations (verified via `scripts/test-reduced-motion.mjs`).
-- [x] **Hardware Fallback:** Physical Volume Key (`'C'` / Volume Up/Down) capture trigger provided for users with tremors or physical mittens.
+- [x] **Alternate Triggers (Simulated):** Physical Key ('C' key) and voice command capture triggers provided in prototype simulation for alternate hands-free/key input; requires continuous device steadiness to settle screen tap shake.
 
 ---
 

@@ -776,7 +776,9 @@ export const InteractiveCameraScreen: React.FC = () => {
                   <button
                     onClick={toggleMute}
                     style={{
-                      padding: '5px 12px',
+                      minHeight: '44px',
+                      minWidth: '44px',
+                      padding: '8px 16px',
                       borderRadius: 'var(--radius-pill)',
                       border: '1px solid var(--glass-border)',
                       backgroundColor: isMuted ? 'transparent' : 'var(--accent)',
@@ -784,6 +786,9 @@ export const InteractiveCameraScreen: React.FC = () => {
                       fontWeight: 600,
                       fontSize: '12px',
                       cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
                     }}
                   >
                     {isMuted ? 'Muted' : 'Sound On'}
@@ -799,7 +804,9 @@ export const InteractiveCameraScreen: React.FC = () => {
                   <button
                     onClick={toggleRealSensor}
                     style={{
-                      padding: '5px 12px',
+                      minHeight: '44px',
+                      minWidth: '44px',
+                      padding: '8px 16px',
                       borderRadius: 'var(--radius-pill)',
                       border: '1px solid var(--glass-border)',
                       backgroundColor: isRealSensorEnabled ? 'var(--accent)' : 'transparent',
@@ -807,6 +814,9 @@ export const InteractiveCameraScreen: React.FC = () => {
                       fontWeight: 600,
                       fontSize: '12px',
                       cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
                     }}
                   >
                     {isRealSensorEnabled ? 'Active' : 'Disabled'}

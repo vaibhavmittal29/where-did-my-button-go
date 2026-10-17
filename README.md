@@ -83,7 +83,7 @@ STILL operates on a deterministic 6-state finite state machine with automatic re
 
 ## ♿ Accessibility & Ergonomics
 
-- **Touch Target Sizing:** Every interactive control enforces a minimum bounding box of **44 × 44 CSS pixels**, complying with Apple Human Interface Guidelines and satisfying WCAG 2.2 Success Criteria 2.5.8 (Level AA minimum target).
+- **Touch Target Sizing:** Every interactive control enforces a minimum bounding box of **44 × 44 CSS pixels**, designed to align with Apple Human Interface Guidelines and WCAG 2.2 target size guidelines (2.5.8 Level AA minimum 24×24px, 2.5.5 enhanced 44×44px; prototype design alignment, not a formal third-party certification).
 - **Color Contrast:** Mathematically verified against dark backgrounds (`#0B0B0F`):
   - Primary text (`#F5F5F7`): **18.0 : 1** (exceeds 4.5:1 / 7:1 benchmarks)
   - Signal Amber (`#FFB020`): **10.7 : 1** (exceeds 4.5:1 / 7:1 benchmarks)

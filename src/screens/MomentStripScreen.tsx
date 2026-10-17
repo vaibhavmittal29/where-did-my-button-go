@@ -179,6 +179,9 @@ export const MomentStripScreen: React.FC<MomentStripScreenProps> = ({ pureDevice
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
+                justifyContent: 'center',
+                minHeight: '44px',
+                minWidth: '44px',
                 gap: '6px',
                 padding: 'var(--space-2) var(--space-6)',
                 backgroundColor: 'var(--accent)',

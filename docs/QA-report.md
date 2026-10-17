@@ -16,7 +16,7 @@ STILL replaces the discrete mechanical shutter button with continuous physical s
 
 ## 2. Touch Target & Sizing Audit (WCAG 2.2 2.5.5 / 2.5.8 & Apple HIG)
 
-Every interactive element in STILL enforces a minimum bounding box of **44 × 44 CSS pixels**, complying with Apple Human Interface Guidelines, exceeding WCAG 2.2 Level AA 2.5.8 (Target Size - Minimum, 24×24 px), and satisfying Level AAA 2.5.5 (Target Size - Enhanced, 44×44 px):
+Every interactive element in STILL enforces a minimum bounding box of **44 × 44 CSS pixels**, designed to align with Apple Human Interface Guidelines and WCAG 2.2 target size guidelines (2.5.8 Level AA minimum 24×24 px, 2.5.5 enhanced 44×44 px; verified via automated Playwright bounding-box assertions across mobile and desktop viewports):
 
 | Component | Target Element | Rendered Dimensions | Standard Applied | Status |
 |---|---|---|---|---|
