@@ -4,7 +4,7 @@
 **Challenge:** VinnovateIT (VIT Vellore) UI/UX Subdomain Round 1 Recruitment  
 **Designer & Engineer:** Vaibhav Mittal ([@vaibhavmittal29](https://github.com/vaibhavmittal29))  
 **Repository:** [https://github.com/vaibhavmittal29/where-did-my-button-go](https://github.com/vaibhavmittal29/where-did-my-button-go)  
-**Tech Stack:** React 18, TypeScript, Vite, CSS Modules, Framer Motion, Lucide Icons, Playwright  
+**Tech Stack:** React 19, TypeScript, Vite, CSS Modules, Framer Motion, Lucide Icons, Playwright  
 
 ---
 
