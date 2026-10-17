@@ -110,7 +110,7 @@ All failure modes were verified via unit state tests (`scripts/test-machine.ts`)
 
 ## 6. Real Automated Test Suite Execution Output
 
-The automated test suite runs via `npm test` (`tsx scripts/test-machine.ts && node scripts/test-interactive.mjs && node scripts/test-reduced-motion.mjs && node scripts/test-figma.mjs`):
+The automated test suite runs via `npm test` (`tsx scripts/test-machine.ts && node scripts/test-interactive.mjs && node scripts/test-reduced-motion.mjs && node scripts/test-figma.mjs && node scripts/sweep.cjs && node scripts/count-d4.mjs`):
 
 ```text
 --- RUNNING CAMERA STATE MACHINE SANITY TESTS ---
@@ -154,24 +154,32 @@ Test 12: Comprehensive State Machine Invariants
 Test 13: Group Auto-Capture Epoch & Undo Disarm
 ✔ Test 13 Passed: Group auto-capture epoch disarmed on capture and through Undo.
 
-ALL 13 STATE MACHINE TESTS PASSED SUCCESSFULLY! 🎉
+Test 14: Guard MODE_CHANGE during CAPTURED and SAVED
+✔ Test 14 Passed: MODE_CHANGE ignored in CAPTURED and SAVED states.
+
+ALL 14 STATE MACHINE TESTS PASSED SUCCESSFULLY! 🎉
 Testing Phase 5 Interactive Camera Scenarios...
 Starting Vite local server on port 5173...
 ✓ Vite local server ready on port 5173
 ✓ Scenario 0 Passed: Interactive screen loaded with Viewfinder & DemoPanel
 ✓ Touch Target Size Verification: All 9 DemoPanel buttons meet >= 44x44px target standard
+Auditing touch targets across routes (live, onboarding, idle, locking, moments, group, kit, settings dialog) at 390x844 and 1200x950...
+✓ Comprehensive Touch Target Size Audit Passed across all routes, dialogs, and viewports (>= 44x44px)
 State after tap: State:LOCKING
 ✓ Scenario 1 Passed: Tap -> Steady Hold -> Auto-Capture -> Moment Strip Review
 ✓ Scenario 2 Passed: Moment Strip allows frame swapping
 Waiting for autosave countdown (approx 4s)...
-✓ Scenario 3a Passed: Autosave completed and showed Saved · Undo toast
-✓ Scenario 3b Passed: Undo successfully discarded photo
+✓ Scenario 3a Passed: Autosave completed, gallery updated, and showed Saved · Undo toast
+✓ Scenario 3b Passed (F7): Undo successfully discarded photo and restored previous gallery thumbnail
 ✓ Scenario 4 Passed: Sudden movement cancels lock and drains ring with "Too much movement" feedback
 ✓ Scenario 5a Passed: Group Mode active with 3 of 4 ready and Tara blinking
 ✓ Scenario 5b Passed: Voice trigger properly guarded by group readiness, then captures when all 4 ready
 ✓ Scenario 5c Passed (P0-01): Group Mode with 3 of 4 ready strictly blocks steady hold capture
-✓ Scenario 5d Passed (1.1): Group Mode auto-capture disarmed through Undo; no re-capture while steady
+✓ Scenario 5d Passed (1.1 & F6): Group Mode auto-capture disarmed through Undo with distinct UI chip; no re-capture while steady
 ✓ Scenario 5e Passed (1.2): Group readiness is single-sourced in reducer without desync
+✓ Scenario 5f Passed (F1): Mode carousel disabled during SAVED state; mode switch blocked and Undo succeeds
+Running Scenario 6 (F16): Static route click sweep & console error monitoring...
+✓ Scenario 6 Passed (F16): Static route click sweep verified with 0 console errors
 
 🎉 ALL PHASE 5 INTERACTION SCENARIOS PASSED WITH FLYING COLORS!
 Testing Phase 6 Prefers-Reduced-Motion Compliance...
@@ -188,6 +196,12 @@ LockRing aria-valuenow under reduced motion: 33%
   ✓ ui.html contains complete message protocol handlers
   ✓ code.js contains MomentStrip, font fallback hierarchy, and idempotent tagging
 🎉 Figma plugin static verification PASSED!
+
+Scanning 57 files for forbidden/unsupported claims (case-insensitive with unit fixtures)...
+
+✔ 0 forbidden claims found! Repository documentation and source code are clean and truthful.
+D4 word count: 180 words (Limit: <= 200 words)
+✔ D4 word count verified within <= 200 words limit.
 ```
 
 ---
