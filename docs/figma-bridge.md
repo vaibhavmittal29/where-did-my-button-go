@@ -6,13 +6,16 @@ This guide describes how to run and verify the STILL Figma plugin generator loca
 
 ## 1. Overview & Architecture
 
-The STILL Figma plugin (`scripts/figma-plugin/`) generates a complete, professional design system and prototype canvas directly inside Figma:
+The STILL Figma plugin (`scripts/figma-plugin/`) generates a structured layout scaffold, baseline design system, and prototype canvas directly inside Figma to jumpstart visual exploration:
 
 - **Page 1: Cover & Overview** — Presentation banner with title, tagline, and project attribution.
 - **Page 2: Design System & Tokens** — Figma Local Variables (12 colors, 5 corner radii, 6 spacing tokens) and Paint Styles matching `tokens.css`.
-- **Page 3: Master Components** — 6 core components (`IconButton`, `GlassChip`, `LockRing`, `Toast`, `ModeCarousel`, `MomentStrip`).
+- **Page 3: Master Components** — 6 core layout components (`IconButton`, `GlassChip`, `LockRing`, `Toast`, `ModeCarousel`, `MomentStrip`).
 - **Page 4: 5 Hi-Fi Screens** — 390 × 844 px mobile viewframes with 48px corner radius for iPhone 14/15.
 - **Page 5: Interactive Prototype** — Full prototype flow wired with Figma Smart Animate transitions (including Still $\leftrightarrow$ Group mode navigation, tap-to-lock, 800ms simulated timeout, and moment strip review).
+
+> [!NOTE]
+> The programmatic plugin serves as an initial layout scaffold and baseline vector canvas. Complex CSS filter stacks, hardware camera streams, and dynamic render behaviors represent a design baseline rather than a pixel-identical runtime clone.
 
 ---
 

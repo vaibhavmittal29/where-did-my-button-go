@@ -286,12 +286,12 @@ flowchart LR
 
 All high-definition source photos and Playwright exports are located in this workspace:
 
-- **Screen 1 Export (1170×2532):** [`export/screens/screen-01-onboarding.png`](file:///c:/Programming/Projects%20of%20antigravity/project_7_uiux_vinnovateit_switchthebutton/export/screens/screen-01-onboarding.png)
-- **Screen 2 Export (1170×2532):** [`export/screens/screen-02-idle.png`](file:///c:/Programming/Projects%20of%20antigravity/project_7_uiux_vinnovateit_switchthebutton/export/screens/screen-02-idle.png)
-- **Screen 3 Export (1170×2532):** [`export/screens/screen-03-locking.png`](file:///c:/Programming/Projects%20of%20antigravity/project_7_uiux_vinnovateit_switchthebutton/export/screens/screen-03-locking.png)
-- **Screen 3 Annotated (1170×2532):** [`export/screens/screen-03-locking-annotated.png`](file:///c:/Programming/Projects%20of%20antigravity/project_7_uiux_vinnovateit_switchthebutton/export/screens/screen-03-locking-annotated.png)
-- **Screen 4 Export (1170×2532):** [`export/screens/screen-04-moments.png`](file:///c:/Programming/Projects%20of%20antigravity/project_7_uiux_vinnovateit_switchthebutton/export/screens/screen-04-moments.png)
-- **Screen 5 Export (1170×2532):** [`export/screens/screen-05-group.png`](file:///c:/Programming/Projects%20of%20antigravity/project_7_uiux_vinnovateit_switchthebutton/export/screens/screen-05-group.png)
-- **Hero Composite Presentation (2400×1350):** [`export/hero-composite.png`](file:///c:/Programming/Projects%20of%20antigravity/project_7_uiux_vinnovateit_switchthebutton/export/hero-composite.png)
-- **User Flow Diagram:** [`export/user-flow.svg`](file:///c:/Programming/Projects%20of%20antigravity/project_7_uiux_vinnovateit_switchthebutton/export/user-flow.svg)
-- **Case Study PDF Document:** [`export/case-study.pdf`](file:///c:/Programming/Projects%20of%20antigravity/project_7_uiux_vinnovateit_switchthebutton/export/case-study.pdf)
+- **Screen 1 Export (1170×2532):** [`export/screens/screen-01-onboarding.png`](../export/screens/screen-01-onboarding.png)
+- **Screen 2 Export (1170×2532):** [`export/screens/screen-02-idle.png`](../export/screens/screen-02-idle.png)
+- **Screen 3 Export (1170×2532):** [`export/screens/screen-03-locking.png`](../export/screens/screen-03-locking.png)
+- **Screen 3 Annotated (1170×2532):** [`export/screens/screen-03-locking-annotated.png`](../export/screens/screen-03-locking-annotated.png)
+- **Screen 4 Export (1170×2532):** [`export/screens/screen-04-moments.png`](../export/screens/screen-04-moments.png)
+- **Screen 5 Export (1170×2532):** [`export/screens/screen-05-group.png`](../export/screens/screen-05-group.png)
+- **Hero Composite Presentation (2400×1350):** [`export/hero-composite.png`](../export/hero-composite.png)
+- **User Flow Diagram:** [`export/user-flow.svg`](../export/user-flow.svg)
+- **Case Study PDF Document:** [`export/case-study.pdf`](../export/case-study.pdf)
