@@ -1,6 +1,7 @@
 import React from 'react';
 import styles from './DemoPanel.module.css';
 import { CameraStatus, CameraMode } from '../../state/cameraMachine';
+import { STEADY_THRESHOLD } from '../../state/constants';
 import { Activity, Zap, Mic, RotateCcw, ShieldAlert, Users, Volume2, VolumeX } from 'lucide-react';
 
 export interface DemoPanelProps {
@@ -91,8 +92,8 @@ export const DemoPanel: React.FC<DemoPanelProps> = ({
         </div>
         <div className={styles.statusRow}>
           <span>Steadiness:</span>
-          <span className={styles.statusVal} style={{ color: steadiness >= 0.7 ? 'var(--success)' : 'var(--accent)' }}>
-            {(steadiness * 100).toFixed(0)}% {steadiness >= 0.7 ? '(Steady)' : '(Moving)'}
+          <span className={styles.statusVal} style={{ color: steadiness >= STEADY_THRESHOLD ? 'var(--success)' : 'var(--accent)' }}>
+            {(steadiness * 100).toFixed(0)}% {steadiness >= STEADY_THRESHOLD ? '(Steady)' : '(Moving)'}
           </span>
         </div>
       </div>

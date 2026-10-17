@@ -177,7 +177,7 @@ export const InteractiveCameraScreen: React.FC = () => {
   // 2. State Machine: FOCUSED -> LOCKING transition on steadiness
   useEffect(() => {
     if (state.status === 'FOCUSED') {
-      if (steadiness >= 0.7) {
+      if (steadiness >= STEADY_THRESHOLD) {
         dispatch({ type: 'STEADY_OK' });
       }
     }
@@ -417,11 +417,12 @@ export const InteractiveCameraScreen: React.FC = () => {
       triggerHaptic('error');
       return;
     }
-    // Require phone to have been held steady continuously for at least 800ms
+    // Require phone to have been held steady continuously for at least required hold time
+    const requiredHold = getEffectiveHoldTime(state.isLowLight, state.baseHoldTime);
     const isSteady =
       steadinessRef.current >= STEADY_THRESHOLD &&
       steadySinceRef.current !== null &&
-      performance.now() - steadySinceRef.current >= 800;
+      performance.now() - steadySinceRef.current >= requiredHold;
 
     dispatch({ type: 'VOLUME_KEY', isSteady });
     if (isSteady) {
@@ -430,7 +431,7 @@ export const InteractiveCameraScreen: React.FC = () => {
     } else {
       triggerHaptic('error');
     }
-  }, [state.status, state.mode, state.groupReadyCount, state.groupTotalCount, triggerHaptic]);
+  }, [state.status, state.mode, state.groupReadyCount, state.groupTotalCount, state.isLowLight, state.baseHoldTime, triggerHaptic]);
 
   const handleVoiceTrigger = useCallback((phrase: string) => {
     if (performance.now() - lastCooldownTimeRef.current < COOLDOWN_MS) {
@@ -454,11 +455,12 @@ export const InteractiveCameraScreen: React.FC = () => {
       return;
     }
 
-    // Require phone to have been held steady continuously for at least 800ms
+    // Require phone to have been held steady continuously for at least required hold time
+    const requiredHold = getEffectiveHoldTime(state.isLowLight, state.baseHoldTime);
     const isSteady =
       steadinessRef.current >= STEADY_THRESHOLD &&
       steadySinceRef.current !== null &&
-      performance.now() - steadySinceRef.current >= 800;
+      performance.now() - steadySinceRef.current >= requiredHold;
 
     dispatch({ type: 'VOICE_TRIGGER', phrase, isSteady });
     if (isSteady) {
@@ -467,7 +469,7 @@ export const InteractiveCameraScreen: React.FC = () => {
     } else {
       triggerHaptic('error');
     }
-  }, [state.status, state.mode, state.groupReadyCount, state.groupTotalCount, triggerHaptic]);
+  }, [state.status, state.mode, state.groupReadyCount, state.groupTotalCount, state.isLowLight, state.baseHoldTime, triggerHaptic]);
 
   // 8. Alternate Input Trigger: Volume Key / 'C' key (requires continuous stillness, avoids screen tap shake)
   useEffect(() => {
@@ -537,7 +539,7 @@ export const InteractiveCameraScreen: React.FC = () => {
   ];
 
   const focusPoint = state.focusPoint || { x: 50, y: 45 };
-  const effectiveHoldTime = getEffectiveHoldTime(state.isLowLight) / 1000;
+  const effectiveHoldTime = getEffectiveHoldTime(state.isLowLight, state.baseHoldTime) / 1000;
   const remainingHoldSec = Math.max(0, (1 - state.progress) * effectiveHoldTime);
 
   return (
@@ -684,7 +686,7 @@ export const InteractiveCameraScreen: React.FC = () => {
               </GlassChip>
             ) : state.isLowLight ? (
               <GlassChip icon={<Moon size={14} />} variant="accent">
-                Low Light · 1.2s Hold
+                {`Low Light · ${effectiveHoldTime.toFixed(1)}s Hold`}
               </GlassChip>
             ) : (
               <GlassChip icon={<Sparkles size={14} />} variant="default">
@@ -899,7 +901,7 @@ export const InteractiveCameraScreen: React.FC = () => {
                   )}
                   {state.status === 'FOCUSED' && (
                     <GlassChip>
-                      {steadiness >= 0.7 ? 'Hold still…' : 'Hold steady to capture'}
+                      {steadiness >= STEADY_THRESHOLD ? 'Hold still…' : 'Hold steady to capture'}
                     </GlassChip>
                   )}
                   {state.status === 'CANCELLED' && (
@@ -983,12 +985,12 @@ export const InteractiveCameraScreen: React.FC = () => {
                     <div style={{
                       width: `${Math.round(steadiness * 100)}%`,
                       height: '100%',
-                      backgroundColor: steadiness >= 0.7 ? 'var(--success)' : 'var(--accent)',
+                      backgroundColor: steadiness >= STEADY_THRESHOLD ? 'var(--success)' : 'var(--accent)',
                       transition: 'width 0.1s ease-out',
                     }} />
                   </div>
                   <span style={{ fontSize: '11px', color: 'var(--text-dim)' }}>
-                    {steadiness >= 0.7 ? 'Steady' : 'Hold still'}
+                    {steadiness >= STEADY_THRESHOLD ? 'Steady' : 'Hold still'}
                   </span>
                 </div>
               )}
