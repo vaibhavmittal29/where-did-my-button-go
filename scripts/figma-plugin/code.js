@@ -1047,7 +1047,7 @@ async function wirePrototype(screens) {
     }
 
     // S5 Ready Face Box -> S4 Moment Strip
-    const s5Face = s5.findOne((n) => n.name === 'Face: Aarav' || n.name.startsWith('Face:'));
+    const s5Face = s5.findOne((n) => n.name === 'Face: Aarav');
     if (s5Face) {
       s5Face.reactions = [
         {
