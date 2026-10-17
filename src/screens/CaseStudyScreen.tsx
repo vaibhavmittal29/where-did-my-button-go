@@ -1,5 +1,6 @@
 import React from 'react';
 import { Sparkles } from 'lucide-react';
+import { getAssetPath } from '../utils/assetPath';
 
 export const CaseStudyScreen: React.FC = () => {
   return (
@@ -142,7 +143,7 @@ export const CaseStudyScreen: React.FC = () => {
               border: '1px solid rgba(255, 255, 255, 0.08)',
             }}>
               <div style={{ fontSize: '12px', color: '#A3A3B2', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Steadiness Trigger</div>
-              <div style={{ fontSize: '24px', fontWeight: 700, color: '#3DDC97', marginTop: '4px' }}>Sensors Active</div>
+              <div style={{ fontSize: '24px', fontWeight: 700, color: '#3DDC97', marginTop: '4px' }}>Motion Heuristic</div>
               <div style={{ fontSize: '12px', color: '#A3A3B2', marginTop: '2px' }}>Simulated in prototype</div>
             </div>
 
@@ -152,9 +153,9 @@ export const CaseStudyScreen: React.FC = () => {
               backgroundColor: 'rgba(255, 255, 255, 0.03)',
               border: '1px solid rgba(255, 255, 255, 0.08)',
             }}>
-              <div style={{ fontSize: '12px', color: '#A3A3B2', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Rolling Buffer</div>
-              <div style={{ fontSize: '24px', fontWeight: 700, color: '#60A5FA', marginTop: '4px' }}>3.0s (7 Candidates)</div>
-              <div style={{ fontSize: '12px', color: '#A3A3B2', marginTop: '2px' }}>Pre-capture history</div>
+              <div style={{ fontSize: '12px', color: '#A3A3B2', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Rewind Buffer</div>
+              <div style={{ fontSize: '24px', fontWeight: 700, color: '#60A5FA', marginTop: '4px' }}>3.0s (Simulated)</div>
+              <div style={{ fontSize: '12px', color: '#A3A3B2', marginTop: '2px' }}>7 illustrative frames</div>
             </div>
 
             <div style={{
@@ -164,8 +165,8 @@ export const CaseStudyScreen: React.FC = () => {
               border: '1px solid rgba(255, 255, 255, 0.08)',
             }}>
               <div style={{ fontSize: '12px', color: '#A3A3B2', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Accessibility</div>
-              <div style={{ fontSize: '24px', fontWeight: 700, color: '#A78BFA', marginTop: '4px' }}>WCAG AA / AAA</div>
-              <div style={{ fontSize: '12px', color: '#A3A3B2', marginTop: '2px' }}>Voice & Key Fallbacks</div>
+              <div style={{ fontSize: '24px', fontWeight: 700, color: '#A78BFA', marginTop: '4px' }}>Target & Contrast</div>
+              <div style={{ fontSize: '12px', color: '#A3A3B2', marginTop: '2px' }}>44px targets & 18:1 contrast</div>
             </div>
           </div>
         </header>
@@ -303,7 +304,7 @@ export const CaseStudyScreen: React.FC = () => {
             alignItems: 'center',
           }}>
             <img
-              src="/export/user-flow.svg"
+              src={getAssetPath('export/user-flow.svg')}
               alt="STILL User Flow & State Machine Architecture Diagram"
               style={{
                 width: '100%',
@@ -355,7 +356,7 @@ export const CaseStudyScreen: React.FC = () => {
             }}>
               <div style={{ fontSize: '13px', color: '#FFB020', fontWeight: 700 }}>3. REVIEW ➔ SAVED</div>
               <p style={{ fontSize: '13px', color: '#A3A3B2', margin: '8px 0 0' }}>
-                Moment Strip opens with Best frame highlighted. 4s countdown auto-saves. 5s persistent toast offers one-tap Undo to discard.
+                Moment Strip opens with preselected Suggested frame (illustrative). 4s countdown auto-saves. 5s toast offers one-tap Undo to discard.
               </p>
             </div>
           </div>
@@ -378,7 +379,7 @@ export const CaseStudyScreen: React.FC = () => {
             The 5 High-Fidelity Screens Walkthrough
           </h2>
           <p style={{ color: '#A3A3B2', fontSize: '16px', margin: '0 0 32px', maxWidth: '840px' }}>
-            Every screen adheres to STILL's dark-room visual grammar: OLED deep blacks (`#0B0B0F`), signal amber (`#FFB020`), frosted glass chips, and strict 44×44px interactive touch targets.
+            Every screen adheres to STILL's dark-room visual grammar: OLED deep blacks (`#0B0B0F`), signal amber (`#FFB020`), frosted glass chips, and 44×44px minimum interactive touch targets.
           </p>
 
           {/* Screen 1 & Screen 2 Row */}
@@ -416,7 +417,7 @@ export const CaseStudyScreen: React.FC = () => {
                 backgroundColor: '#000',
               }}>
                 <img
-                  src="/export/screens/screen-01-onboarding.png"
+                  src={getAssetPath('export/screens/screen-01-onboarding.png')}
                   alt="Screen 1: Progressive Onboarding"
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                 />
@@ -451,7 +452,7 @@ export const CaseStudyScreen: React.FC = () => {
                 backgroundColor: '#000',
               }}>
                 <img
-                  src="/export/screens/screen-02-idle.png"
+                  src={getAssetPath('export/screens/screen-02-idle.png')}
                   alt="Screen 2: Zero-Button Viewfinder"
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                 />
@@ -477,7 +478,7 @@ export const CaseStudyScreen: React.FC = () => {
                 backgroundColor: '#000',
               }}>
                 <img
-                  src="/export/screens/screen-03-locking-annotated.png"
+                  src={getAssetPath('export/screens/screen-03-locking-annotated.png')}
                   alt="Screen 3 Hero: Locking Screen with numbered callouts"
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                 />
@@ -579,7 +580,7 @@ export const CaseStudyScreen: React.FC = () => {
                   Moment Strip (Rewind & Choose)
                 </h3>
                 <p style={{ fontSize: '14px', color: '#A3A3B2', margin: '0 0 16px', lineHeight: 1.5 }}>
-                  <strong>Post-hoc reassurance:</strong> 7-frame rolling buffer carousel with preselected "Best" frame. 4-second autosave countdown removes decision paralysis; 5-second Undo toast guarantees reversible control.
+                  <strong>Post-hoc reassurance:</strong> 7-frame simulated rewind carousel with preselected Suggested frame (illustrative). 4-second autosave countdown removes decision paralysis; 5-second Undo toast guarantees reversible control.
                 </p>
               </div>
               <div style={{
@@ -591,7 +592,7 @@ export const CaseStudyScreen: React.FC = () => {
                 backgroundColor: '#000',
               }}>
                 <img
-                  src="/export/screens/screen-04-moments.png"
+                  src={getAssetPath('export/screens/screen-04-moments.png')}
                   alt="Screen 4: Moment Strip (Rewind & Choose)"
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                 />
@@ -626,7 +627,7 @@ export const CaseStudyScreen: React.FC = () => {
                 backgroundColor: '#000',
               }}>
                 <img
-                  src="/export/screens/screen-05-group.png"
+                  src={getAssetPath('export/screens/screen-05-group.png')}
                   alt="Screen 5: Group Mode"
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                 />
@@ -702,14 +703,14 @@ export const CaseStudyScreen: React.FC = () => {
             <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
               <span style={{ color: '#FFB020', fontWeight: 700, fontSize: '15px' }}>6.</span>
               <p style={{ margin: 0, fontSize: '15px', color: '#D1D1DB', lineHeight: 1.6 }}>
-                <strong style={{ color: '#F5F5F7' }}>Inclusive fallbacks.</strong> Adjustable hold time, voice trigger and volume key for people who cannot hold still.
+                <strong style={{ color: '#F5F5F7' }}>Alternate input triggers.</strong> Adjustable hold time, simulated voice and key triggers for capture without touching the screen.
               </p>
             </div>
 
             <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
               <span style={{ color: '#FFB020', fontWeight: 700, fontSize: '15px' }}>7.</span>
               <p style={{ margin: 0, fontSize: '15px', color: '#D1D1DB', lineHeight: 1.6 }}>
-                <strong style={{ color: '#F5F5F7' }}>Calm dark UI.</strong> The photo is the hero; amber is reserved for action and "best".
+                <strong style={{ color: '#F5F5F7' }}>Calm dark UI.</strong> The photo is the hero; amber is reserved for action and suggestions.
               </p>
             </div>
 
@@ -733,7 +734,7 @@ export const CaseStudyScreen: React.FC = () => {
             letterSpacing: '-0.02em',
             margin: '0 0 16px',
           }}>
-            Accessibility & Ergonomics Compliance
+            Accessibility & Ergonomics Verification
           </h2>
 
           <div style={{
@@ -760,8 +761,8 @@ export const CaseStudyScreen: React.FC = () => {
               border: '1px solid rgba(255, 255, 255, 0.08)',
             }}>
               <div style={{ color: '#3DDC97', fontWeight: 700, fontSize: '18px' }}>18.0 : 1 Contrast</div>
-              <div style={{ fontSize: '13px', fontWeight: 600, color: '#F5F5F7', marginTop: '4px' }}>WCAG AA / AAA Compliant</div>
-              <div style={{ fontSize: '12px', color: '#A3A3B2', marginTop: '4px' }}>Primary text on dark canvas is 18.0:1 (AAA); signal amber 10.7:1 (AAA); all text passes AA.</div>
+              <div style={{ fontSize: '13px', fontWeight: 600, color: '#F5F5F7', marginTop: '4px' }}>High Contrast Palette</div>
+              <div style={{ fontSize: '12px', color: '#A3A3B2', marginTop: '4px' }}>Primary text on dark canvas evaluates to 18.0:1; signal amber to 10.7:1, exceeding standard readability benchmarks.</div>
             </div>
 
             <div style={{
@@ -825,14 +826,14 @@ export const CaseStudyScreen: React.FC = () => {
                 <td>Lagged behind human reaction</td>
                 <td>Generates many duplicate photos</td>
                 <td>3s video slice</td>
-                <td><strong style={{ color: '#3DDC97' }}>Rolling buffer (pre-capture)</strong></td>
+                <td><strong style={{ color: '#3DDC97' }}>Simulated rewind buffer (3s concept)</strong></td>
               </tr>
               <tr>
                 <td><strong>Triage & Cleanup</strong></td>
                 <td>Manual re-take</td>
                 <td>Painful manual curation</td>
                 <td>Key photo scrubber hidden</td>
-                <td><strong style={{ color: '#3DDC97' }}>Moment Strip with preselected Best frame</strong></td>
+                <td><strong style={{ color: '#3DDC97' }}>Moment Strip with preselected Suggested frame</strong></td>
               </tr>
               <tr>
                 <td><strong>Group Coordination</strong></td>
@@ -846,10 +847,92 @@ export const CaseStudyScreen: React.FC = () => {
                 <td>Requires precise finger hit</td>
                 <td>Requires sustained thumb force</td>
                 <td>Standard button</td>
-                <td><strong style={{ color: '#3DDC97' }}>Tap anywhere + Voice fallback</strong></td>
+                <td><strong style={{ color: '#3DDC97' }}>Tap anywhere + Alternate input triggers</strong></td>
               </tr>
             </tbody>
           </table>
+        </section>
+
+        {/* ========================================================
+            SECTION 6: PROTOTYPE LIMITATIONS (SIMULATED VS REAL)
+        ======================================================== */}
+        <section className="no-break" style={{
+          marginBottom: '56px',
+          padding: '24px 28px',
+          borderRadius: '20px',
+          backgroundColor: 'rgba(255, 176, 32, 0.04)',
+          border: '1px solid rgba(255, 176, 32, 0.25)',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#FFB020', marginBottom: '8px' }}>
+            <span style={{ fontSize: '13px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Technical Integrity</span>
+          </div>
+          <h2 style={{
+            fontFamily: 'Space Grotesk, sans-serif',
+            fontSize: '24px',
+            fontWeight: 700,
+            letterSpacing: '-0.01em',
+            margin: '0 0 12px',
+          }}>
+            Prototype Limitations (Simulated vs Real Hardware)
+          </h2>
+          <p style={{ color: '#A3A3B2', fontSize: '14px', lineHeight: 1.6, margin: '0 0 20px', maxWidth: '840px' }}>
+            STILL is a frontend browser UI/UX prototype created for the VinnovateIT design challenge. To maintain absolute technical truthfulness, prototype behaviors are clearly distinguished from native hardware implementations:
+          </p>
+
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            gap: '16px',
+            fontSize: '13px',
+          }}>
+            <div style={{
+              padding: '14px 18px',
+              borderRadius: '12px',
+              backgroundColor: 'rgba(255, 255, 255, 0.03)',
+              border: '1px solid rgba(255, 255, 255, 0.06)',
+            }}>
+              <div style={{ fontWeight: 600, color: '#F5F5F7', marginBottom: '4px' }}>Device Motion Heuristic</div>
+              <div style={{ color: '#A3A3B2', lineHeight: 1.5 }}>
+                Steadiness is evaluated via browser DeviceMotionEvent acceleration or on-screen controls, not a native hardware multi-axis gyroscope.
+              </div>
+            </div>
+
+            <div style={{
+              padding: '14px 18px',
+              borderRadius: '12px',
+              backgroundColor: 'rgba(255, 255, 255, 0.03)',
+              border: '1px solid rgba(255, 255, 255, 0.06)',
+            }}>
+              <div style={{ fontWeight: 600, color: '#F5F5F7', marginBottom: '4px' }}>Rewind Buffer Concept</div>
+              <div style={{ color: '#A3A3B2', lineHeight: 1.5 }}>
+                Moment Strip presents 7 illustrative variations of a high-resolution portrait to demonstrate the 3-second rewind UI/UX workflow, not a hardware circular ring buffer.
+              </div>
+            </div>
+
+            <div style={{
+              padding: '14px 18px',
+              borderRadius: '12px',
+              backgroundColor: 'rgba(255, 255, 255, 0.03)',
+              border: '1px solid rgba(255, 255, 255, 0.06)',
+            }}>
+              <div style={{ fontWeight: 600, color: '#F5F5F7', marginBottom: '4px' }}>Group Readiness Tracking</div>
+              <div style={{ color: '#A3A3B2', lineHeight: 1.5 }}>
+                Face detection bounding boxes and readiness are simulated via interactive state machine models rather than on-device machine vision.
+              </div>
+            </div>
+
+            <div style={{
+              padding: '14px 18px',
+              borderRadius: '12px',
+              backgroundColor: 'rgba(255, 255, 255, 0.03)',
+              border: '1px solid rgba(255, 255, 255, 0.06)',
+            }}>
+              <div style={{ fontWeight: 600, color: '#F5F5F7', marginBottom: '4px' }}>Alternate Input Triggers</div>
+              <div style={{ color: '#A3A3B2', lineHeight: 1.5 }}>
+                Simulated voice command and keyboard triggers still require device steadiness to settle screen tap shake and avoid accidental exposure.
+              </div>
+            </div>
+          </div>
         </section>
 
         {/* ========================================================

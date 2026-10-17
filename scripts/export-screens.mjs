@@ -167,6 +167,27 @@ async function runExport() {
     await pdfPage.screenshot({ path: csPreviewProjectFile, fullPage: true });
     if (csPreviewBrainFile) safeCopyToBrain(csPreviewProjectFile, csPreviewBrainFile);
 
+    const pdfBodyText = await pdfPage.textContent('body');
+    if (!pdfBodyText.includes('Prototype Limitations')) {
+      throw new Error('Case study page missing "Prototype Limitations" section! F3 violation.');
+    }
+    const forbiddenInPdf = [
+      'Sensors Active',
+      '3.0s (7 Candidates)',
+      'rolling buffer (pre-capture)',
+      'WCAG AA / AAA (Compliant)',
+      'all text passes AA',
+      'strict 44',
+      'persistent toast',
+      'Best frame',
+    ];
+    for (const term of forbiddenInPdf) {
+      if (pdfBodyText.includes(term)) {
+        throw new Error(`Case study page contains forbidden term "${term}"! F3 violation.`);
+      }
+    }
+    console.log(`     ✓ Verified case study contains Prototype Limitations and 0 forbidden claims`);
+
     const pdfStats = fs.statSync(pdfProjectFile);
     console.log(`     ✓ Generated case-study.pdf (${(pdfStats.size / 1024).toFixed(1)} KB)`);
     console.log(`     ✓ Generated case-study-preview.png`);
