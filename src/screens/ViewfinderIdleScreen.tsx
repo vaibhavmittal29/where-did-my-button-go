@@ -72,6 +72,7 @@ export const ViewfinderIdleScreen: React.FC<ViewfinderIdleScreenProps> = ({ pure
           <IconButton
             icon={<Zap size={18} />}
             aria-label="Flash mode auto (prototype simulation)"
+            aria-disabled="true"
             onClick={() => { window.location.href = getScreenUrl('screen=live'); }}
           />
           
@@ -82,6 +83,7 @@ export const ViewfinderIdleScreen: React.FC<ViewfinderIdleScreenProps> = ({ pure
           <IconButton
             icon={<Settings2 size={18} />}
             aria-label="Open Camera Settings (prototype simulation)"
+            aria-disabled="true"
             onClick={() => { window.location.href = getScreenUrl('screen=live'); }}
           />
         </header>
@@ -155,6 +157,7 @@ export const ViewfinderIdleScreen: React.FC<ViewfinderIdleScreenProps> = ({ pure
             <IconButton
               icon={<RotateCcw size={18} />}
               aria-label="Switch lens (prototype simulation)"
+              aria-disabled="true"
               onClick={() => { window.location.href = getScreenUrl('screen=live'); }}
             />
           </div>

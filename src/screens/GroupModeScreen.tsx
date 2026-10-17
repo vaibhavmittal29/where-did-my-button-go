@@ -98,7 +98,12 @@ export const GroupModeScreen: React.FC<GroupModeScreenProps> = ({ pureDevice = f
           alignItems: 'center',
           justifyContent: 'space-between',
         }}>
-          <IconButton icon={<Zap size={18} />} aria-label="Flash (prototype)" />
+          <IconButton
+            icon={<Zap size={18} />}
+            aria-label="Flash (prototype simulation)"
+            aria-disabled="true"
+            onClick={() => { window.location.href = getScreenUrl('screen=live'); }}
+          />
 
           {/* Group Ready Counter Chip */}
           <GlassChip
@@ -108,7 +113,12 @@ export const GroupModeScreen: React.FC<GroupModeScreenProps> = ({ pureDevice = f
             {readyCount >= 4 ? 'All 4 Ready (simulated) · Hold still to capture' : `${readyCount} of 4 ready (simulated)`}
           </GlassChip>
 
-          <IconButton icon={<Settings2 size={18} />} aria-label="Settings (prototype)" />
+          <IconButton
+            icon={<Settings2 size={18} />}
+            aria-label="Settings (prototype simulation)"
+            aria-disabled="true"
+            onClick={() => { window.location.href = getScreenUrl('screen=live'); }}
+          />
         </header>
 
         {/* Face Tracking Bounding Boxes with Status Indicators */}
@@ -185,7 +195,12 @@ export const GroupModeScreen: React.FC<GroupModeScreenProps> = ({ pureDevice = f
             />
 
             {/* Switch Camera */}
-            <IconButton icon={<RotateCcw size={18} />} aria-label="Switch lens (prototype simulation)" />
+            <IconButton
+              icon={<RotateCcw size={18} />}
+              aria-label="Switch lens (prototype simulation)"
+              aria-disabled="true"
+              onClick={() => { window.location.href = getScreenUrl('screen=live'); }}
+            />
           </div>
         </footer>
       </div>

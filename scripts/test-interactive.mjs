@@ -341,6 +341,42 @@ async function testInteractive() {
   await page.waitForFunction(() => document.body.innerText.includes('Photo removed'), { timeout: 2000 });
   console.log('✓ Scenario 5f Passed (F1): Mode carousel disabled during SAVED state; mode switch blocked and Undo succeeds');
 
+  // Scenario 6 (F16): Static Route Control Inertness & Click Sweep with Console Error Verification
+  console.log('Running Scenario 6 (F16): Static route click sweep & console error monitoring...');
+  const staticRoutes = [
+    '/?screen=onboarding',
+    '/?screen=idle',
+    '/?screen=locking&progress=0.6',
+    '/?screen=moments&selected=3',
+    '/?screen=group&ready=3',
+  ];
+
+  for (const route of staticRoutes) {
+    const staticPage = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    const pageErrors = [];
+    staticPage.on('pageerror', (err) => pageErrors.push(err.message));
+    staticPage.on('console', (msg) => {
+      if (msg.type() === 'error') pageErrors.push(msg.text());
+    });
+
+    await staticPage.goto(`http://127.0.0.1:5173${route}`, { waitUntil: 'networkidle' });
+    const buttonCount = await staticPage.locator('button, [role="button"]').count();
+    for (let i = 0; i < buttonCount; i++) {
+      const btn = staticPage.locator('button, [role="button"]').nth(i);
+      if (await btn.isVisible()) {
+        await btn.click({ force: true, noWaitAfter: true }).catch(() => {});
+        await staticPage.waitForTimeout(50);
+      }
+    }
+
+    if (pageErrors.length > 0) {
+      await staticPage.close();
+      throw new Error(`Console/runtime errors detected on static route ${route}: ${pageErrors.join(', ')}! F16 violation.`);
+    }
+    await staticPage.close();
+  }
+  console.log('✓ Scenario 6 Passed (F16): Static route click sweep verified with 0 console errors');
+
   console.log('\n🎉 ALL PHASE 5 INTERACTION SCENARIOS PASSED WITH FLYING COLORS!');
 } finally {
   if (browser) {

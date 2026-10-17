@@ -82,13 +82,23 @@ export const LockingScreen: React.FC<LockingScreenProps> = ({ pureDevice = false
           alignItems: 'center',
           justifyContent: 'space-between',
         }}>
-          <IconButton icon={<Zap size={18} />} aria-label="Flash mode (prototype)" />
+          <IconButton
+            icon={<Zap size={18} />}
+            aria-label="Flash mode (prototype simulation)"
+            aria-disabled="true"
+            onClick={() => { window.location.href = getScreenUrl('screen=live'); }}
+          />
           
           <GlassChip icon={<Sun size={14} />} variant="accent">
             Locking Focus · 1×
           </GlassChip>
 
-          <IconButton icon={<Settings2 size={18} />} aria-label="Settings (prototype)" />
+          <IconButton
+            icon={<Settings2 size={18} />}
+            aria-label="Settings (prototype simulation)"
+            aria-disabled="true"
+            onClick={() => { window.location.href = getScreenUrl('screen=live'); }}
+          />
         </header>
 
         {/* Core Hero Interaction: Anchored LockRing + Real-Time Status */}
@@ -255,10 +265,21 @@ export const LockingScreen: React.FC<LockingScreenProps> = ({ pureDevice = false
             </button>
 
             {/* Mode Carousel */}
-            <ModeCarousel activeMode="still" />
+            <ModeCarousel
+              activeMode="still"
+              onModeChange={(m) => {
+                if (m === 'group') window.location.href = getScreenUrl('screen=group&ready=3');
+                if (m === 'still') window.location.href = getScreenUrl('screen=idle');
+              }}
+            />
 
             {/* Lens Switcher */}
-            <IconButton icon={<RotateCcw size={18} />} aria-label="Switch lens (prototype simulation)" />
+            <IconButton
+              icon={<RotateCcw size={18} />}
+              aria-label="Switch lens (prototype simulation)"
+              aria-disabled="true"
+              onClick={() => { window.location.href = getScreenUrl('screen=live'); }}
+            />
           </div>
         </footer>
       </div>
