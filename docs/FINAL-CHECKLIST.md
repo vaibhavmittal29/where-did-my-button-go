@@ -54,8 +54,8 @@
 
 | Test Script | Target | Results | Status |
 |---|---|---|---|
-| `scripts/test-machine.ts` | Finite State Machine Transitions | 14/14 Tests Passed (Focus, Lock, Unsteady Shake, Timeout, Buffer Autosave, Undo, Group Guards, Hold Time Clamps, Delta Time Validation, Reference Stability, Group Auto-Capture Epoch, Mode Change Guard) | **PASSED** |
-| `scripts/test-interactive.mjs` | Browser E2E Interaction Scenarios | 9/9 Scenarios Passed (Touch target audit across routes, Tap hold, frame swap, autosave & Undo thumbnail restore, shake cancel, Group ready voice guard, Group 3/4 steady hold block, Group Undo disarm, Reducer single source of truth, Mode switch disable) | **PASSED** |
+| `scripts/test-machine.ts` | Finite State Machine Transitions | 15/15 Tests Passed (Focus, Lock, Unsteady Shake, Timeout, Buffer Autosave, Undo, Group Guards, Hold Time Clamps, Delta Time Validation, Reference Stability, Group Auto-Capture Epoch, Mode Change Guard, Strict Payload Validation & Clamping) | **PASSED** |
+| `scripts/test-interactive.mjs` | Browser E2E Interaction Scenarios | 10/10 Scenarios Passed (Touch target audit across routes, Tap hold, frame swap, autosave & Undo thumbnail restore, shake cancel, Group ready voice guard, Group 3/4 steady hold block, Group Undo disarm, Reducer single source of truth, Mode switch disable, Static route click sweep) | **PASSED** |
 | `scripts/test-reduced-motion.mjs` | Motion & Vestibular Safety | Checks Passed (Stepped percentages and full review flow verified) | **PASSED** |
 | `scripts/export-screens.mjs` | High-Resolution Asset Generation | 6 Screens (1170×2532) + Hero Banner (2400×1350) + PDF (14.1 MB) generated with export/MANIFEST.json | **PASSED** |
 

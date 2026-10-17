@@ -97,6 +97,15 @@ export function cameraReducer(state: CameraState, action: CameraAction): CameraS
       if (['CAPTURED', 'REVIEW', 'SAVED'].includes(state.status)) {
         return state;
       }
+      // F19: Validate x, y payloads - reject non-number, non-finite, or NaN
+      if (
+        typeof action.x !== 'number' ||
+        !Number.isFinite(action.x) ||
+        typeof action.y !== 'number' ||
+        !Number.isFinite(action.y)
+      ) {
+        return state;
+      }
       // Tap sets focus point but NEVER triggers capture on its own
       return {
         ...state,
@@ -224,7 +233,12 @@ export function cameraReducer(state: CameraState, action: CameraAction): CameraS
 
     case 'PICK_FRAME': {
       if (state.status !== 'REVIEW') return state;
-      const clampedIndex = Math.max(0, Math.min(CANDIDATE_FRAMES - 1, action.index));
+      // F19: Validate index payload - reject non-number, non-finite, or NaN
+      if (typeof action.index !== 'number' || !Number.isFinite(action.index)) {
+        return state;
+      }
+      const intIndex = Math.round(action.index);
+      const clampedIndex = Math.max(0, Math.min(CANDIDATE_FRAMES - 1, intIndex));
       return {
         ...state,
         selectedFrameIndex: clampedIndex,
@@ -354,7 +368,11 @@ export function cameraReducer(state: CameraState, action: CameraAction): CameraS
     }
 
     case 'SET_HOLD_TIME': {
-      const clamped = Math.max(HOLD_TIME_MIN_MS, Math.min(HOLD_TIME_MAX_MS, action.holdTimeMs));
+      // F19: Validate holdTimeMs payload - reject non-number, non-finite, or NaN
+      if (typeof action.holdTimeMs !== 'number' || !Number.isFinite(action.holdTimeMs)) {
+        return state;
+      }
+      const clamped = Math.max(HOLD_TIME_MIN_MS, Math.min(HOLD_TIME_MAX_MS, Math.round(action.holdTimeMs)));
       return {
         ...state,
         baseHoldTime: clamped,
@@ -362,7 +380,12 @@ export function cameraReducer(state: CameraState, action: CameraAction): CameraS
     }
 
     case 'SET_GROUP_READY': {
-      const clamped = Math.max(0, Math.min(state.groupTotalCount, action.count));
+      // F19: Validate count payload - reject non-number, non-finite, or NaN
+      if (typeof action.count !== 'number' || !Number.isFinite(action.count)) {
+        return state;
+      }
+      const intCount = Math.round(action.count);
+      const clamped = Math.max(0, Math.min(state.groupTotalCount, intCount));
       const lostReadiness = state.mode === 'group' && state.status === 'LOCKING' && clamped < state.groupTotalCount;
       return {
         ...state,

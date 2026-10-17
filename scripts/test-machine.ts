@@ -4,7 +4,13 @@ import {
   initialCameraState,
   getEffectiveHoldTime,
 } from '../src/state/cameraMachine';
-import { HOLD_TIME_MS, LOW_LIGHT_MULTIPLIER } from '../src/state/constants';
+import {
+  HOLD_TIME_MS,
+  HOLD_TIME_MIN_MS,
+  HOLD_TIME_MAX_MS,
+  CANDIDATE_FRAMES,
+  LOW_LIGHT_MULTIPLIER,
+} from '../src/state/constants';
 
 console.log('--- RUNNING CAMERA STATE MACHINE SANITY TESTS ---\n');
 
@@ -477,4 +483,89 @@ console.log('--- RUNNING CAMERA STATE MACHINE SANITY TESTS ---\n');
   console.log('✔ Test 14 Passed: MODE_CHANGE ignored in CAPTURED and SAVED states.\n');
 }
 
-console.log('ALL 14 STATE MACHINE TESTS PASSED SUCCESSFULLY! 🎉');
+// SCENARIO 15: Payload Validation and Clamping Guards (F19)
+{
+  console.log('Test 15: Strict Payload Validation and Clamping Guards');
+  let state = initialCameraState;
+
+  // 1. TAP_SUBJECT payload validation
+  // Non-number, NaN, Infinity must be rejected
+  const tapNaN = cameraReducer(state, { type: 'TAP_SUBJECT', x: NaN, y: 50 });
+  assert.strictEqual(tapNaN, state);
+
+  const tapInf = cameraReducer(state, { type: 'TAP_SUBJECT', x: 50, y: Infinity });
+  assert.strictEqual(tapInf, state);
+
+  const tapStr = cameraReducer(state, { type: 'TAP_SUBJECT', x: '50' as any, y: 50 });
+  assert.strictEqual(tapStr, state);
+
+  // Negative and > 100 coordinates clamped to 0..100
+  const tapClampedMin = cameraReducer(state, { type: 'TAP_SUBJECT', x: -25, y: -10 });
+  assert.deepStrictEqual(tapClampedMin.focusPoint, { x: 0, y: 0 });
+
+  const tapClampedMax = cameraReducer(state, { type: 'TAP_SUBJECT', x: 150, y: 200 });
+  assert.deepStrictEqual(tapClampedMax.focusPoint, { x: 100, y: 100 });
+
+  // 2. SET_HOLD_TIME payload validation
+  const holdNaN = cameraReducer(state, { type: 'SET_HOLD_TIME', holdTimeMs: NaN });
+  assert.strictEqual(holdNaN, state);
+
+  const holdInf = cameraReducer(state, { type: 'SET_HOLD_TIME', holdTimeMs: Infinity });
+  assert.strictEqual(holdInf, state);
+
+  const holdLow = cameraReducer(state, { type: 'SET_HOLD_TIME', holdTimeMs: 100 });
+  assert.strictEqual(holdLow.baseHoldTime, HOLD_TIME_MIN_MS);
+
+  const holdHigh = cameraReducer(state, { type: 'SET_HOLD_TIME', holdTimeMs: 5000 });
+  assert.strictEqual(holdHigh.baseHoldTime, HOLD_TIME_MAX_MS);
+
+  const holdFloat = cameraReducer(state, { type: 'SET_HOLD_TIME', holdTimeMs: 850.4 });
+  assert.strictEqual(holdFloat.baseHoldTime, 850);
+
+  // 3. SET_GROUP_READY payload validation
+  const groupNaN = cameraReducer(state, { type: 'SET_GROUP_READY', count: NaN });
+  assert.strictEqual(groupNaN, state);
+
+  const groupInf = cameraReducer(state, { type: 'SET_GROUP_READY', count: Infinity });
+  assert.strictEqual(groupInf, state);
+
+  const groupLow = cameraReducer(state, { type: 'SET_GROUP_READY', count: -5 });
+  assert.strictEqual(groupLow.groupReadyCount, 0);
+
+  const groupHigh = cameraReducer(state, { type: 'SET_GROUP_READY', count: 10 });
+  assert.strictEqual(groupHigh.groupReadyCount, state.groupTotalCount);
+
+  const groupFloat = cameraReducer(state, { type: 'SET_GROUP_READY', count: 2.7 });
+  assert.strictEqual(groupFloat.groupReadyCount, 3);
+
+  // 4. PICK_FRAME payload validation
+  // In non-REVIEW state, ignored
+  const pickIdle = cameraReducer(state, { type: 'PICK_FRAME', index: 2 });
+  assert.strictEqual(pickIdle, state);
+
+  // Transition to REVIEW state
+  let reviewState = cameraReducer(state, { type: 'TAP_SUBJECT', x: 50, y: 50 });
+  reviewState = cameraReducer(reviewState, { type: 'STEADY_OK' });
+  reviewState = cameraReducer(reviewState, { type: 'PROGRESS_COMPLETE' });
+  reviewState = cameraReducer(reviewState, { type: 'ANIM_DONE' });
+  assert.strictEqual(reviewState.status, 'REVIEW');
+
+  const pickNaN = cameraReducer(reviewState, { type: 'PICK_FRAME', index: NaN });
+  assert.strictEqual(pickNaN, reviewState);
+
+  const pickInf = cameraReducer(reviewState, { type: 'PICK_FRAME', index: Infinity });
+  assert.strictEqual(pickInf, reviewState);
+
+  const pickLow = cameraReducer(reviewState, { type: 'PICK_FRAME', index: -3 });
+  assert.strictEqual(pickLow.selectedFrameIndex, 0);
+
+  const pickHigh = cameraReducer(reviewState, { type: 'PICK_FRAME', index: 20 });
+  assert.strictEqual(pickHigh.selectedFrameIndex, CANDIDATE_FRAMES - 1);
+
+  const pickFloat = cameraReducer(reviewState, { type: 'PICK_FRAME', index: 4.8 });
+  assert.strictEqual(pickFloat.selectedFrameIndex, 5);
+
+  console.log('✔ Test 15 Passed: Strict payload validation and clamping guards verified.\n');
+}
+
+console.log('ALL 15 STATE MACHINE TESTS PASSED SUCCESSFULLY! 🎉');

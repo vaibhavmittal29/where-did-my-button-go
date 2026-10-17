@@ -157,7 +157,10 @@ Test 13: Group Auto-Capture Epoch & Undo Disarm
 Test 14: Guard MODE_CHANGE during CAPTURED and SAVED
 ✔ Test 14 Passed: MODE_CHANGE ignored in CAPTURED and SAVED states.
 
-ALL 14 STATE MACHINE TESTS PASSED SUCCESSFULLY! 🎉
+Test 15: Strict Payload Validation and Clamping Guards
+✔ Test 15 Passed: Strict payload validation and clamping guards verified.
+
+ALL 15 STATE MACHINE TESTS PASSED SUCCESSFULLY! 🎉
 Testing Phase 5 Interactive Camera Scenarios...
 Starting Vite local server on port 5173...
 ✓ Vite local server ready on port 5173
