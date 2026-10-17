@@ -171,7 +171,12 @@ async function testInteractive() {
   if (!toastText.includes('Saved · Undo') && !toastText.includes('Undo')) {
     throw new Error('Toast "Saved · Undo" did not appear after autosave');
   }
-  console.log('✓ Scenario 3a Passed: Autosave completed and showed Saved · Undo toast');
+  const galleryImg = page.locator('button[aria-label="View last capture in Moment Strip"] img');
+  const savedImgSrc = await galleryImg.getAttribute('src');
+  if (!savedImgSrc || !savedImgSrc.includes('moment-1.jpg')) {
+    throw new Error(`Gallery thumbnail did not update to saved photo (got: ${savedImgSrc})`);
+  }
+  console.log('✓ Scenario 3a Passed: Autosave completed, gallery updated, and showed Saved · Undo toast');
   await saveScreen(page, 'phase5-04-saved.png');
 
   // Click Undo button
@@ -182,7 +187,11 @@ async function testInteractive() {
   if (!undoToast.includes('Photo removed')) {
     throw new Error('Undo did not show "Photo removed" feedback');
   }
-  console.log('✓ Scenario 3b Passed: Undo successfully discarded photo');
+  const restoredImgSrc = await galleryImg.getAttribute('src');
+  if (!restoredImgSrc || !restoredImgSrc.includes('portrait-subject.jpg')) {
+    throw new Error(`Undo did not restore previous gallery thumbnail (got: ${restoredImgSrc})! F7 violation.`);
+  }
+  console.log('✓ Scenario 3b Passed (F7): Undo successfully discarded photo and restored previous gallery thumbnail');
   await saveScreen(page, 'phase5-05-undone.png');
 
   // 5. Scenario 4: Shake / Movement Interruption

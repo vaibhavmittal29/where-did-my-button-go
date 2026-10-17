@@ -57,6 +57,7 @@ export const InteractiveCameraScreen: React.FC = () => {
   const previewFrameIndexRef = useRef<number>(3);
   const hasResetAutosaveRef = useRef<boolean>(false);
   const [savedThumbnail, setSavedThumbnail] = useState<string>(getAssetPath('scenes/portrait-subject.jpg'));
+  const previousThumbnailRef = useRef<string>(getAssetPath('scenes/portrait-subject.jpg'));
   const [flashActive, setFlashActive] = useState<boolean>(false);
   const [flashMode, setFlashMode] = useState<'off' | 'auto' | 'on'>('auto');
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
@@ -306,7 +307,10 @@ export const InteractiveCameraScreen: React.FC = () => {
 
       if (progress >= 1) {
         triggerHaptic('save');
-        setSavedThumbnail(getAssetPath(`scenes/moment-${previewFrameIndexRef.current}.jpg`));
+        setSavedThumbnail((prev) => {
+          previousThumbnailRef.current = prev;
+          return getAssetPath(`scenes/moment-${previewFrameIndexRef.current}.jpg`);
+        });
         dispatch({ type: 'TIMEOUT_REVIEW' });
       } else {
         autosaveTimerRef.current = requestAnimationFrame(updateAutosave);
@@ -499,6 +503,7 @@ export const InteractiveCameraScreen: React.FC = () => {
       groupHoldTimerRef.current = null;
     }
     dispatch({ type: 'UNDO' });
+    setSavedThumbnail(previousThumbnailRef.current);
     setToastMessage('Photo removed');
     undoSecondaryTimerRef.current = window.setTimeout(() => {
       setToastMessage(null);
@@ -515,6 +520,9 @@ export const InteractiveCameraScreen: React.FC = () => {
       clearTimeout(groupHoldTimerRef.current);
       groupHoldTimerRef.current = null;
     }
+    const initialThumb = getAssetPath('scenes/portrait-subject.jpg');
+    setSavedThumbnail(initialThumb);
+    previousThumbnailRef.current = initialThumb;
     setToastMessage(null);
     dispatch({ type: 'RESET' });
   }, [triggerHaptic]);
